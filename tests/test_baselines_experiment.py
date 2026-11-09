@@ -156,3 +156,7 @@ def test_cli_missing_processed_dir(tmp_path):
                         str(tmp_path / "none"), "--output-dir", str(tmp_path / "o")],
                        capture_output=True, text=True)
     assert r.returncode == 1 and "bri.prep.build" in r.stderr
+
+
+def test_phase22_dataset_checksum_is_registered():
+    assert B.LOCKED_DATASETS["9d68d4145a7c251b749ea38464a780126545b02934b07d80f01c145d20a6927b"] == "phase2.2"

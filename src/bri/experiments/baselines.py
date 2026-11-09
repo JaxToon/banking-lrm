@@ -39,6 +39,8 @@ FROZEN_MARKER = "FROZEN"
 LOCKED_DATASETS: dict[str, str] = {
     # generator 0.2.0, seed 42, 500 customers, 30 days (benchmark-v1, Phase 2.1)
     "ca53375dd030f13627ae3b7748ccdf209f32f2007657a3d918d84c3682a34fa8": "benchmark-v1",
+    # generator 0.2.0, seed 20261109, 500 customers, 30 days (Phase 2.2 final evaluation)
+    "9d68d4145a7c251b749ea38464a780126545b02934b07d80f01c145d20a6927b": "phase2.2",
 }
 
 

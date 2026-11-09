@@ -7,7 +7,7 @@ real customer behavior or real-world recommendation effectiveness.
 | Benchmark | Dataset | Code | Test split status |
 |---|---|---|---|
 | `benchmark-v1` | generator 0.2.0, seed 42, 500 customers, 30 days, split 16/7/7; events.csv sha256 `ca53375d…a34fa8` | git tag `benchmark-v1` (suite `benchmark-v1`) | **Locked.** Used once for Phase 2.1 final evaluation. |
-| `phase2.2` | generator 0.2.0, seed 20261109, 500 customers, 30 days, split 16/7/7 | suite `phase2.2` | Used once for Phase 2.2 final evaluation. Locked after that run. |
+| `phase2.2` | generator 0.2.0, seed 20261109, 500 customers, 30 days, split 16/7/7; events.csv sha256 `9d68d414…a6927b` | suite `phase2.2` | **Locked.** Used once for Phase 2.2 final evaluation. |
 
 ## Rules for locked test splits
 
