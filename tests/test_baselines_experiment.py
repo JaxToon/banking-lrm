@@ -6,38 +6,75 @@ import sys
 import pandas as pd
 import pytest
 
-from bri.experiments.baselines import run_baselines, to_markdown
+from bri.experiments import baselines as B
+from bri.experiments.baselines import LockedTestSplitError, run_baselines, to_markdown
 from bri.tasks import SYNTHETIC_LABEL
 
 FAST = dict(ks=(1, 3), n_boot=100, seed=42, random_seeds=3)
+PHASE22_MODELS = {"popularity", "personal_frequency", "itemknn_self", "itemknn_noself", "mf"}
 
 
 @pytest.fixture(scope="module")
 def report(processed_dir):
-    return run_baselines(processed_dir, **FAST)
+    return run_baselines(processed_dir, **FAST, suite="phase2.2")
 
 
 def test_report_is_labelled_and_task_separated(report):
     assert report["label"] == SYNTHETIC_LABEL
+    assert report["suite"] == "phase2.2"
     assert set(report["tasks"]) == {"nbs", "nbp"}
     assert "Cold start is not evaluated" in report["population_note"]
+    assert "one dataset seed" in report["protocol"]["ci_scope"]
     for task in report["tasks"].values():
-        assert set(task["models"]) == {"popularity", "itemknn", "mf"}
+        assert set(task["models"]) == PHASE22_MODELS
+
+
+def test_ablation_variants_are_fixed(report):
+    for task in report["tasks"].values():
+        assert task["models"]["itemknn_self"]["selected_params"]["include_self"] is True
+        assert task["models"]["itemknn_noself"]["selected_params"]["include_self"] is False
+        assert len(task["models"]["personal_frequency"]["validation_trials"]) == 2  # signal only
 
 
 def test_report_contains_cis_paired_diffs_and_random_floor(report):
     for task in report["tasks"].values():
         if task["n_test_cases"] == 0:
             continue
-        for family, m in task["models"].items():
+        for name, m in task["models"].items():
             ci = m["test_bootstrap_ci"]["@3"]["ndcg"]
             assert ci["ci_low"] <= ci["mean"] <= ci["ci_high"]
-            assert ("test_paired_diff_vs_popularity" in m) == (family != "popularity")
+            assert ("test_paired_diff_vs_popularity" in m) == (name != "popularity")
         assert len(task["random_floor"]["seeds"]) == 3
 
 
+def test_key_comparisons_answer_the_three_ablation_questions(report):
+    for task in report["tasks"].values():
+        comps = [c["comparison"] for c in task["key_comparisons"]]
+        assert comps == ["itemknn_self - personal_frequency",
+                         "itemknn_noself - personal_frequency",
+                         "itemknn_self - itemknn_noself"]
+        for c in task["key_comparisons"]:
+            for k in ("@1", "@3"):
+                assert set(c["results"][k]) == {"precision", "recall", "ndcg", "map"}
+
+
+def test_pairwise_differences_cover_every_model_pair_at_every_k(report):
+    for task in report["tasks"].values():
+        for k in ("@1", "@3"):
+            assert len(task["pairwise_paired_diff"][k]) == 10  # C(5, 2)
+            d = task["pairwise_paired_diff"][k]["itemknn_self - mf"]
+            assert d["ci_low"] <= d["mean_diff"] <= d["ci_high"]
+
+
+def test_benchmark_v1_suite_keeps_original_models(processed_dir):
+    r = run_baselines(processed_dir, **FAST, suite="benchmark-v1")
+    for task in r["tasks"].values():
+        assert set(task["models"]) == {"popularity", "itemknn", "mf"}
+        assert task["key_comparisons"] == []
+
+
 def test_experiment_is_deterministic(processed_dir, report):
-    again = run_baselines(processed_dir, **FAST)
+    again = run_baselines(processed_dir, **FAST, suite="phase2.2")
     assert json.dumps(again, sort_keys=True) == json.dumps(report, sort_keys=True)
 
 
@@ -55,20 +92,32 @@ def test_test_split_never_influences_model_selection(processed_dir, report, tmp_
     targets.loc[is_test, "item_id"] = [first_cand[task_of[c]] for c in targets.loc[is_test, "case_id"]]
     targets.drop_duplicates().to_csv(altered / "eval_targets.csv", index=False, lineterminator="\n")
 
-    other = run_baselines(altered, **FAST)
+    other = run_baselines(altered, **FAST, suite="phase2.2")
     for task in report["tasks"]:
-        for family in report["tasks"][task]["models"]:
-            before = report["tasks"][task]["models"][family]
-            after = other["tasks"][task]["models"][family]
+        for name in report["tasks"][task]["models"]:
+            before = report["tasks"][task]["models"][name]
+            after = other["tasks"][task]["models"][name]
             assert before["selected_params"] == after["selected_params"]
             assert before["validation_trials"] == after["validation_trials"]
+
+
+def test_locked_dataset_refuses_other_suites(processed_dir, monkeypatch):
+    meta = json.loads((processed_dir / "prep_metadata.json").read_text(encoding="utf-8"))
+    monkeypatch.setitem(B.LOCKED_DATASETS, meta["source"]["events_sha256"], "benchmark-v1")
+    with pytest.raises(LockedTestSplitError, match="locked by suite 'benchmark-v1'"):
+        run_baselines(processed_dir, **FAST, suite="phase2.2")
+    run_baselines(processed_dir, **FAST, suite="benchmark-v1")  # reproduction stays allowed
+
+
+def test_benchmark_v1_dataset_checksum_is_registered():
+    assert B.LOCKED_DATASETS["ca53375dd030f13627ae3b7748ccdf209f32f2007657a3d918d84c3682a34fa8"] == "benchmark-v1"
 
 
 def test_markdown_is_ascii_and_mentions_label(report):
     md = to_markdown(report)
     md.encode("ascii")  # must print on any console (e.g. Windows cp1252)
     assert "SYNTHETIC-DATA EXPERIMENT" in md
-    assert "Exposure diversity" in md
+    assert "Key comparisons" in md and "Exposure diversity" in md
 
 
 def test_invalid_arguments(processed_dir):
@@ -78,6 +127,8 @@ def test_invalid_arguments(processed_dir):
         run_baselines(processed_dir, select_metric="auc")
     with pytest.raises(ValueError):
         run_baselines(processed_dir, random_seeds=0)
+    with pytest.raises(ValueError):
+        run_baselines(processed_dir, suite="phase9")
 
 
 def test_cli_writes_reports(processed_dir, tmp_path):
@@ -89,17 +140,19 @@ def test_cli_writes_reports(processed_dir, tmp_path):
     assert (out / "baseline_report.json").exists() and (out / "baseline_report.md").exists()
 
 
+def test_cli_refuses_frozen_output_dir(processed_dir, tmp_path):
+    out = tmp_path / "frozen"
+    out.mkdir()
+    (out / "FROZEN").write_text("frozen", encoding="utf-8")
+    (out / "baseline_report.md").write_text("original", encoding="utf-8")
+    r = subprocess.run([sys.executable, "-m", "bri.experiments.baselines", "--processed-dir", str(processed_dir),
+                        "--output-dir", str(out), "--n-boot", "10"], capture_output=True, text=True)
+    assert r.returncode == 1 and "frozen" in r.stderr
+    assert (out / "baseline_report.md").read_text(encoding="utf-8") == "original"
+
+
 def test_cli_missing_processed_dir(tmp_path):
     r = subprocess.run([sys.executable, "-m", "bri.experiments.baselines", "--processed-dir",
                         str(tmp_path / "none"), "--output-dir", str(tmp_path / "o")],
                        capture_output=True, text=True)
     assert r.returncode == 1 and "bri.prep.build" in r.stderr
-
-
-def test_pairwise_differences_cover_every_model_pair(report):
-    for task in report["tasks"].values():
-        if task["n_test_cases"] == 0:
-            continue
-        assert set(task["pairwise_paired_diff"]) == {"popularity - itemknn", "popularity - mf", "itemknn - mf"}
-        d = task["pairwise_paired_diff"]["itemknn - mf"]
-        assert d["ci_low"] <= d["mean_diff"] <= d["ci_high"]

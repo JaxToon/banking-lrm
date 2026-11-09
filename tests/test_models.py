@@ -148,3 +148,37 @@ def test_model_recommendations_pass_validation():
         recs = to_recommendations(cases["case_id"], model.fit(TRAIN).score(hist), ITEMS, np.zeros(3))
         assert validate_recommendations(recs, cases, cands) == []
         assert set(recs["item_id"]) <= set(ITEMS)
+
+
+def test_personal_frequency_ranks_own_history_with_popularity_fallback():
+    from bri.models.baselines import PersonalFrequency
+
+    m = PersonalFrequency().fit(TRAIN)
+    hist = np.array([[0, 3, 1], [0, 0, 0]], dtype=float)
+    assert (m.score(hist) == hist).all()
+    pop = Popularity().fit(TRAIN).popularity_  # [3, 2, 1]
+    recs = to_recommendations(["c1", "c2"], m.score(hist), ITEMS, tiebreak=pop)
+    assert recs[recs.case_id == "c1"]["item_id"].tolist() == ["SVC_B", "SVC_C", "SVC_A"]
+    # no item-bearing history -> exactly the popularity order
+    assert recs[recs.case_id == "c2"]["item_id"].tolist() == ["SVC_A", "SVC_B", "SVC_C"]
+
+
+def test_personal_frequency_ignores_other_customers():
+    from bri.models.baselines import PersonalFrequency
+
+    hist = np.array([[1, 0, 0]], dtype=float)
+    a = PersonalFrequency().fit(TRAIN).score(hist)
+    b = PersonalFrequency().fit(np.zeros((0, 3))).score(hist)
+    assert np.array_equal(a, b)
+
+
+def test_suites_are_well_formed():
+    from bri.models.baselines import KEY_COMPARISONS, SUITES
+
+    for suite, models in SUITES.items():
+        for name, (family, grid) in models.items():
+            assert grid, name
+            for params in grid:
+                make_model(family, params)
+        for a, b, _ in KEY_COMPARISONS[suite]:
+            assert a in models and b in models
