@@ -64,7 +64,28 @@ These hold in every phase and must not be relaxed without an explicit design rev
 - Fail closed if policy status is missing or cannot be evaluated.
 - Record policy version and reason codes.
 
-## 5. Local PoC topology
+## 5. Offline data preparation and evaluation (Phase 2 foundations)
+
+```mermaid
+flowchart LR
+    A[Validated synthetic dataset] --> B[Consent filter - fail closed]
+    B --> C[Task assignment by purpose: NBS / NBP]
+    C --> D[Temporal split: train / val / test]
+    D --> E[Train examples]
+    D --> F[Eval cases + relevant items]
+    G[Candidate recommendations] --> H[Recommendation validation]
+    F --> H
+    H --> I[Metrics per task, labelled synthetic]
+```
+
+- The consent filter decides which events may be used to *build training data and
+  evaluation sets*. It does not replace the serving-time policy engine.
+- Each task reads only events of its own purpose (no cross-purpose features).
+- Evaluation rejects malformed or out-of-candidate recommendations rather than
+  silently scoring them.
+- Details: [08_PHASE_2_FOUNDATIONS_REPORT.md](08_PHASE_2_FOUNDATIONS_REPORT.md).
+
+## 6. Local PoC topology
 
 - CSV/Parquet synthetic files.
 - DuckDB or pandas for local analytics.
@@ -74,7 +95,7 @@ These hold in every phase and must not be relaxed without an explicit design rev
 - FastAPI and Streamlit for later application phases.
 - MLflow local tracking.
 
-## 6. Production migration considerations
+## 7. Production migration considerations
 
 Production deployment must be selected with the institution's enterprise architecture and security teams. Possible capabilities include governed lakehouse/object storage, approved event streaming, distributed feature processing, model registry, private model serving, enterprise IAM, KMS/HSM, secrets management, centralized logging, monitoring, disaster recovery, and network segmentation.
 

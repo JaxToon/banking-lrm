@@ -11,7 +11,11 @@ This repository must remain safe for a public GitHub portfolio. Treat all data a
 - Behavioral scope: both mobile-app navigation behavior and service-use behavior.
 - Recommendation scope: both Next Best Service (NBS) and Next Best Product (NBP).
 - Local development target: laptop with 16 GB RAM.
-- Current delivery: Phase 0 and Phase 1 only (project foundation, synthetic dataset generator, schema validation).
+- Completed: Phase 0 and Phase 1 (project foundation, synthetic dataset generator, schema validation).
+- Current delivery: **Phase 2 foundations only**: temporal train/validation/test splitting, consent-aware training-example generation, and a shared offline evaluation framework for NBS and NBP.
+- Not yet authorized: recommendation models of any kind (popularity, item-item, matrix factorization, LightGBM, sequential, Transformer/LRM), LLM/RAG, API, dashboard, deployment. Models start only after the Phase 2 foundations are reviewed.
+- Approved Phase 2 dependency: SciPy (add only when code actually needs it). LightGBM is not approved yet.
+- Architectural invariants in `docs/02_SYSTEM_ARCHITECTURE.md` §3 always apply: purpose metadata is not permission; synthetic results are not real-world evidence; recommendation and policy stay separate.
 - Later architecture: sequential LRM + LLM explanation layer, deterministic policy/eligibility layer, API, dashboard.
 - The prototype must not make credit decisions, credit scoring, financial suitability assessments, fraud decisions, or execute transactions.
 
@@ -59,3 +63,12 @@ Do not include any real bank name, logo, color system, internal terminology, emp
 - Dataset validator catches missing columns, invalid event types, broken customer/item references, duplicate IDs, invalid timestamps, and consent-purpose inconsistencies.
 - Tests pass.
 - No real-bank references or real personal data appear in tracked files.
+
+## Definition of done for Phase 2 foundations
+
+- Chronological train/validation/test split with half-open UTC intervals; no feature or history uses events at or after the cutoff it is evaluated against.
+- Training examples and evaluation cases use only events whose purpose has explicit, unambiguous consent; missing, unknown, ambiguous, or denied consent excludes the event (fail closed).
+- NBS and NBP are built and evaluated separately; each task uses only events of its own purpose.
+- Precision@K, Recall@K, NDCG@K, MAP@K, catalog coverage, and diversity are implemented with documented definitions and verified against hand-calculated examples.
+- Outputs are deterministic and labelled as synthetic-data experiments.
+- Tests pass; documented commands run on Windows PowerShell and Linux/macOS.

@@ -71,6 +71,27 @@ run produces about 44k events in a few seconds; 5,000 customers/90 days produces
 1.3M events in under a minute. Schema and rules: [docs/03_DATA_DICTIONARY.md](docs/03_DATA_DICTIONARY.md).
 Design rationale: [docs/07_PHASE_1_DESIGN_DECISIONS.md](docs/07_PHASE_1_DESIGN_DECISIONS.md).
 
+## Phase 2 foundations: splits, consent-aware examples, evaluation
+
+Same commands on Windows PowerShell and macOS/Linux (after generating the dataset above):
+
+```bash
+python -m bri.prep.build --data-dir data/synthetic --output-dir data/processed --val-days 7 --test-days 7
+python -m bri.eval.evaluate --processed-dir data/processed --split val --ranker random
+python -m bri.eval.evaluate --processed-dir data/processed --split val --ranker oracle --output data/processed/report_val_oracle.json
+```
+
+- `bri.prep.build` validates the source dataset, keeps only events with explicit,
+  unambiguous consent for their purpose, splits by time, and writes training examples
+  and evaluation cases for NBS and NBP separately.
+- `bri.eval.evaluate` scores a `case_id,item_id,rank` recommendations CSV
+  (`--recommendations`), or a built-in sanity ranker, with Precision/Recall/NDCG/MAP@K,
+  coverage, and diversity per task.
+- `random` and `oracle` are pipeline sanity checks (floor and ceiling), not
+  recommendation models. All outputs are labelled as synthetic-data experiments.
+
+Protocol, decisions, and limitations: [docs/08_PHASE_2_FOUNDATIONS_REPORT.md](docs/08_PHASE_2_FOUNDATIONS_REPORT.md).
+
 ## Repository map
 
 ```text
@@ -89,22 +110,30 @@ Design rationale: [docs/07_PHASE_1_DESIGN_DECISIONS.md](docs/07_PHASE_1_DESIGN_D
 │   ├── 04_PRIVACY_COMPLIANCE.md
 │   ├── 05_PUBLIC_GITHUB_SAFETY.md
 │   ├── 06_CLAUDE_CODE_TASKS.md
-│   └── 07_PHASE_1_DESIGN_DECISIONS.md
+│   ├── 07_PHASE_1_DESIGN_DECISIONS.md
+│   └── 08_PHASE_2_FOUNDATIONS_REPORT.md
 ├── data/synthetic/          # generated output (git-ignored)
+├── data/processed/          # Phase 2 outputs (git-ignored)
 ├── src/bri/
-│   └── data/
-│       ├── schema.py            # single source of truth for the schema
-│       ├── generate_synthetic.py
-│       └── validate_dataset.py
-└── tests/
-    ├── conftest.py
-    ├── test_generator.py
-    └── test_validator.py
+│   ├── tasks.py                 # NBS/NBP task definitions
+│   ├── data/
+│   │   ├── schema.py            # single source of truth for the schema
+│   │   ├── generate_synthetic.py
+│   │   └── validate_dataset.py
+│   ├── prep/
+│   │   ├── split.py             # temporal splitting
+│   │   ├── consent.py           # fail-closed consent filter
+│   │   ├── examples.py          # interactions, train examples, eval cases, negatives
+│   │   └── build.py             # CLI
+│   └── eval/
+│       ├── metrics.py           # ranking + catalog metrics
+│       └── evaluate.py          # recommendation validation, reports, CLI
+└── tests/                       # unit + integration tests
 ```
 
 ## Roadmap after Phase 1
 
-- Phase 2: popularity, item-item, and matrix-factorization baselines.
+- Phase 2: temporal splits, consent-aware examples, and evaluation framework (done); then popularity, item-item, and matrix-factorization baselines after review.
 - Phase 3: sequential recommendation (SASRec-style baseline).
 - Phase 4: multi-behavior LRM-inspired Transformer and scaling experiments.
 - Phase 5: LLM product-catalog explanation with strict context minimization.

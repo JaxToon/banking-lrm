@@ -20,3 +20,13 @@ def dataset_copy(dataset_dir, tmp_path) -> Path:
     dest = tmp_path / "data"
     shutil.copytree(dataset_dir, dest)
     return dest
+
+
+@pytest.fixture(scope="session")
+def processed_dir(dataset_dir, tmp_path_factory) -> Path:
+    """Phase 2 processed outputs built once from the session dataset."""
+    from bri.prep.build import build
+
+    path = tmp_path_factory.mktemp("processed")
+    build(dataset_dir, path, val_days=3, test_days=3, min_history=1)
+    return path

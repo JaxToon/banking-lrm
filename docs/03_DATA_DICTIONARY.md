@@ -124,3 +124,47 @@ byte-identical for the same arguments on any OS.
    `created_at`; stored order per customer; funnel prerequisites.
 
 Exit code `0` = valid, `1` = invalid (all issues listed), `2` = CLI usage error.
+
+## 7. Phase 2 processed outputs (`python -m bri.prep.build`, git-ignored `data/processed/`)
+
+All files are derived only from consent-permitted events. See
+[08_PHASE_2_FOUNDATIONS_REPORT.md](08_PHASE_2_FOUNDATIONS_REPORT.md) for definitions.
+
+### interactions.csv
+| Field | Description |
+|---|---|
+| event_id, customer_token, session_id, event_timestamp, event_type, item_id | Copied from `events.csv` |
+| task | `nbs` (purpose `service_personalization`) or `nbp` (purpose `marketing_personalization`) |
+| split | `train`, `val`, `test` by event timestamp (half-open UTC intervals) |
+| is_target | Event type is a positive for its task (before per-journey dedupe) |
+
+Sorted by task, customer, timestamp, event_id.
+
+### train_examples.csv
+| Field | Description |
+|---|---|
+| example_id | `SYN_EX_` + 9 digits |
+| task, customer_token | Task and customer |
+| target_event_id, target_timestamp, target_item_id | First target per (task, customer, session, item) in train |
+| history_length | Same-task train interactions strictly before the target |
+
+### eval_cases.csv / eval_targets.csv
+| Field | Description |
+|---|---|
+| case_id | `SYN_CASE_<split>_<task>_<customer_token>` |
+| split | `val` or `test` |
+| task, customer_token | Task and customer |
+| cutoff_utc | Split start; history = same-task events strictly before it |
+| history_length | Count of those events |
+| n_relevant | Distinct relevant candidate items in the split window |
+
+`eval_targets.csv` lists (`case_id`, `item_id`) for every relevant item.
+
+### prep_metadata.json
+Synthetic label, source dataset version/seed/checksum, parameters, cutoffs, per-task
+purpose/targets/candidates, consent-filter report (kept and excluded counts by
+reason), counts, and output SHA-256 hashes. No wall-clock timestamp.
+
+### Recommendations input (for `python -m bri.eval.evaluate --recommendations`)
+CSV with `case_id,item_id,rank`; ranks unique and contiguous from 1 per case; items
+must be in the case's task candidate set.
