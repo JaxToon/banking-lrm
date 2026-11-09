@@ -11,10 +11,38 @@ This repository must remain safe for a public GitHub portfolio. Treat all data a
 - Behavioral scope: both mobile-app navigation behavior and service-use behavior.
 - Recommendation scope: both Next Best Service (NBS) and Next Best Product (NBP).
 - Local development target: laptop with 16 GB RAM.
-- Completed: Phase 0 and Phase 1 (project foundation, synthetic dataset generator, schema validation).
-- Current delivery: **Phase 2 foundations only**: temporal train/validation/test splitting, consent-aware training-example generation, and a shared offline evaluation framework for NBS and NBP.
-- Not yet authorized: recommendation models of any kind (popularity, item-item, matrix factorization, LightGBM, sequential, Transformer/LRM), LLM/RAG, API, dashboard, deployment. Models start only after the Phase 2 foundations are reviewed.
-- Approved Phase 2 dependency: SciPy (add only when code actually needs it). LightGBM is not approved yet.
+- Completed: Phase 0 and Phase 1 (project foundation, synthetic dataset generator, schema validation); Phase 2 foundations (temporal split, consent-aware examples, shared evaluation framework), reviewed and merged.
+
+### Current delivery: Phase 2.1 — Classical Recommendation Baselines
+
+Authorized:
+- Popularity-based recommendation for NBS and NBP.
+- Item-item collaborative filtering.
+- Matrix Factorization.
+- Shared model comparison and bootstrap confidence intervals.
+- Reproducible offline experiments using the existing Phase 2 foundation.
+
+Not yet authorized:
+- LightGBM ranking.
+- Sequential recommendation / SASRec.
+- Transformer or LRM implementation.
+- LLM integration and RAG.
+- API, dashboard, and production deployment.
+
+All models must use the existing temporal split, consent-filtered interactions, task-specific candidate sets, and shared evaluation framework.
+
+Fit models using training data, select configurations using validation data, and reserve test data for final evaluation.
+
+Every reported result must be explicitly labelled as a synthetic-data experiment.
+
+Additional Phase 2.1 requirements (from review):
+- Model comparisons use paired bootstrap confidence intervals with the customer/case as the resampling unit; the random floor is reported over several seeds.
+- `exposure_diversity` measures catalog exposure evenness, not per-customer semantic diversity; keep that name and interpretation.
+- Results cover only customers with sufficient history; cold start is an explicit limitation and a separate future experiment.
+- Never trade away NBS/NBP purpose separation to improve scores.
+- Dependencies: SciPy approved (add only when code needs it). LightGBM and PyTorch not approved.
+
+### Scope notes
 - Architectural invariants in `docs/02_SYSTEM_ARCHITECTURE.md` §3 always apply: purpose metadata is not permission; synthetic results are not real-world evidence; recommendation and policy stay separate.
 - Later architecture: sequential LRM + LLM explanation layer, deterministic policy/eligibility layer, API, dashboard.
 - The prototype must not make credit decisions, credit scoring, financial suitability assessments, fraud decisions, or execute transactions.
