@@ -1,4 +1,4 @@
-# Runtime + dev dependencies for Phase 0-1. Keep in sync with pyproject.toml.
+# Runtime + dev dependencies (current through Phase 2). Keep in sync with pyproject.toml.
 numpy>=1.26,<3.0
 pandas>=2.2,<3.0
 pytest>=8.0,<9.0
