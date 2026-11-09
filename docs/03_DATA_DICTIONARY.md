@@ -168,3 +168,16 @@ reason), counts, and output SHA-256 hashes. No wall-clock timestamp.
 ### Recommendations input (for `python -m bri.eval.evaluate --recommendations`)
 CSV with `case_id,item_id,rank`; ranks unique and contiguous from 1 per case; items
 must be in the case's task candidate set.
+
+## 8. Phase 2.1 experiment outputs (`python -m bri.experiments.baselines`, git-ignored `artifacts/`)
+
+`baseline_report.json`: synthetic label, protocol (fit/selection/final split, bootstrap
+settings, seed, K values), population note (cold-start exclusions), source checksums,
+and per task: candidates, case counts, per-family validation trials and selected
+parameters, test metrics, bootstrap CIs, paired differences vs popularity, pairwise
+paired differences, and the multi-seed random floor. `baseline_report.md` renders the
+same as ASCII tables.
+
+Evaluation reports use the key `exposure_diversity` (renamed from `diversity` in
+Phase 2.1) for normalized exposure entropy. It is not a semantic, per-list diversity
+measure.

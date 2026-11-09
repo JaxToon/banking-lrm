@@ -161,6 +161,16 @@ def run_baselines(
             if diffs:
                 entry["models"][family][f"test_paired_diff_vs_{REFERENCE_MODEL}"] = diffs
 
+        # Every pair of models (a - b) on the selection metric, so no comparison relies on
+        # eyeballing overlapping marginal CIs.
+        families = list(selected)
+        entry["pairwise_paired_diff"] = {
+            f"{a} - {b}": _round(paired_bootstrap_diff(per_case[a][select_k][select_metric],
+                                                       per_case[b][select_k][select_metric],
+                                                       n_boot, seed, confidence))
+            for i, a in enumerate(families) for b in families[i + 1:]
+        }
+
         # Step 4b: random floor over several seeds.
         runs = [evaluate(test_c, test_t,
                          sanity_recommendations(test_c, test_t, td.candidates, "random", seed + s),
@@ -242,6 +252,13 @@ def to_markdown(report: dict) -> str:
                     f"| {t['map']:.3f} | {t['coverage']:.3f} | {t['exposure_diversity']:.3f} | {d} |"
                 )
             lines.append("")
+        sel = p["selection"].split()[-1]
+        lines += [f"### Pairwise paired differences ({sel}, test)", "",
+                  "| Comparison | Mean diff [CI] | Share of resamples not better |", "|---|---|---|"]
+        for pair, d in e["pairwise_paired_diff"].items():
+            lines.append(f"| {pair} | {d['mean_diff']:+.3f} [{d['ci_low']:+.3f}, {d['ci_high']:+.3f}] "
+                         f"| {d['share_not_better']:.3f} |")
+        lines.append("")
     lines += [
         "Notes: exposure diversity measures how evenly recommendations spread across the catalog, "
         "not semantic diversity within one customer's list. A difference whose CI includes 0 is not "

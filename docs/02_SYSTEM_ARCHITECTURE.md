@@ -84,6 +84,11 @@ flowchart LR
 - Evaluation rejects malformed or out-of-candidate recommendations rather than
   silently scoring them.
 - Details: [08_PHASE_2_FOUNDATIONS_REPORT.md](08_PHASE_2_FOUNDATIONS_REPORT.md).
+- Phase 2.1 baselines (popularity, item-item CF, implicit MF) plug into this pipeline:
+  parameters are fitted on train, configurations are selected on validation, and test
+  is used once for final evaluation with paired bootstrap CIs. Models only produce
+  candidate scores; they make no policy decisions. Details:
+  [09_PHASE_2_1_BASELINES_REPORT.md](09_PHASE_2_1_BASELINES_REPORT.md).
 
 ## 6. Local PoC topology
 

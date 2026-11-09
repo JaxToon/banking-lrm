@@ -94,3 +94,12 @@ def test_cli_missing_processed_dir(tmp_path):
                         str(tmp_path / "none"), "--output-dir", str(tmp_path / "o")],
                        capture_output=True, text=True)
     assert r.returncode == 1 and "bri.prep.build" in r.stderr
+
+
+def test_pairwise_differences_cover_every_model_pair(report):
+    for task in report["tasks"].values():
+        if task["n_test_cases"] == 0:
+            continue
+        assert set(task["pairwise_paired_diff"]) == {"popularity - itemknn", "popularity - mf", "itemknn - mf"}
+        d = task["pairwise_paired_diff"]["itemknn - mf"]
+        assert d["ci_low"] <= d["mean_diff"] <= d["ci_high"]

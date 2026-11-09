@@ -92,6 +92,18 @@ python -m bri.eval.evaluate --processed-dir data/processed --split val --ranker 
 
 Protocol, decisions, and limitations: [docs/08_PHASE_2_FOUNDATIONS_REPORT.md](docs/08_PHASE_2_FOUNDATIONS_REPORT.md).
 
+## Phase 2.1: classical recommendation baselines
+
+```bash
+python -m bri.experiments.baselines --processed-dir data/processed --output-dir artifacts/baselines
+```
+
+Fits popularity, item-item CF, and implicit-feedback matrix factorization on the train
+split, selects each family's configuration on validation (NDCG@3), evaluates the
+selected configurations once on test, and reports paired bootstrap 95% CIs (customer
+resampling) plus a 5-seed random floor, for NBS and NBP separately. Results are
+synthetic-data experiments: [docs/09_PHASE_2_1_BASELINES_REPORT.md](docs/09_PHASE_2_1_BASELINES_REPORT.md).
+
 ## Repository map
 
 ```text
@@ -111,7 +123,8 @@ Protocol, decisions, and limitations: [docs/08_PHASE_2_FOUNDATIONS_REPORT.md](do
 │   ├── 05_PUBLIC_GITHUB_SAFETY.md
 │   ├── 06_CLAUDE_CODE_TASKS.md
 │   ├── 07_PHASE_1_DESIGN_DECISIONS.md
-│   └── 08_PHASE_2_FOUNDATIONS_REPORT.md
+│   ├── 08_PHASE_2_FOUNDATIONS_REPORT.md
+│   └── 09_PHASE_2_1_BASELINES_REPORT.md
 ├── data/synthetic/          # generated output (git-ignored)
 ├── data/processed/          # Phase 2 outputs (git-ignored)
 ├── src/bri/
@@ -125,15 +138,21 @@ Protocol, decisions, and limitations: [docs/08_PHASE_2_FOUNDATIONS_REPORT.md](do
 │   │   ├── consent.py           # fail-closed consent filter
 │   │   ├── examples.py          # interactions, train examples, eval cases, negatives
 │   │   └── build.py             # CLI
-│   └── eval/
-│       ├── metrics.py           # ranking + catalog metrics
-│       └── evaluate.py          # recommendation validation, reports, CLI
+│   ├── eval/
+│   │   ├── metrics.py           # ranking + catalog metrics
+│   │   ├── evaluate.py          # recommendation validation, reports, CLI
+│   │   └── bootstrap.py         # paired bootstrap CIs over cases
+│   ├── models/
+│   │   ├── common.py            # train/history matrices, deterministic ranking
+│   │   └── baselines.py         # popularity, item-item CF, implicit MF
+│   └── experiments/
+│       └── baselines.py         # train-fit / val-select / test-evaluate runner
 └── tests/                       # unit + integration tests
 ```
 
 ## Roadmap after Phase 1
 
-- Phase 2: temporal splits, consent-aware examples, and evaluation framework (done); then popularity, item-item, and matrix-factorization baselines after review.
+- Phase 2: temporal splits, consent-aware examples, and evaluation framework (done); Phase 2.1 popularity, item-item, and matrix-factorization baselines with bootstrap CIs (done, pending review).
 - Phase 3: sequential recommendation (SASRec-style baseline).
 - Phase 4: multi-behavior LRM-inspired Transformer and scaling experiments.
 - Phase 5: LLM product-catalog explanation with strict context minimization.
