@@ -89,6 +89,10 @@ flowchart LR
   is used once for final evaluation with paired bootstrap CIs. Models only produce
   candidate scores; they make no policy decisions. Details:
   [09_PHASE_2_1_BASELINES_REPORT.md](09_PHASE_2_1_BASELINES_REPORT.md).
+- Experiment governance: experiments are named suites. Datasets whose test split has
+  been used are registered by checksum and can only be re-run with their original
+  suite. Frozen benchmark reports live in `benchmarks/`. Phase 2.2 added Personal
+  Frequency as the reference baseline: [10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md](10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md).
 
 ## 6. Local PoC topology
 

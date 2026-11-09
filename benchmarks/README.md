@@ -23,3 +23,11 @@ real customer behavior or real-world recommendation effectiveness.
   generalization.
 - Confidence intervals in these reports capture case-to-case variation within one
   dataset only, not variation across generator seeds, dataset sizes, or populations.
+
+## Reproduction notes
+
+- `benchmark-v1`: re-running `--suite benchmark-v1` with current code reproduces every
+  frozen number (selections, validation trials, test metrics, CIs, paired differences,
+  random floor). The current JSON adds fields (`family`, per-K pairwise differences,
+  `key_comparisons`). For byte-identical output, check out git tag `benchmark-v1`.
+- `phase2.2`: re-running `--suite phase2.2` reproduces the frozen JSON byte for byte.

@@ -92,17 +92,32 @@ python -m bri.eval.evaluate --processed-dir data/processed --split val --ranker 
 
 Protocol, decisions, and limitations: [docs/08_PHASE_2_FOUNDATIONS_REPORT.md](docs/08_PHASE_2_FOUNDATIONS_REPORT.md).
 
-## Phase 2.1: classical recommendation baselines
+## Phase 2.1 / 2.2: classical baselines and ablation
+
+Benchmark-v1 (Phase 2.1, dataset seed 42) is frozen in `benchmarks/benchmark-v1/`, and
+its test split is locked. It can only be reproduced with its original suite:
 
 ```bash
-python -m bri.experiments.baselines --processed-dir data/processed --output-dir artifacts/baselines
+python -m bri.experiments.baselines --suite benchmark-v1 --processed-dir data/processed --output-dir artifacts/benchmark_v1_repro
 ```
 
-Fits popularity, item-item CF, and implicit-feedback matrix factorization on the train
-split, selects each family's configuration on validation (NDCG@3), evaluates the
-selected configurations once on test, and reports paired bootstrap 95% CIs (customer
-resampling) plus a 5-seed random floor, for NBS and NBP separately. Results are
-synthetic-data experiments: [docs/09_PHASE_2_1_BASELINES_REPORT.md](docs/09_PHASE_2_1_BASELINES_REPORT.md).
+Phase 2.2 (Personal Frequency + ItemKNN ablation) uses a fresh dataset, seed 20261109:
+
+```bash
+python -m bri.data.generate_synthetic --customers 500 --days 30 --seed 20261109 --output-dir data/synthetic/seed20261109
+python -m bri.data.validate_dataset --data-dir data/synthetic/seed20261109
+python -m bri.prep.build --data-dir data/synthetic/seed20261109 --output-dir data/processed/seed20261109 --val-days 7 --test-days 7
+python -m bri.experiments.baselines --suite phase2.2 --processed-dir data/processed/seed20261109 --output-dir artifacts/phase2_2_repro
+```
+
+The runner fits on train, selects each model's configuration on validation (NDCG@3),
+evaluates once on test, and reports paired bootstrap 95% CIs (customer resampling),
+pairwise comparisons, and a 5-seed random floor, for NBS and NBP separately. It refuses
+to run a different suite on a locked dataset, and refuses to write into a `FROZEN`
+benchmark directory. See [benchmarks/README.md](benchmarks/README.md),
+[docs/09_PHASE_2_1_BASELINES_REPORT.md](docs/09_PHASE_2_1_BASELINES_REPORT.md), and
+[docs/10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md](docs/10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md).
+All results are synthetic-data experiments.
 
 ## Repository map
 
@@ -124,7 +139,9 @@ synthetic-data experiments: [docs/09_PHASE_2_1_BASELINES_REPORT.md](docs/09_PHAS
 │   ├── 06_CLAUDE_CODE_TASKS.md
 │   ├── 07_PHASE_1_DESIGN_DECISIONS.md
 │   ├── 08_PHASE_2_FOUNDATIONS_REPORT.md
-│   └── 09_PHASE_2_1_BASELINES_REPORT.md
+│   ├── 09_PHASE_2_1_BASELINES_REPORT.md
+│   └── 10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md
+├── benchmarks/              # frozen, locked benchmark reports (benchmark-v1, phase2.2)
 ├── data/synthetic/          # generated output (git-ignored)
 ├── data/processed/          # Phase 2 outputs (git-ignored)
 ├── src/bri/
@@ -144,7 +161,7 @@ synthetic-data experiments: [docs/09_PHASE_2_1_BASELINES_REPORT.md](docs/09_PHAS
 │   │   └── bootstrap.py         # paired bootstrap CIs over cases
 │   ├── models/
 │   │   ├── common.py            # train/history matrices, deterministic ranking
-│   │   └── baselines.py         # popularity, item-item CF, implicit MF
+│   │   └── baselines.py         # popularity, personal frequency, item-item CF, implicit MF, suites
 │   └── experiments/
 │       └── baselines.py         # train-fit / val-select / test-evaluate runner
 └── tests/                       # unit + integration tests
@@ -152,7 +169,7 @@ synthetic-data experiments: [docs/09_PHASE_2_1_BASELINES_REPORT.md](docs/09_PHAS
 
 ## Roadmap after Phase 1
 
-- Phase 2: temporal splits, consent-aware examples, and evaluation framework (done); Phase 2.1 popularity, item-item, and matrix-factorization baselines with bootstrap CIs (done, pending review).
+- Phase 2: temporal splits, consent-aware examples, and evaluation framework (done); Phase 2.1 classical baselines (done, benchmark-v1); Phase 2.2 personal frequency + ItemKNN ablation (done, pending review); Phase 2.3 multi-seed robustness (planned).
 - Phase 3: sequential recommendation (SASRec-style baseline).
 - Phase 4: multi-behavior LRM-inspired Transformer and scaling experiments.
 - Phase 5: LLM product-catalog explanation with strict context minimization.

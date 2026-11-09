@@ -1,5 +1,11 @@
 # Phase 2.1 Report: Classical Recommendation Baselines
 
+> **Status: frozen as `benchmark-v1`** (git tag `benchmark-v1`, report in
+> `benchmarks/benchmark-v1/`). The seed-42 test split is locked. Phase 2.2 later showed
+> that item-item CF's advantage comes mostly from repeat usage: a Personal Frequency
+> baseline matches or beats it. See
+> [10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md](10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md).
+
 > **SYNTHETIC-DATA EXPERIMENT.** Every number below comes from data produced by this
 > repository's synthetic generator. Models recover patterns the generator deliberately
 > embeds (per-customer item affinity, service transitions, segment tilts). The results
