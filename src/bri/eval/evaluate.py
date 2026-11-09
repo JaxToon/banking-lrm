@@ -74,6 +74,45 @@ def validate_recommendations(
     return errors
 
 
+RANK_METRICS = ("precision", "recall", "ndcg", "map")
+
+
+def _lists_and_relevant(targets: pd.DataFrame, recs: pd.DataFrame) -> tuple[dict, dict]:
+    relevant = targets.groupby("case_id")["item_id"].apply(set).to_dict()
+    ordered = recs.assign(_rank=pd.to_numeric(recs["rank"]).astype(int)).sort_values(["case_id", "_rank"])
+    lists = ordered.groupby("case_id")["item_id"].apply(list).to_dict()
+    return lists, relevant
+
+
+def _check_inputs(cases, recs, candidates, ks) -> None:
+    if not ks or any(not isinstance(k, int) or isinstance(k, bool) or k < 1 for k in ks):
+        raise ValueError("ks must be positive integers")
+    errors = validate_recommendations(recs, cases, candidates)
+    if errors:
+        raise InvalidRecommendationsError("; ".join(errors))
+
+
+def per_case_metrics(
+    cases: pd.DataFrame,
+    targets: pd.DataFrame,
+    recs: pd.DataFrame,
+    candidates: dict[str, list[str]],
+    k: int,
+) -> pd.DataFrame:
+    """One row per case (sorted by case_id): case_id, task, precision, recall, ndcg, map at K.
+
+    A case without recommendations scores 0. This is the unit used for bootstrap CIs.
+    """
+    _check_inputs(cases, recs, candidates, (k,))
+    lists, relevant = _lists_and_relevant(targets, recs)
+    rows = []
+    for case, task in sorted(zip(cases["case_id"], cases["task"])):
+        ranked, rel = lists.get(case, []), relevant[case]
+        rows.append((case, task, M.precision_at_k(ranked, rel, k), M.recall_at_k(ranked, rel, k),
+                     M.ndcg_at_k(ranked, rel, k), M.average_precision_at_k(ranked, rel, k)))
+    return pd.DataFrame(rows, columns=["case_id", "task", *RANK_METRICS])
+
+
 def evaluate(
     cases: pd.DataFrame,
     targets: pd.DataFrame,
@@ -82,15 +121,8 @@ def evaluate(
     ks: tuple[int, ...] = DEFAULT_KS,
 ) -> dict:
     """Score recommendations per task. Raises InvalidRecommendationsError on bad input."""
-    if not ks or any(not isinstance(k, int) or k < 1 for k in ks):
-        raise ValueError("ks must be positive integers")
-    errors = validate_recommendations(recs, cases, candidates)
-    if errors:
-        raise InvalidRecommendationsError("; ".join(errors))
-
-    relevant = targets.groupby("case_id")["item_id"].apply(set).to_dict()
-    ordered = recs.assign(_rank=pd.to_numeric(recs["rank"]).astype(int)).sort_values(["case_id", "_rank"])
-    lists = ordered.groupby("case_id")["item_id"].apply(list).to_dict()
+    _check_inputs(cases, recs, candidates, ks)
+    lists, _ = _lists_and_relevant(targets, recs)
 
     results = {}
     for name in TASKS:
@@ -104,22 +136,17 @@ def evaluate(
         }
         if any(k >= len(cands) for k in ks):
             entry["note"] = "K >= candidate_count makes Recall/coverage trivial at that K."
+        task_case_frame = cases[cases["task"] == name]
         for k in ks:
             if not task_cases:
                 entry["metrics"][f"@{k}"] = None  # undefined, not zero
                 continue
-            per_case = {"precision": [], "recall": [], "ndcg": [], "map": []}
-            for case in task_cases:
-                ranked, rel = lists.get(case, []), relevant[case]
-                per_case["precision"].append(M.precision_at_k(ranked, rel, k))
-                per_case["recall"].append(M.recall_at_k(ranked, rel, k))
-                per_case["ndcg"].append(M.ndcg_at_k(ranked, rel, k))
-                per_case["map"].append(M.average_precision_at_k(ranked, rel, k))
+            pc = per_case_metrics(task_case_frame, targets, recs[recs["case_id"].isin(task_cases)], candidates, k)
             case_lists = [lists.get(c, []) for c in task_cases]
             entry["metrics"][f"@{k}"] = {
-                **{m: round(float(np.mean(v)), 6) for m, v in per_case.items()},
+                **{m: round(float(pc[m].mean()), 6) for m in RANK_METRICS},
                 "coverage": round(M.catalog_coverage(case_lists, cands, k), 6),
-                "diversity": round(M.exposure_diversity(case_lists, cands, k), 6),
+                "exposure_diversity": round(M.exposure_diversity(case_lists, cands, k), 6),
             }
         results[name] = entry
     return results

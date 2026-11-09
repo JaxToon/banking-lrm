@@ -55,7 +55,7 @@ def build_interactions(permitted: pd.DataFrame, cutoffs: SplitCutoffs) -> pd.Dat
     return df[INTERACTION_COLUMNS].reset_index(drop=True)
 
 
-def _first_targets(df: pd.DataFrame) -> pd.DataFrame:
+def first_targets(df: pd.DataFrame) -> pd.DataFrame:
     t = df[df["is_target"]]
     return t[~t.duplicated(["task", "customer_token", "session_id", "item_id"])]
 
@@ -71,7 +71,7 @@ def build_train_examples(interactions: pd.DataFrame, min_history: int = 1) -> tu
     prior = train.groupby(_TC, sort=False).cumcount()
     ties = train.groupby([*_TC, "event_timestamp"], sort=False).cumcount()
     train = train.assign(history_length=prior - ties)  # strictly earlier events only
-    targets = _first_targets(train)
+    targets = first_targets(train)
     enough = targets["history_length"] >= min_history
     ex = targets[enough]
     out = pd.DataFrame({
@@ -107,7 +107,7 @@ def build_eval_cases(
     ts = interactions["event_timestamp"]
     history = interactions[ts < start].groupby(_TC).size().rename("history_length")
     window = interactions[(ts >= start) & (ts < end)]
-    rel = _first_targets(window)[[*_TC, "item_id"]].drop_duplicates()
+    rel = first_targets(window)[[*_TC, "item_id"]].drop_duplicates()
     is_candidate = [item in candidates[task] for task, item in zip(rel["task"], rel["item_id"])]
     stats["non_candidate_targets_dropped"] = int(len(rel) - sum(is_candidate))
     rel = rel[is_candidate]

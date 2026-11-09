@@ -95,4 +95,4 @@ def exposure_diversity(lists: Iterable[Sequence[str]], candidates: Sequence[str]
     if total == 0 or n == 1:
         return 0.0
     entropy = -sum((c / total) * math.log(c / total) for c in counts.values())
-    return entropy / math.log(n)
+    return abs(entropy) / math.log(n)  # abs() turns -0.0 into 0.0
