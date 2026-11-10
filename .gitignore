@@ -20,6 +20,7 @@ artifacts/
 data/raw/
 data/processed/
 data/phase2_3/
+data/phase3/
 data/synthetic/*
 !data/synthetic/.gitkeep
 *.parquet

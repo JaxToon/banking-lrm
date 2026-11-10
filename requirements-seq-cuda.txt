@@ -1,0 +1,7 @@
+# Phase 3 sequential models, CUDA 12.8 build (NVIDIA GPU; required for Blackwell / sm_120).
+# Needs an NVIDIA driver that supports CUDA 12.8 or newer.
+#   pip install -r requirements.txt -r requirements-seq-cuda.txt
+# Verify: python -m bri.seq.runtime
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0+cu128
+optuna==4.9.0

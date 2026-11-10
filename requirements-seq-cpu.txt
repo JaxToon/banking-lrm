@@ -1,0 +1,6 @@
+# Phase 3 sequential models, CPU build (any machine; no GPU required).
+#   pip install -r requirements.txt -r requirements-seq-cpu.txt
+# On Linux, PyPI's default torch wheel bundles CUDA libraries; to get the small CPU-only
+# wheel there, add: --index-url https://download.pytorch.org/whl/cpu (torch line only).
+torch==2.11.0
+optuna==4.9.0

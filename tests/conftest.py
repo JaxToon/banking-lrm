@@ -1,5 +1,12 @@
+import os
 import shutil
 from pathlib import Path
+
+# Deterministic cuBLAS must be configured before anything initializes CUDA in this
+# test process (some test modules probe the GPU at import). Setting it here mirrors
+# what bri.seq.runtime.configure_determinism() does first thing in a real run; tests
+# that check the refusal path remove it in their own subprocess.
+os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
 
 import pytest
 

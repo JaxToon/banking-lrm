@@ -15,6 +15,9 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0,<9.0"]
+# Phase 3 sequential models (approved: torch 2.11.0, optuna 4.9.0). `pip install -e .[seq]`
+# installs the CPU build from PyPI; for CUDA use requirements-seq-cuda.txt first.
+seq = ["torch==2.11.0", "optuna==4.9.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -22,4 +25,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = "-ra"
+# CUDA tests are excluded from the default run; run them with `pytest -m cuda`
+# (mandatory dedicated validation run before every final experiment).
+addopts = "-ra -m 'not cuda'"
+markers = ["cuda: needs a usable CUDA GPU; run separately with `pytest -m cuda`"]
