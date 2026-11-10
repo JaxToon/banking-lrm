@@ -54,9 +54,13 @@ def build_next_event_cases(
     candidates: dict[str, list[str]],
     min_history: int = 1,
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
-    """Return (cases, targets, stats) for split 'val' or 'test'."""
-    if split not in ("val", "test"):
-        raise ValueError("evaluation split must be 'val' or 'test'")
+    """Return (cases, targets, stats) for split 'val' or 'test' (evaluation), or 'train'.
+
+    'train' (Phase 3 sequential training cases) applies exactly the same rules inside
+    the train window; output for 'val' and 'test' is unchanged by its addition.
+    """
+    if split not in ("train", "val", "test"):
+        raise ValueError("split must be 'train', 'val' or 'test'")
     if min_history < 0:
         raise ValueError("min_history must be >= 0")
     start, end = cutoffs.bounds(split)
