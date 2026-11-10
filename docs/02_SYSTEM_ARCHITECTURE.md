@@ -130,11 +130,45 @@ flowchart LR
 - Synthetic robustness results are evidence about the generator regimes only, never
   about real customers. Details: [11_PHASE_2_3_ROBUSTNESS_REPORT.md](11_PHASE_2_3_ROBUSTNESS_REPORT.md).
 
+### 5.2 Sequential recommendation experiment (Phase 3)
+
+```mermaid
+flowchart LR
+    S[(Seed reservation<br/>phase3_tuning / phase3_final)] --> G1
+    G1[Gates: tests, CUDA tests,<br/>manifests, device, versions,<br/>runtime fingerprint] --> T
+    T[Tuning datasets<br/>train/val only] --> H[Optuna TPE<br/>val macro NDCG@3]
+    H --> F[(Frozen config<br/>pinned manifest)]
+    F --> G2[Gates] --> D[Final datasets]
+    D --> C[Classical models<br/>Phase 2.3 grids]
+    D --> Q[Next-event sequence cases<br/>shared with evaluator]
+    Q --> M[SASRec Full + 4 ablations<br/>CUDA, FP32, deterministic]
+    C --> E[Shared evaluator +<br/>shared tie-break]
+    M --> E
+    E --> R[Within-seed bootstrap +<br/>across-seed Student-t]
+    R --> L[(Lock manifest +<br/>frozen report)]
+```
+
+- **Separation of tuning and final evaluation.** Seeds are reserved per namespace in a
+  pinned manifest before any data exists. Hyperparameters are searched on tuning
+  validation splits only, then frozen in a pinned manifest before the first final
+  dataset is generated. Final test splits are used once and locked.
+- **One case protocol.** Sequence cases are the next-event cases of the evaluator,
+  also built for the train window. Tie, repeat, session and cold-start rules are
+  shared. History is strictly before the target. Session-boundary features come only
+  from the historical prefix, and the within/cross-session label is evaluator-only.
+- **Runtime as part of the experiment identity.** The device, GPU, CUDA/cuDNN/torch
+  build, CPU threads and determinism settings form a runtime fingerprint recorded at
+  the freeze. A final run on a different runtime is refused instead of mixed.
+- **Recommendation stays separate from policy.** SASRec only produces candidate
+  scores, exactly like the classical models. It makes no eligibility, consent or
+  policy decisions.
+- Details and results: [12_PHASE_3_SEQUENTIAL_REPORT.md](12_PHASE_3_SEQUENTIAL_REPORT.md).
+
 ## 6. Local PoC topology
 
 - CSV/Parquet synthetic files.
 - DuckDB or pandas for local analytics.
-- PyTorch for model experiments.
+- PyTorch (2.11.0, optional `seq` extra; CUDA or CPU) for sequential model experiments; Optuna (4.9.0) for validation-only hyperparameter search.
 - FAISS CPU for later retrieval experiments.
 - Local LLM runtime only if hardware permits.
 - FastAPI and Streamlit for later application phases.

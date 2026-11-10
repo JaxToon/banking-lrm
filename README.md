@@ -152,6 +152,68 @@ reproduced with unmodified data and configuration. Results:
 [docs/11_PHASE_2_3_ROBUSTNESS_REPORT.md](docs/11_PHASE_2_3_ROBUSTNESS_REPORT.md).
 All results are synthetic-data experiments.
 
+## Phase 3: sequential recommendation (SASRec) and ablations
+
+**Question.** Does sequential modeling add predictive value beyond Personal Frequency
+and the classical baselines? SASRec Full and four controlled ablations (NoPosition,
+Shuffled, MeanPool, SessionBoundary) are compared with the classical models on 30
+fresh synthetic datasets (3 behavior profiles x 10 seeds). The primary protocol is
+next-event; the 7-day window is secondary.
+
+**Result (synthetic-data experiment).**
+- SASRec beats Personal Frequency clearly in one of six groups, `transition_dominant` /
+  NBS: next-event NDCG@1 0.400 vs 0.235, +0.164 [+0.152, +0.176] across seeds,
+  positive in 10/10 seeds.
+- That gain comes almost entirely from **within-session** targets (0.868 vs 0.213).
+  On cross-session targets, and in the habit and balanced regimes, Personal Frequency
+  stays as good or better.
+- Chronological order and attention matter: Full beats Shuffled and MeanPool.
+  Explicit positional embeddings and session-boundary embeddings add nothing
+  measurable.
+- In the 7-day window protocol, SASRec trails Personal Frequency in every group.
+
+Full report: [docs/12_PHASE_3_SEQUENTIAL_REPORT.md](docs/12_PHASE_3_SEQUENTIAL_REPORT.md).
+Release notes: [docs/RELEASE_NOTES_PHASE3.md](docs/RELEASE_NOTES_PHASE3.md). Compact derived
+summary: `benchmarks/phase3-summary/phase3_summary.json` (the frozen report stays authoritative).
+
+### Optional dependencies
+
+Phase 3 needs PyTorch 2.11.0 and Optuna 4.9.0 (optional `seq` extra). Nothing before
+Phase 3 needs them, and the default test suite skips the Phase 3 tests when torch is
+absent. A GPU is never required for tests.
+
+```bash
+pip install -r requirements.txt -r requirements-seq-cpu.txt    # CPU build, any machine
+pip install -r requirements.txt -r requirements-seq-cuda.txt   # CUDA 12.8 build (driver 12.8+; needed for sm_120)
+python -m bri.seq.runtime --device auto                        # device, CPU fallback, determinism, versions
+```
+
+Equivalent explicit commands:
+`pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu128` and
+`pip install optuna==4.9.0`.
+
+### Commands (same on Windows PowerShell and macOS/Linux)
+
+```bash
+python -m bri.experiments.integrity          # verify every manifest, the seed reservation, frozen config and reports
+pytest -q                                    # default suite (CUDA tests excluded)
+pytest -q -m cuda                            # dedicated CUDA validation run (required before a final run)
+python -m bri.seq.prepare                    # phase3_tuning datasets + train-only history-length report
+python -m bri.seq.hpo report                 # HPO report from the SQLite study (the search itself is frozen)
+python -m bri.experiments.phase3 run --output-dir artifacts/phase3/repro --profiles transition_dominant --seeds 20261134
+```
+
+The last command is a subset reproduction of the locked final evaluation. It runs
+every gate first: both test runs, manifests, frozen-configuration hash,
+`require_device("cuda:0")`, the seed namespace, pipeline versions and the runtime
+fingerprint. It must write to a new output directory. Re-running HPO, changing the
+frozen configuration, writing into `benchmarks/phase3/`, or replacing the aggregate
+report is refused.
+
+Seeds: `phase3_tuning` 20261120-20261122 (validation only) and `phase3_final`
+20261130-20261139 (test used once), reserved in `benchmarks/manifests/phase3-seeds.json`
+before any Phase 3 dataset existed. Other runners refuse them.
+
 ## Repository map
 
 ```text
@@ -174,11 +236,14 @@ All results are synthetic-data experiments.
 │   ├── 08_PHASE_2_FOUNDATIONS_REPORT.md
 │   ├── 09_PHASE_2_1_BASELINES_REPORT.md
 │   ├── 10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md
-│   └── 11_PHASE_2_3_ROBUSTNESS_REPORT.md
-├── benchmarks/              # frozen reports + immutable manifests (benchmark-v1, phase2.2, phase2.3)
+│   ├── 11_PHASE_2_3_ROBUSTNESS_REPORT.md
+│   ├── 12_PHASE_3_SEQUENTIAL_REPORT.md
+│   └── RELEASE_NOTES_PHASE3.md
+├── benchmarks/              # frozen reports + immutable manifests (benchmark-v1, phase2.2, phase2.3, phase3)
 ├── data/synthetic/          # generated output (git-ignored)
 ├── data/processed/          # Phase 2 outputs (git-ignored)
 ├── data/phase2_3/           # Phase 2.3 datasets (git-ignored)
+├── data/phase3/             # Phase 3 tuning + final datasets (git-ignored)
 ├── src/bri/
 │   ├── tasks.py                 # NBS/NBP task definitions
 │   ├── data/
@@ -195,20 +260,29 @@ All results are synthetic-data experiments.
 │   │   ├── evaluate.py          # recommendation validation, reports, CLI
 │   │   ├── next_event.py        # next-event cases + strict-history counts
 │   │   └── bootstrap.py         # paired (and customer-cluster) bootstrap CIs
+│   ├── seq/                     # Phase 3 (optional `seq` extra)
+│   │   ├── runtime.py           # device selection, seeding, determinism, runtime fingerprint
+│   │   ├── data.py              # next-event sequence cases (train/val/test), tie and boundary rules
+│   │   ├── prepare.py           # tuning datasets + train-only history-length report
+│   │   ├── sasrec.py            # SASRec Full + NoPosition / Shuffled / MeanPool / SessionBoundary
+│   │   ├── train.py             # training, validation-only early stopping, checkpoints
+│   │   ├── hpo.py               # Optuna TPE search on tuning seeds, frozen-config manifest
+│   │   └── bench.py             # CPU vs CUDA runtime benchmark
 │   ├── models/
 │   │   ├── common.py            # train/history matrices, deterministic ranking
 │   │   └── baselines.py         # popularity, personal frequency, item-item CF, implicit MF, suites
 │   └── experiments/
 │       ├── baselines.py         # train-fit / val-select / test-evaluate runner (window, next-event)
-│       ├── integrity.py         # fingerprints, config hashes, immutable manifests
-│       └── robustness.py        # Phase 2.3 multi-seed orchestration + statistics
+│       ├── integrity.py         # fingerprints, config hashes, immutable manifests, seed namespaces
+│       ├── robustness.py        # Phase 2.3 multi-seed orchestration + statistics
+│       └── phase3.py            # Phase 3 gated final experiment, statistics, lock
 └── tests/                       # unit + integration tests
 ```
 
 ## Roadmap after Phase 1
 
-- Phase 2: temporal splits, consent-aware examples, and evaluation framework (done); Phase 2.1 classical baselines (done, benchmark-v1); Phase 2.2 personal frequency + ItemKNN ablation (done); Phase 2.3 benchmark integrity + multi-seed behavioral robustness (done, pending review).
-- Phase 3: sequential recommendation (SASRec-style baseline).
+- Phase 2: temporal splits, consent-aware examples, and evaluation framework (done); Phase 2.1 classical baselines (done, benchmark-v1); Phase 2.2 personal frequency + ItemKNN ablation (done); Phase 2.3 benchmark integrity + multi-seed behavioral robustness (done).
+- Phase 3: sequential recommendation (SASRec + ablations) — done, pending review. Phase 3.1 (hybrid Personal Frequency + SASRec with a gate on pre-recommendation features only, fresh seeds) is future work.
 - Phase 4: multi-behavior LRM-inspired Transformer and scaling experiments.
 - Phase 5: LLM product-catalog explanation with strict context minimization.
 - Phase 6: deterministic eligibility/consent/frequency policy service.

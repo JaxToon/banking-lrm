@@ -9,6 +9,7 @@ real customer behavior or real-world recommendation effectiveness.
 | `benchmark-v1` | generator 0.2.0, seed 42, 500 customers, 30 days, split 16/7/7; events.csv sha256 `ca53375d…a34fa8` | git tag `benchmark-v1` (suite `benchmark-v1`) | **Locked.** Used once for Phase 2.1 final evaluation. |
 | `phase2.2` | generator 0.2.0, seed 20261109, 500 customers, 30 days, split 16/7/7; events.csv sha256 `9d68d414…a6927b` | suite `phase2.2` | **Locked.** Used once for Phase 2.2 final evaluation. |
 | `phase2.3` | generator 0.3.0, profiles habit_dominant / balanced / transition_dominant x seeds 20261110-20261119 (30 datasets), 500 customers, 30 days, split 16/7/7 | suites `phase2.3` (window) and `phase2.3-next-event` | **Locked.** Used once for Phase 2.3 final evaluation. |
+| `phase3` | generator 0.3.0, 3 profiles x `phase3_final` seeds 20261130-20261139 (30 datasets), 500 customers, 30 days, split 16/7/7; SASRec configuration frozen in `manifests/phase3-config.json` (Optuna trial 21 on `phase3_tuning` validation splits) | suites `phase3`, `phase3-next-event` (classical, Phase 2.3 grids) and `phase3-sasrec` (5 variants, CUDA, FP32, deterministic) | **Locked.** Used once for Phase 3 final evaluation. |
 
 ## Manifests
 
@@ -27,6 +28,30 @@ the original runs used. The supporting evidence for that is reproduction: the or
 suites reproduce the frozen results from this data (`phase2.2` byte for byte). Their
 frozen reports were not touched. The `phase2.3` manifest was written at its final
 evaluation, before any re-run.
+
+## Phase 3 configuration and lock
+
+- `manifests/phase3-config.json`: the frozen SASRec configuration (written before any
+  `phase3_final` dataset existed) with the Optuna study metadata, tuning-data
+  fingerprints and the runtime fingerprint (GPU, CUDA/cuDNN/torch build, CPU threads,
+  determinism settings). Final runs on another runtime are refused.
+- `manifests/phase3.json` + `phase3/`: the final evaluation. A subset reproduction
+  is allowed only into a new output directory; replacing the aggregate report, writing
+  into `phase3/` or changing any configuration is refused.
+
+- `phase3-summary/phase3_summary.json`: a DERIVED compact summary (about 50 KB vs 0.9
+  MB) generated from the frozen report by `python -m bri.experiments.phase3 summary`.
+  It records the source sha256 and refuses to build unless that hash matches the lock
+  manifest. The frozen report remains the authoritative record.
+
+## Seed reservations
+
+`manifests/phase3-seeds.json` reserves `phase3_tuning` (20261120-20261122) and
+`phase3_final` (20261130-20261139) for Phase 3, before any Phase 3 dataset exists. The
+seeds were checked against every pinned manifest at reservation time (recorded in
+`checked_against`). Every manifest load re-verifies that no reserved seed is used by a
+dataset of another namespace. A namespace's runner may only use its own seeds, and the
+Phase 2.3 runner refuses reserved seeds before writing anything.
 
 ## Rules for locked test splits
 

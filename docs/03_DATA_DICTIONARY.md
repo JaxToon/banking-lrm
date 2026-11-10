@@ -246,3 +246,53 @@ definition hashes, frozen report file hashes, and per locked dataset: generator
 identity (version, seed, customers, days, profile), source file hashes and composite,
 processed file hashes, and prep fingerprint. The sha256 of each manifest file is pinned
 in `bri.experiments.integrity.MANIFEST_SHA256`.
+
+## 10. Phase 3 sequential cases (`bri.seq.data`, in memory; never written as CSV)
+
+Cases are the Phase 2.3 next-event cases, also built for the train window. Per task
+and split, `SeqCases` holds:
+
+| Array | Shape / type | Meaning |
+|---|---|---|
+| items | (n_cases, max_len, max_tie) int64 | History steps, left-padded; 0 = padding, j + 1 = item j of the task vocabulary (sorted candidates). A step holds every first-target item sharing one timestamp (ties are never ordered) |
+| new_session | (n_cases, max_len) int8 | 1 when a history step starts a session different from the previous history step; from the historical prefix only (the target session is never read) |
+| length / full_length | (n_cases,) int64 | Steps kept after truncation / steps before truncation (most recent kept) |
+| targets | (n_cases, n_items) float32 | Multi-hot relevant items (several only on timestamp ties) |
+
+`SeqCases.fingerprint()` hashes the arrays, case ids, vocabulary and `max_len`.
+`python -m bri.seq.prepare` generates the `phase3_tuning` datasets under
+`data/phase3/phase3_tuning/` (git-ignored) and writes `seq_length_report.{json,md}`
+from train-window cases (val as a sanity check; test events are dropped before building).
+
+## 11. Phase 3 experiment outputs
+
+Tracked, immutable (sha256 pinned in `bri.experiments.integrity.MANIFEST_SHA256`):
+- `benchmarks/manifests/phase3-seeds.json`: `seed_namespaces` (`phase3_tuning`,
+  `phase3_final`) with seeds, profiles, size and split, plus `checked_against` (the
+  manifests and seeds in use when the reservation was made).
+- `benchmarks/manifests/phase3-config.json`: `frozen_config` (model, training,
+  device, precision) and `frozen_config_sha256`; `selection` (rule, trial, objective,
+  group scores); `study` (name, trial counts, protocol, sha256 of the SQLite file at
+  freeze); `tuning_data` (per-dataset source/processed/prep and sequence
+  fingerprints); `runtime` (runtime fingerprint and environment); `versions`.
+- `benchmarks/manifests/phase3.json`: per final dataset, generator identity, source
+  and processed fingerprints, prep fingerprint and `seed_namespace`; `configs` for the
+  `phase3` / `phase3-next-event` classical suites and the `phase3-sasrec`
+  configuration; `phase3_run_config` and its hash; `runtime`; frozen report hashes.
+- `benchmarks/phase3/phase3_report.{json,md}`: aggregate results. Per profile,
+  protocol and task: across-seed statistics of every metric for every model, paired
+  differences with within-seed CI sign counts, per-seed NDCG, next-event session
+  strata with case counts, SASRec runtime, classical selection counts, and cold-start
+  totals.
+
+Git-ignored (`artifacts/phase3/`, `data/phase3/`):
+- `hpo/study.db` (Optuna SQLite study) and `hpo/hpo_report.{json,md}` (all trials with
+  per-group and per-dataset scores).
+- `final/runs/<profile>/seed<N>/`: classical window and next-event reports and
+  `phase3_dataset_record.json` (per-seed metrics, comparisons, strata, runtime).
+- `final/checkpoints/<profile>/seed<N>/<task>_<variant>.pt`: SASRec checkpoints. Each
+  holds `state_dict` and metadata: variant, architecture, hyperparameters, unused
+  hyperparameters, item-mapping sha256, training seed, train/val sequence
+  fingerprints, best epoch, torch version, device, state_dict sha256 (verified on
+  load).
+- `bench/`, `seq_lengths/`, `ablation_smoke.json`: Checkpoint 2–4 diagnostics.
