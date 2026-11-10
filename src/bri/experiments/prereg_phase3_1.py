@@ -230,11 +230,65 @@ def verify(m: dict, manifests: dict | None = None, design_doc: Path = DESIGN_DOC
     return problems
 
 
+SEEDS_NAME = "phase3_1-seeds"
+PREREG_SHA256 = "9834e435dd8ba0a51b2123c57e7b9ae4522e6ec7aa7c8965ee875ab1616840eb"
+# Exact dataset-seed values approved by the project owner at Phase 3.1 Checkpoint 1
+# (2026-11-10). The pre-registration fixed only the number of seeds per namespace.
+APPROVED_SEEDS = {"phase3_1_tuning": list(range(20261140, 20261143)),
+                  "phase3_1_final": list(range(20261150, 20261160))}
+
+
+def build_seed_reservation(manifests: dict) -> dict:
+    """Phase 3.1 seed reservation; raises on any collision (checked against `manifests`)."""
+    from bri.data.generate_synthetic import PROFILE_GENERATOR_VERSION
+    pre = manifests[NAME]
+    if I.MANIFEST_SHA256.get(NAME) != PREREG_SHA256:
+        raise I.BenchmarkIntegrityError("pinned pre-registration hash differs from the one approved at Checkpoint 1")
+    if verify(pre, {k: v for k, v in manifests.items() if k not in (NAME, SEEDS_NAME)}):
+        raise I.BenchmarkIntegrityError("pre-registration no longer verifies")
+    spec = {"generator_version": PROFILE_GENERATOR_VERSION, "profiles": pre["data"]["profiles"],
+            "customers": pre["data"]["customers"], "days": pre["data"]["days"], "split_days": pre["data"]["split_days"]}
+    init = set(pre["seed_policy"]["initialization_seeds"])
+    namespaces = {}
+    for ns, seeds in APPROVED_SEEDS.items():
+        if len(seeds) != pre["seed_policy"]["namespaces"][ns]["seeds_per_profile"] or len(set(seeds)) != len(seeds):
+            raise I.BenchmarkIntegrityError(f"{ns}: seed count/uniqueness differs from the pre-registration")
+        if set(seeds) & init:
+            raise I.BenchmarkIntegrityError(f"{ns}: dataset seeds overlap initialization seeds")
+        namespaces[ns] = {**spec, "seeds": seeds,
+                          "purpose": ("Phase 3.1 tuning: alpha / gate selection on validation splits only; test splits "
+                                      "never evaluated." if ns.endswith("tuning") else
+                                      "Phase 3.1 final evaluation after the configuration is frozen; each test split used once.")}
+    m = I.build_seed_reservation(  # collision check against every registered seed and reservation
+        SEEDS_NAME, namespaces, manifests,
+        "Phase 3.1 seed reservation, written before any Phase 3.1 dataset exists. Exact seed values were set by "
+        "project-owner approval at Phase 3.1 Checkpoint 1 because the pre-registration fixed only the number of "
+        "seeds per namespace.")
+    m["prereg_reference"] = {"manifest": f"benchmarks/manifests/{NAME}.json", "sha256": PREREG_SHA256}
+    m["approval"] = {"checkpoint_1": "exact seed values approved by the project owner on 2026-11-10",
+                     "not_authorized_by_this_manifest": ["dataset generation", "model training", "cross-fitting",
+                                                         "gate training", "Phase 3.1 evaluation"]}
+    m["initialization_seeds_separate"] = sorted(init)
+    return m
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("command", choices=("stage", "pin"))
+    parser.add_argument("command", choices=("stage", "pin", "reserve"))
     args = parser.parse_args(argv)
     manifests = I.load_manifests()
+    if args.command == "reserve":
+        if SEEDS_NAME in manifests:
+            print("REFUSED: Phase 3.1 seeds are already reserved", file=sys.stderr)
+            return 1
+        try:
+            m = build_seed_reservation(manifests)  # collision check immediately before writing
+        except I.BenchmarkIntegrityError as exc:
+            print(f"REFUSED (nothing written): {exc}", file=sys.stderr)
+            return 1
+        digest = I.write_manifest(m, I.MANIFEST_DIR / f"{SEEDS_NAME}.json")
+        print(f"seed reservation written; pin sha256 {digest} in bri.experiments.integrity.MANIFEST_SHA256")
+        return 0
     m = build(manifests)
     problems = verify(m, manifests)
     if problems:

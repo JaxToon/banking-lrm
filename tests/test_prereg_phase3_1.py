@@ -9,7 +9,8 @@ from bri.experiments import prereg_phase3_1 as PR
 
 @pytest.fixture(scope="module")
 def ctx():
-    manifests = {k: v for k, v in I.load_manifests().items() if k != PR.NAME}
+    # The state the pre-registration was built against: before itself and the later seed reservation.
+    manifests = {k: v for k, v in I.load_manifests().items() if k not in (PR.NAME, PR.SEEDS_NAME)}
     return manifests, PR.build(manifests)
 
 
@@ -76,9 +77,60 @@ def test_pinned_prereg_matches_the_builder_when_present():
     manifests = I.load_manifests()
     if PR.NAME not in manifests:
         pytest.skip("pre-registration not pinned yet")
-    others = {k: v for k, v in manifests.items() if k != PR.NAME}
+    others = {k: v for k, v in manifests.items() if k not in (PR.NAME, PR.SEEDS_NAME)}
     pinned = manifests[PR.NAME]
     assert pinned == PR.build(others)  # the pinned manifest is exactly what the approved inputs produce
     assert PR.verify(pinned, others) == []
-    assert I.sha256_file(I.MANIFEST_DIR / f"{PR.NAME}.json") == I.MANIFEST_SHA256[PR.NAME]
-    assert not any(ns.startswith("phase3_1") for ns in I.seed_reservations(manifests).values())
+    assert I.sha256_file(I.MANIFEST_DIR / f"{PR.NAME}.json") == I.MANIFEST_SHA256[PR.NAME] == PR.PREREG_SHA256
+
+
+
+# --- Checkpoint 1: seed reservation ------------------------------------------------------
+
+def test_phase3_1_seed_reservation_uses_the_exact_approved_values():
+    manifests = I.load_manifests()
+    r = manifests[PR.SEEDS_NAME]
+    ns = r["seed_namespaces"]
+    assert ns["phase3_1_tuning"]["seeds"] == [20261140, 20261141, 20261142]
+    assert ns["phase3_1_final"]["seeds"] == list(range(20261150, 20261160))
+    pre = manifests[PR.NAME]["seed_policy"]
+    for name, spec in ns.items():
+        assert len(spec["seeds"]) == len(set(spec["seeds"])) == pre["namespaces"][name]["seeds_per_profile"]
+        assert spec["profiles"] == ["habit_dominant", "balanced", "transition_dominant"]
+        assert not set(spec["seeds"]) & set(pre["initialization_seeds"])
+    assert not set(ns["phase3_1_tuning"]["seeds"]) & set(ns["phase3_1_final"]["seeds"])
+    assert r["prereg_reference"]["sha256"] == PR.PREREG_SHA256
+    assert "Checkpoint 1" in r["notes"] and "dataset generation" in r["approval"]["not_authorized_by_this_manifest"]
+    assert I.sha256_file(I.MANIFEST_DIR / f"{PR.SEEDS_NAME}.json") == I.MANIFEST_SHA256[PR.SEEDS_NAME]
+
+
+def test_phase3_1_seeds_collide_with_nothing_registered_before_them():
+    manifests = I.load_manifests()
+    r = manifests[PR.SEEDS_NAME]
+    before = set(r["checked_against"]["manifests"])
+    assert before == {"benchmark-v1", "phase2.2", "phase2.3", "phase3-seeds", "phase3-config", "phase3", PR.NAME}
+    new = {s for spec in r["seed_namespaces"].values() for s in spec["seeds"]}
+    prior = {k: manifests[k] for k in before}
+    assert not new & set(I.seed_uses(prior)) and not new & set(I.seed_reservations(prior))
+    assert set(r["checked_against"]["seeds_in_use"]) == set(I.seed_uses(prior))
+
+
+def test_phase3_1_namespaces_are_enforced_and_other_runners_refuse_them(tmp_path):
+    from bri.experiments.robustness import RobustnessConfig, run_robustness
+    manifests = I.load_manifests()
+    I.check_seed_namespace(range(20261140, 20261143), "phase3_1_tuning", manifests)
+    I.check_seed_namespace(range(20261150, 20261160), "phase3_1_final", manifests)
+    with pytest.raises(I.LockedTestSplitError, match="reserved for 'phase3_1_final'"):
+        I.check_seed_namespace([20261150], "phase3_1_tuning", manifests)
+    with pytest.raises(I.LockedTestSplitError, match="reserved for 'phase3_final'"):
+        I.check_seed_namespace([20261130], "phase3_1_final", manifests)  # Phase 3 seeds stay Phase 3's
+    cfg = RobustnessConfig(profiles=("balanced",), seeds=(20261141,), customers=20, days=10, val_days=3, test_days=3)
+    with pytest.raises(I.LockedTestSplitError, match="reserved for namespace"):
+        run_robustness(cfg, tmp_path / "d", tmp_path / "o", log=lambda *_: None)
+    assert not (tmp_path / "d").exists()
+
+
+def test_seed_reservation_is_write_once():
+    manifests = I.load_manifests()
+    with pytest.raises(I.BenchmarkIntegrityError, match="already reserved"):
+        PR.build_seed_reservation(manifests)  # the approved seeds now collide with their own reservation
