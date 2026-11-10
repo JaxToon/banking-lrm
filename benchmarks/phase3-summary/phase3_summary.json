@@ -1,0 +1,2113 @@
+{
+  "label": "SYNTHETIC-DATA EXPERIMENT: metrics reflect patterns deliberately embedded by the synthetic generator. They are not evidence of real customer behavior or of real-world recommendation effectiveness.",
+  "derived_from": {
+    "file": "benchmarks/phase3/phase3_report.json",
+    "sha256": "7531fae97591323a454c59cee0dc6401729fb8cd5b6fa0c41ed7f91059510e1e",
+    "manifest": "benchmarks/manifests/phase3.json",
+    "run_config_sha256": "6cac84785e492ba155bf59add59821a419d9932bf052ce66801c4ac51ef1b7d4"
+  },
+  "note": "Derived summary of the frozen Phase 3 report (synthetic-data experiment). The frozen report and manifests remain the authoritative record. Brackets are across-seed Student-t 95% intervals over 10 seeds; seed counts are within-seed paired-bootstrap CIs excluding 0.",
+  "limitations": [
+    "Synthetic data only; no evidence about real customers or banking systems.",
+    "One SASRec training seed: initialization variation not measured; 10 seeds are 10 datasets.",
+    "Small NBP training sets and few within-session NBP cases.",
+    "Training histories are shorter than validation/test histories (temporal shift).",
+    "Bit-identical reproduction shown only on the same runtime (GPU, CUDA/torch build, threads)."
+  ],
+  "frozen_sasrec_config": {
+    "applies_to_variants": [
+      "full",
+      "no_position",
+      "shuffled",
+      "meanpool",
+      "session_boundary"
+    ],
+    "device": "cuda:0",
+    "model": {
+      "blocks": 3,
+      "dim": 64,
+      "dropout": 0.042734518774772565,
+      "heads": 2,
+      "max_len": 20
+    },
+    "precision": "fp32",
+    "train": {
+      "batch_size": 64,
+      "grad_clip": 1.0,
+      "lr": 0.00016340808773409658,
+      "max_epochs": 40,
+      "patience": 5,
+      "seed": 1,
+      "select_k": 3,
+      "select_metric": "ndcg",
+      "weight_decay": 0.0002739494641598398
+    },
+    "variant_hyperparameters_from": "full"
+  },
+  "groups": {
+    "balanced/next_event/nbs": {
+      "test_cases_per_seed": [
+        1193,
+        1317
+      ],
+      "random_floor_ndcg@1": 0.201069,
+      "ndcg": {
+        "popularity": {
+          "@1": {
+            "mean": 0.233931,
+            "ci_low": 0.223001,
+            "ci_high": 0.244861
+          },
+          "@3": {
+            "mean": 0.463242,
+            "ci_low": 0.453854,
+            "ci_high": 0.47263
+          }
+        },
+        "personal_frequency": {
+          "@1": {
+            "mean": 0.389691,
+            "ci_low": 0.379869,
+            "ci_high": 0.399514
+          },
+          "@3": {
+            "mean": 0.630526,
+            "ci_low": 0.62297,
+            "ci_high": 0.638081
+          }
+        },
+        "itemknn_self": {
+          "@1": {
+            "mean": 0.374769,
+            "ci_low": 0.362908,
+            "ci_high": 0.386631
+          },
+          "@3": {
+            "mean": 0.617383,
+            "ci_low": 0.606435,
+            "ci_high": 0.628332
+          }
+        },
+        "mf": {
+          "@1": {
+            "mean": 0.279376,
+            "ci_low": 0.264043,
+            "ci_high": 0.294708
+          },
+          "@3": {
+            "mean": 0.555893,
+            "ci_low": 0.542522,
+            "ci_high": 0.569265
+          }
+        },
+        "sasrec_full": {
+          "@1": {
+            "mean": 0.373242,
+            "ci_low": 0.356498,
+            "ci_high": 0.389986
+          },
+          "@3": {
+            "mean": 0.625485,
+            "ci_low": 0.614446,
+            "ci_high": 0.636525
+          }
+        },
+        "sasrec_no_position": {
+          "@1": {
+            "mean": 0.371925,
+            "ci_low": 0.359534,
+            "ci_high": 0.384315
+          },
+          "@3": {
+            "mean": 0.622961,
+            "ci_low": 0.615009,
+            "ci_high": 0.630914
+          }
+        },
+        "sasrec_shuffled": {
+          "@1": {
+            "mean": 0.344474,
+            "ci_low": 0.334944,
+            "ci_high": 0.354004
+          },
+          "@3": {
+            "mean": 0.604087,
+            "ci_low": 0.594359,
+            "ci_high": 0.613815
+          }
+        },
+        "sasrec_meanpool": {
+          "@1": {
+            "mean": 0.385081,
+            "ci_low": 0.37381,
+            "ci_high": 0.396352
+          },
+          "@3": {
+            "mean": 0.623435,
+            "ci_low": 0.615316,
+            "ci_high": 0.631554
+          }
+        },
+        "sasrec_session_boundary": {
+          "@1": {
+            "mean": 0.372669,
+            "ci_low": 0.359575,
+            "ci_high": 0.385764
+          },
+          "@3": {
+            "mean": 0.624391,
+            "ci_low": 0.61547,
+            "ci_high": 0.633313
+          }
+        }
+      },
+      "paired_ndcg@1": {
+        "sasrec_full - personal_frequency": {
+          "mean": -0.016449,
+          "ci_low": -0.034148,
+          "ci_high": 0.001249,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 3
+        },
+        "sasrec_full - sasrec_shuffled": {
+          "mean": 0.028768,
+          "ci_low": 0.012652,
+          "ci_high": 0.044884,
+          "seeds_ci_above_0": 5,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_full - sasrec_meanpool": {
+          "mean": -0.011839,
+          "ci_low": -0.02615,
+          "ci_high": 0.002471,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 2
+        },
+        "sasrec_full - sasrec_no_position": {
+          "mean": 0.001317,
+          "ci_low": -0.010002,
+          "ci_high": 0.012637,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        },
+        "sasrec_session_boundary - sasrec_full": {
+          "mean": -0.000573,
+          "ci_low": -0.008896,
+          "ci_high": 0.00775,
+          "seeds_ci_above_0": 1,
+          "seeds_ci_below_0": 0
+        }
+      },
+      "strata_ndcg@1": {
+        "personal_frequency": {
+          "within_session": {
+            "mean": 0.203216,
+            "ci_low": 0.185891,
+            "ci_high": 0.22054
+          },
+          "cross_session": {
+            "mean": 0.451715,
+            "ci_low": 0.443325,
+            "ci_high": 0.460104
+          }
+        },
+        "sasrec_full": {
+          "within_session": {
+            "mean": 0.37185,
+            "ci_low": 0.329374,
+            "ci_high": 0.414326
+          },
+          "cross_session": {
+            "mean": 0.373763,
+            "ci_low": 0.345759,
+            "ci_high": 0.401768
+          }
+        }
+      },
+      "strata_cases_per_seed": {
+        "within_session": [
+          282,
+          334
+        ],
+        "cross_session": [
+          910,
+          999
+        ]
+      }
+    },
+    "balanced/next_event/nbp": {
+      "test_cases_per_seed": [
+        245,
+        290
+      ],
+      "random_floor_ndcg@1": 0.166996,
+      "ndcg": {
+        "popularity": {
+          "@1": {
+            "mean": 0.20286,
+            "ci_low": 0.186909,
+            "ci_high": 0.218811
+          },
+          "@3": {
+            "mean": 0.406257,
+            "ci_low": 0.39151,
+            "ci_high": 0.421003
+          }
+        },
+        "personal_frequency": {
+          "@1": {
+            "mean": 0.373104,
+            "ci_low": 0.345493,
+            "ci_high": 0.400715
+          },
+          "@3": {
+            "mean": 0.575593,
+            "ci_low": 0.549594,
+            "ci_high": 0.601592
+          }
+        },
+        "itemknn_self": {
+          "@1": {
+            "mean": 0.371878,
+            "ci_low": 0.345933,
+            "ci_high": 0.397823
+          },
+          "@3": {
+            "mean": 0.575307,
+            "ci_low": 0.549365,
+            "ci_high": 0.60125
+          }
+        },
+        "mf": {
+          "@1": {
+            "mean": 0.230876,
+            "ci_low": 0.212921,
+            "ci_high": 0.248831
+          },
+          "@3": {
+            "mean": 0.471557,
+            "ci_low": 0.453284,
+            "ci_high": 0.48983
+          }
+        },
+        "sasrec_full": {
+          "@1": {
+            "mean": 0.339006,
+            "ci_low": 0.313208,
+            "ci_high": 0.364803
+          },
+          "@3": {
+            "mean": 0.537914,
+            "ci_low": 0.51758,
+            "ci_high": 0.558248
+          }
+        },
+        "sasrec_no_position": {
+          "@1": {
+            "mean": 0.337614,
+            "ci_low": 0.311186,
+            "ci_high": 0.364042
+          },
+          "@3": {
+            "mean": 0.53758,
+            "ci_low": 0.517578,
+            "ci_high": 0.557583
+          }
+        },
+        "sasrec_shuffled": {
+          "@1": {
+            "mean": 0.341891,
+            "ci_low": 0.322794,
+            "ci_high": 0.360989
+          },
+          "@3": {
+            "mean": 0.539104,
+            "ci_low": 0.519222,
+            "ci_high": 0.558985
+          }
+        },
+        "sasrec_meanpool": {
+          "@1": {
+            "mean": 0.362952,
+            "ci_low": 0.333692,
+            "ci_high": 0.392211
+          },
+          "@3": {
+            "mean": 0.563948,
+            "ci_low": 0.540186,
+            "ci_high": 0.587709
+          }
+        },
+        "sasrec_session_boundary": {
+          "@1": {
+            "mean": 0.334867,
+            "ci_low": 0.310267,
+            "ci_high": 0.359467
+          },
+          "@3": {
+            "mean": 0.538047,
+            "ci_low": 0.518897,
+            "ci_high": 0.557197
+          }
+        }
+      },
+      "paired_ndcg@1": {
+        "sasrec_full - personal_frequency": {
+          "mean": -0.034098,
+          "ci_low": -0.053293,
+          "ci_high": -0.014903,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 3
+        },
+        "sasrec_full - sasrec_shuffled": {
+          "mean": -0.002886,
+          "ci_low": -0.017027,
+          "ci_high": 0.011256,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 2
+        },
+        "sasrec_full - sasrec_meanpool": {
+          "mean": -0.023946,
+          "ci_low": -0.040499,
+          "ci_high": -0.007393,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        },
+        "sasrec_full - sasrec_no_position": {
+          "mean": 0.001391,
+          "ci_low": -0.003057,
+          "ci_high": 0.00584,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_session_boundary - sasrec_full": {
+          "mean": -0.004138,
+          "ci_low": -0.009752,
+          "ci_high": 0.001475,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        }
+      },
+      "strata_ndcg@1": {
+        "personal_frequency": {
+          "within_session": {
+            "mean": 0.154067,
+            "ci_low": 0.107153,
+            "ci_high": 0.20098
+          },
+          "cross_session": {
+            "mean": 0.392044,
+            "ci_low": 0.362849,
+            "ci_high": 0.421239
+          }
+        },
+        "sasrec_full": {
+          "within_session": {
+            "mean": 0.132347,
+            "ci_low": 0.090272,
+            "ci_high": 0.174422
+          },
+          "cross_session": {
+            "mean": 0.357169,
+            "ci_low": 0.329534,
+            "ci_high": 0.384804
+          }
+        }
+      },
+      "strata_cases_per_seed": {
+        "within_session": [
+          15,
+          28
+        ],
+        "cross_session": [
+          219,
+          268
+        ]
+      }
+    },
+    "balanced/window/nbs": {
+      "test_cases_per_seed": [
+        350,
+        373
+      ],
+      "random_floor_ndcg@1": 0.446373,
+      "ndcg": {
+        "popularity": {
+          "@1": {
+            "mean": 0.508546,
+            "ci_low": 0.485724,
+            "ci_high": 0.531369
+          },
+          "@3": {
+            "mean": 0.591198,
+            "ci_low": 0.579391,
+            "ci_high": 0.603006
+          }
+        },
+        "personal_frequency": {
+          "@1": {
+            "mean": 0.747603,
+            "ci_low": 0.72914,
+            "ci_high": 0.766066
+          },
+          "@3": {
+            "mean": 0.782001,
+            "ci_low": 0.768235,
+            "ci_high": 0.795767
+          }
+        },
+        "itemknn_self": {
+          "@1": {
+            "mean": 0.703962,
+            "ci_low": 0.680418,
+            "ci_high": 0.727505
+          },
+          "@3": {
+            "mean": 0.7553,
+            "ci_low": 0.740897,
+            "ci_high": 0.769703
+          }
+        },
+        "mf": {
+          "@1": {
+            "mean": 0.580478,
+            "ci_low": 0.552044,
+            "ci_high": 0.608911
+          },
+          "@3": {
+            "mean": 0.698474,
+            "ci_low": 0.68482,
+            "ci_high": 0.712128
+          }
+        },
+        "sasrec_full": {
+          "@1": {
+            "mean": 0.660448,
+            "ci_low": 0.629694,
+            "ci_high": 0.691203
+          },
+          "@3": {
+            "mean": 0.730737,
+            "ci_low": 0.714248,
+            "ci_high": 0.747226
+          }
+        },
+        "sasrec_no_position": {
+          "@1": {
+            "mean": 0.665794,
+            "ci_low": 0.641354,
+            "ci_high": 0.690235
+          },
+          "@3": {
+            "mean": 0.732934,
+            "ci_low": 0.717179,
+            "ci_high": 0.748689
+          }
+        },
+        "sasrec_shuffled": {
+          "@1": {
+            "mean": 0.692689,
+            "ci_low": 0.67651,
+            "ci_high": 0.708868
+          },
+          "@3": {
+            "mean": 0.750826,
+            "ci_low": 0.740054,
+            "ci_high": 0.761599
+          }
+        },
+        "sasrec_meanpool": {
+          "@1": {
+            "mean": 0.727102,
+            "ci_low": 0.707834,
+            "ci_high": 0.746371
+          },
+          "@3": {
+            "mean": 0.763503,
+            "ci_low": 0.750312,
+            "ci_high": 0.776694
+          }
+        },
+        "sasrec_session_boundary": {
+          "@1": {
+            "mean": 0.672788,
+            "ci_low": 0.649991,
+            "ci_high": 0.695585
+          },
+          "@3": {
+            "mean": 0.734686,
+            "ci_low": 0.719697,
+            "ci_high": 0.749675
+          }
+        }
+      },
+      "paired_ndcg@1": {
+        "sasrec_full - personal_frequency": {
+          "mean": -0.087155,
+          "ci_low": -0.108774,
+          "ci_high": -0.065535,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 10
+        },
+        "sasrec_full - sasrec_shuffled": {
+          "mean": -0.032241,
+          "ci_low": -0.054262,
+          "ci_high": -0.010219,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 4
+        },
+        "sasrec_full - sasrec_meanpool": {
+          "mean": -0.066654,
+          "ci_low": -0.09078,
+          "ci_high": -0.042528,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 9
+        },
+        "sasrec_full - sasrec_no_position": {
+          "mean": -0.005346,
+          "ci_low": -0.022936,
+          "ci_high": 0.012243,
+          "seeds_ci_above_0": 1,
+          "seeds_ci_below_0": 1
+        },
+        "sasrec_session_boundary - sasrec_full": {
+          "mean": 0.012339,
+          "ci_low": -0.005284,
+          "ci_high": 0.029963,
+          "seeds_ci_above_0": 2,
+          "seeds_ci_below_0": 0
+        }
+      }
+    },
+    "balanced/window/nbp": {
+      "test_cases_per_seed": [
+        144,
+        177
+      ],
+      "random_floor_ndcg@1": 0.248155,
+      "ndcg": {
+        "popularity": {
+          "@1": {
+            "mean": 0.287209,
+            "ci_low": 0.259891,
+            "ci_high": 0.314527
+          },
+          "@3": {
+            "mean": 0.455012,
+            "ci_low": 0.440276,
+            "ci_high": 0.469747
+          }
+        },
+        "personal_frequency": {
+          "@1": {
+            "mean": 0.507949,
+            "ci_low": 0.471919,
+            "ci_high": 0.543978
+          },
+          "@3": {
+            "mean": 0.648741,
+            "ci_low": 0.623184,
+            "ci_high": 0.674298
+          }
+        },
+        "itemknn_self": {
+          "@1": {
+            "mean": 0.505319,
+            "ci_low": 0.469748,
+            "ci_high": 0.540889
+          },
+          "@3": {
+            "mean": 0.638407,
+            "ci_low": 0.613591,
+            "ci_high": 0.663224
+          }
+        },
+        "mf": {
+          "@1": {
+            "mean": 0.359059,
+            "ci_low": 0.32459,
+            "ci_high": 0.393528
+          },
+          "@3": {
+            "mean": 0.538375,
+            "ci_low": 0.512275,
+            "ci_high": 0.564474
+          }
+        },
+        "sasrec_full": {
+          "@1": {
+            "mean": 0.462399,
+            "ci_low": 0.423281,
+            "ci_high": 0.501518
+          },
+          "@3": {
+            "mean": 0.580431,
+            "ci_low": 0.557916,
+            "ci_high": 0.602946
+          }
+        },
+        "sasrec_no_position": {
+          "@1": {
+            "mean": 0.460117,
+            "ci_low": 0.421492,
+            "ci_high": 0.498743
+          },
+          "@3": {
+            "mean": 0.579643,
+            "ci_low": 0.557729,
+            "ci_high": 0.601556
+          }
+        },
+        "sasrec_shuffled": {
+          "@1": {
+            "mean": 0.464818,
+            "ci_low": 0.431867,
+            "ci_high": 0.497769
+          },
+          "@3": {
+            "mean": 0.584169,
+            "ci_low": 0.560061,
+            "ci_high": 0.608277
+          }
+        },
+        "sasrec_meanpool": {
+          "@1": {
+            "mean": 0.477029,
+            "ci_low": 0.445416,
+            "ci_high": 0.508642
+          },
+          "@3": {
+            "mean": 0.599973,
+            "ci_low": 0.57524,
+            "ci_high": 0.624706
+          }
+        },
+        "sasrec_session_boundary": {
+          "@1": {
+            "mean": 0.455983,
+            "ci_low": 0.419997,
+            "ci_high": 0.49197
+          },
+          "@3": {
+            "mean": 0.580815,
+            "ci_low": 0.559498,
+            "ci_high": 0.602131
+          }
+        }
+      },
+      "paired_ndcg@1": {
+        "sasrec_full - personal_frequency": {
+          "mean": -0.045549,
+          "ci_low": -0.080576,
+          "ci_high": -0.010522,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 4
+        },
+        "sasrec_full - sasrec_shuffled": {
+          "mean": -0.002419,
+          "ci_low": -0.024113,
+          "ci_high": 0.019274,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 2
+        },
+        "sasrec_full - sasrec_meanpool": {
+          "mean": -0.01463,
+          "ci_low": -0.029778,
+          "ci_high": 0.000519,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_full - sasrec_no_position": {
+          "mean": 0.002282,
+          "ci_low": -0.003608,
+          "ci_high": 0.008172,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_session_boundary - sasrec_full": {
+          "mean": -0.006416,
+          "ci_low": -0.015744,
+          "ci_high": 0.002913,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        }
+      }
+    },
+    "habit_dominant/next_event/nbs": {
+      "test_cases_per_seed": [
+        1062,
+        1162
+      ],
+      "random_floor_ndcg@1": 0.201878,
+      "ndcg": {
+        "popularity": {
+          "@1": {
+            "mean": 0.209705,
+            "ci_low": 0.202776,
+            "ci_high": 0.216634
+          },
+          "@3": {
+            "mean": 0.43828,
+            "ci_low": 0.42671,
+            "ci_high": 0.44985
+          }
+        },
+        "personal_frequency": {
+          "@1": {
+            "mean": 0.654228,
+            "ci_low": 0.641237,
+            "ci_high": 0.667219
+          },
+          "@3": {
+            "mean": 0.826344,
+            "ci_low": 0.81833,
+            "ci_high": 0.834358
+          }
+        },
+        "itemknn_self": {
+          "@1": {
+            "mean": 0.652668,
+            "ci_low": 0.639428,
+            "ci_high": 0.665908
+          },
+          "@3": {
+            "mean": 0.827118,
+            "ci_low": 0.819487,
+            "ci_high": 0.834748
+          }
+        },
+        "mf": {
+          "@1": {
+            "mean": 0.436862,
+            "ci_low": 0.419352,
+            "ci_high": 0.454372
+          },
+          "@3": {
+            "mean": 0.711801,
+            "ci_low": 0.698639,
+            "ci_high": 0.724964
+          }
+        },
+        "sasrec_full": {
+          "@1": {
+            "mean": 0.640219,
+            "ci_low": 0.630092,
+            "ci_high": 0.650345
+          },
+          "@3": {
+            "mean": 0.819072,
+            "ci_low": 0.812699,
+            "ci_high": 0.825445
+          }
+        },
+        "sasrec_no_position": {
+          "@1": {
+            "mean": 0.642325,
+            "ci_low": 0.6318,
+            "ci_high": 0.65285
+          },
+          "@3": {
+            "mean": 0.821168,
+            "ci_low": 0.815268,
+            "ci_high": 0.827067
+          }
+        },
+        "sasrec_shuffled": {
+          "@1": {
+            "mean": 0.642108,
+            "ci_low": 0.630518,
+            "ci_high": 0.653698
+          },
+          "@3": {
+            "mean": 0.819861,
+            "ci_low": 0.813383,
+            "ci_high": 0.826338
+          }
+        },
+        "sasrec_meanpool": {
+          "@1": {
+            "mean": 0.652196,
+            "ci_low": 0.639735,
+            "ci_high": 0.664657
+          },
+          "@3": {
+            "mean": 0.823739,
+            "ci_low": 0.816402,
+            "ci_high": 0.831077
+          }
+        },
+        "sasrec_session_boundary": {
+          "@1": {
+            "mean": 0.640461,
+            "ci_low": 0.630574,
+            "ci_high": 0.650347
+          },
+          "@3": {
+            "mean": 0.819756,
+            "ci_low": 0.813455,
+            "ci_high": 0.826057
+          }
+        }
+      },
+      "paired_ndcg@1": {
+        "sasrec_full - personal_frequency": {
+          "mean": -0.014009,
+          "ci_low": -0.020503,
+          "ci_high": -0.007515,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 4
+        },
+        "sasrec_full - sasrec_shuffled": {
+          "mean": -0.001889,
+          "ci_low": -0.008643,
+          "ci_high": 0.004865,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        },
+        "sasrec_full - sasrec_meanpool": {
+          "mean": -0.011977,
+          "ci_low": -0.017275,
+          "ci_high": -0.00668,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 3
+        },
+        "sasrec_full - sasrec_no_position": {
+          "mean": -0.002106,
+          "ci_low": -0.006656,
+          "ci_high": 0.002444,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        },
+        "sasrec_session_boundary - sasrec_full": {
+          "mean": 0.000242,
+          "ci_low": -0.001297,
+          "ci_high": 0.001781,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        }
+      },
+      "strata_ndcg@1": {
+        "personal_frequency": {
+          "within_session": {
+            "mean": 0.301478,
+            "ci_low": 0.275368,
+            "ci_high": 0.327589
+          },
+          "cross_session": {
+            "mean": 0.717706,
+            "ci_low": 0.702012,
+            "ci_high": 0.7334
+          }
+        },
+        "sasrec_full": {
+          "within_session": {
+            "mean": 0.3194,
+            "ci_low": 0.291026,
+            "ci_high": 0.347773
+          },
+          "cross_session": {
+            "mean": 0.698222,
+            "ci_low": 0.684231,
+            "ci_high": 0.712213
+          }
+        }
+      },
+      "strata_cases_per_seed": {
+        "within_session": [
+          153,
+          184
+        ],
+        "cross_session": [
+          897,
+          982
+        ]
+      }
+    },
+    "habit_dominant/next_event/nbp": {
+      "test_cases_per_seed": [
+        222,
+        292
+      ],
+      "random_floor_ndcg@1": 0.164091,
+      "ndcg": {
+        "popularity": {
+          "@1": {
+            "mean": 0.188707,
+            "ci_low": 0.16924,
+            "ci_high": 0.208173
+          },
+          "@3": {
+            "mean": 0.392223,
+            "ci_low": 0.37005,
+            "ci_high": 0.414396
+          }
+        },
+        "personal_frequency": {
+          "@1": {
+            "mean": 0.639244,
+            "ci_low": 0.617756,
+            "ci_high": 0.660732
+          },
+          "@3": {
+            "mean": 0.786309,
+            "ci_low": 0.772464,
+            "ci_high": 0.800154
+          }
+        },
+        "itemknn_self": {
+          "@1": {
+            "mean": 0.642699,
+            "ci_low": 0.621794,
+            "ci_high": 0.663603
+          },
+          "@3": {
+            "mean": 0.788431,
+            "ci_low": 0.77317,
+            "ci_high": 0.803691
+          }
+        },
+        "mf": {
+          "@1": {
+            "mean": 0.438502,
+            "ci_low": 0.407841,
+            "ci_high": 0.469162
+          },
+          "@3": {
+            "mean": 0.681528,
+            "ci_low": 0.663771,
+            "ci_high": 0.699285
+          }
+        },
+        "sasrec_full": {
+          "@1": {
+            "mean": 0.620048,
+            "ci_low": 0.601148,
+            "ci_high": 0.638947
+          },
+          "@3": {
+            "mean": 0.768034,
+            "ci_low": 0.75183,
+            "ci_high": 0.784238
+          }
+        },
+        "sasrec_no_position": {
+          "@1": {
+            "mean": 0.618855,
+            "ci_low": 0.599649,
+            "ci_high": 0.638062
+          },
+          "@3": {
+            "mean": 0.767778,
+            "ci_low": 0.751487,
+            "ci_high": 0.784069
+          }
+        },
+        "sasrec_shuffled": {
+          "@1": {
+            "mean": 0.619129,
+            "ci_low": 0.600136,
+            "ci_high": 0.638123
+          },
+          "@3": {
+            "mean": 0.764469,
+            "ci_low": 0.747996,
+            "ci_high": 0.780942
+          }
+        },
+        "sasrec_meanpool": {
+          "@1": {
+            "mean": 0.632112,
+            "ci_low": 0.609624,
+            "ci_high": 0.6546
+          },
+          "@3": {
+            "mean": 0.782935,
+            "ci_low": 0.767252,
+            "ci_high": 0.798617
+          }
+        },
+        "sasrec_session_boundary": {
+          "@1": {
+            "mean": 0.618271,
+            "ci_low": 0.601117,
+            "ci_high": 0.635426
+          },
+          "@3": {
+            "mean": 0.767656,
+            "ci_low": 0.752408,
+            "ci_high": 0.782904
+          }
+        }
+      },
+      "paired_ndcg@1": {
+        "sasrec_full - personal_frequency": {
+          "mean": -0.019196,
+          "ci_low": -0.032415,
+          "ci_high": -0.005978,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        },
+        "sasrec_full - sasrec_shuffled": {
+          "mean": 0.000918,
+          "ci_low": -0.008606,
+          "ci_high": 0.010442,
+          "seeds_ci_above_0": 1,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_full - sasrec_meanpool": {
+          "mean": -0.012064,
+          "ci_low": -0.028221,
+          "ci_high": 0.004093,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        },
+        "sasrec_full - sasrec_no_position": {
+          "mean": 0.001192,
+          "ci_low": -0.00079,
+          "ci_high": 0.003175,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_session_boundary - sasrec_full": {
+          "mean": -0.001776,
+          "ci_low": -0.010695,
+          "ci_high": 0.007142,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 2
+        }
+      },
+      "strata_ndcg@1": {
+        "personal_frequency": {
+          "within_session": {
+            "mean": 0.310355,
+            "ci_low": 0.222689,
+            "ci_high": 0.398021
+          },
+          "cross_session": {
+            "mean": 0.655799,
+            "ci_low": 0.633925,
+            "ci_high": 0.677672
+          }
+        },
+        "sasrec_full": {
+          "within_session": {
+            "mean": 0.206153,
+            "ci_low": 0.128481,
+            "ci_high": 0.283825
+          },
+          "cross_session": {
+            "mean": 0.641277,
+            "ci_low": 0.622096,
+            "ci_high": 0.660459
+          }
+        }
+      },
+      "strata_cases_per_seed": {
+        "within_session": [
+          7,
+          17
+        ],
+        "cross_session": [
+          215,
+          275
+        ]
+      }
+    },
+    "habit_dominant/window/nbs": {
+      "test_cases_per_seed": [
+        342,
+        375
+      ],
+      "random_floor_ndcg@1": 0.325434,
+      "ndcg": {
+        "popularity": {
+          "@1": {
+            "mean": 0.346332,
+            "ci_low": 0.331414,
+            "ci_high": 0.361251
+          },
+          "@3": {
+            "mean": 0.503186,
+            "ci_low": 0.48944,
+            "ci_high": 0.516932
+          }
+        },
+        "personal_frequency": {
+          "@1": {
+            "mean": 0.898378,
+            "ci_low": 0.886909,
+            "ci_high": 0.909848
+          },
+          "@3": {
+            "mean": 0.911149,
+            "ci_low": 0.903486,
+            "ci_high": 0.918813
+          }
+        },
+        "itemknn_self": {
+          "@1": {
+            "mean": 0.898599,
+            "ci_low": 0.888288,
+            "ci_high": 0.90891
+          },
+          "@3": {
+            "mean": 0.912571,
+            "ci_low": 0.90494,
+            "ci_high": 0.920202
+          }
+        },
+        "mf": {
+          "@1": {
+            "mean": 0.649542,
+            "ci_low": 0.630791,
+            "ci_high": 0.668292
+          },
+          "@3": {
+            "mean": 0.798566,
+            "ci_low": 0.786364,
+            "ci_high": 0.810768
+          }
+        },
+        "sasrec_full": {
+          "@1": {
+            "mean": 0.86755,
+            "ci_low": 0.857449,
+            "ci_high": 0.87765
+          },
+          "@3": {
+            "mean": 0.891656,
+            "ci_low": 0.884558,
+            "ci_high": 0.898754
+          }
+        },
+        "sasrec_no_position": {
+          "@1": {
+            "mean": 0.867142,
+            "ci_low": 0.85409,
+            "ci_high": 0.880193
+          },
+          "@3": {
+            "mean": 0.893725,
+            "ci_low": 0.887216,
+            "ci_high": 0.900234
+          }
+        },
+        "sasrec_shuffled": {
+          "@1": {
+            "mean": 0.881526,
+            "ci_low": 0.86851,
+            "ci_high": 0.894541
+          },
+          "@3": {
+            "mean": 0.896733,
+            "ci_low": 0.888625,
+            "ci_high": 0.904841
+          }
+        },
+        "sasrec_meanpool": {
+          "@1": {
+            "mean": 0.88488,
+            "ci_low": 0.868961,
+            "ci_high": 0.900798
+          },
+          "@3": {
+            "mean": 0.897562,
+            "ci_low": 0.888413,
+            "ci_high": 0.90671
+          }
+        },
+        "sasrec_session_boundary": {
+          "@1": {
+            "mean": 0.86376,
+            "ci_low": 0.852983,
+            "ci_high": 0.874537
+          },
+          "@3": {
+            "mean": 0.890975,
+            "ci_low": 0.884518,
+            "ci_high": 0.897431
+          }
+        }
+      },
+      "paired_ndcg@1": {
+        "sasrec_full - personal_frequency": {
+          "mean": -0.030829,
+          "ci_low": -0.041335,
+          "ci_high": -0.020323,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 7
+        },
+        "sasrec_full - sasrec_shuffled": {
+          "mean": -0.013976,
+          "ci_low": -0.025286,
+          "ci_high": -0.002666,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        },
+        "sasrec_full - sasrec_meanpool": {
+          "mean": -0.01733,
+          "ci_low": -0.027514,
+          "ci_high": -0.007145,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 3
+        },
+        "sasrec_full - sasrec_no_position": {
+          "mean": 0.000408,
+          "ci_low": -0.006498,
+          "ci_high": 0.007313,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        },
+        "sasrec_session_boundary - sasrec_full": {
+          "mean": -0.003789,
+          "ci_low": -0.010389,
+          "ci_high": 0.002811,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        }
+      }
+    },
+    "habit_dominant/window/nbp": {
+      "test_cases_per_seed": [
+        147,
+        167
+      ],
+      "random_floor_ndcg@1": 0.223095,
+      "ndcg": {
+        "popularity": {
+          "@1": {
+            "mean": 0.24319,
+            "ci_low": 0.220872,
+            "ci_high": 0.265509
+          },
+          "@3": {
+            "mean": 0.416321,
+            "ci_low": 0.392937,
+            "ci_high": 0.439705
+          }
+        },
+        "personal_frequency": {
+          "@1": {
+            "mean": 0.750163,
+            "ci_low": 0.727358,
+            "ci_high": 0.772967
+          },
+          "@3": {
+            "mean": 0.838242,
+            "ci_low": 0.820834,
+            "ci_high": 0.85565
+          }
+        },
+        "itemknn_self": {
+          "@1": {
+            "mean": 0.751505,
+            "ci_low": 0.730289,
+            "ci_high": 0.772721
+          },
+          "@3": {
+            "mean": 0.842672,
+            "ci_low": 0.825701,
+            "ci_high": 0.859644
+          }
+        },
+        "mf": {
+          "@1": {
+            "mean": 0.506131,
+            "ci_low": 0.466038,
+            "ci_high": 0.546224
+          },
+          "@3": {
+            "mean": 0.706738,
+            "ci_low": 0.684397,
+            "ci_high": 0.729078
+          }
+        },
+        "sasrec_full": {
+          "@1": {
+            "mean": 0.696081,
+            "ci_low": 0.672078,
+            "ci_high": 0.720085
+          },
+          "@3": {
+            "mean": 0.775748,
+            "ci_low": 0.760994,
+            "ci_high": 0.790503
+          }
+        },
+        "sasrec_no_position": {
+          "@1": {
+            "mean": 0.695412,
+            "ci_low": 0.671517,
+            "ci_high": 0.719307
+          },
+          "@3": {
+            "mean": 0.77379,
+            "ci_low": 0.762168,
+            "ci_high": 0.785411
+          }
+        },
+        "sasrec_shuffled": {
+          "@1": {
+            "mean": 0.696692,
+            "ci_low": 0.673517,
+            "ci_high": 0.719866
+          },
+          "@3": {
+            "mean": 0.772677,
+            "ci_low": 0.759334,
+            "ci_high": 0.78602
+          }
+        },
+        "sasrec_meanpool": {
+          "@1": {
+            "mean": 0.699487,
+            "ci_low": 0.671698,
+            "ci_high": 0.727276
+          },
+          "@3": {
+            "mean": 0.783675,
+            "ci_low": 0.769007,
+            "ci_high": 0.798343
+          }
+        },
+        "sasrec_session_boundary": {
+          "@1": {
+            "mean": 0.69758,
+            "ci_low": 0.670387,
+            "ci_high": 0.724773
+          },
+          "@3": {
+            "mean": 0.775472,
+            "ci_low": 0.758716,
+            "ci_high": 0.792229
+          }
+        }
+      },
+      "paired_ndcg@1": {
+        "sasrec_full - personal_frequency": {
+          "mean": -0.054081,
+          "ci_low": -0.071075,
+          "ci_high": -0.037086,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 5
+        },
+        "sasrec_full - sasrec_shuffled": {
+          "mean": -0.00061,
+          "ci_low": -0.005965,
+          "ci_high": 0.004745,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_full - sasrec_meanpool": {
+          "mean": -0.003405,
+          "ci_low": -0.014206,
+          "ci_high": 0.007395,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_full - sasrec_no_position": {
+          "mean": 0.000669,
+          "ci_low": -0.00274,
+          "ci_high": 0.004079,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_session_boundary - sasrec_full": {
+          "mean": 0.001499,
+          "ci_low": -0.012421,
+          "ci_high": 0.015419,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        }
+      }
+    },
+    "transition_dominant/next_event/nbs": {
+      "test_cases_per_seed": [
+        1274,
+        1419
+      ],
+      "random_floor_ndcg@1": 0.202562,
+      "ndcg": {
+        "popularity": {
+          "@1": {
+            "mean": 0.263517,
+            "ci_low": 0.258087,
+            "ci_high": 0.268947
+          },
+          "@3": {
+            "mean": 0.494609,
+            "ci_low": 0.48731,
+            "ci_high": 0.501909
+          }
+        },
+        "personal_frequency": {
+          "@1": {
+            "mean": 0.235106,
+            "ci_low": 0.226527,
+            "ci_high": 0.243684
+          },
+          "@3": {
+            "mean": 0.479391,
+            "ci_low": 0.470116,
+            "ci_high": 0.488665
+          }
+        },
+        "itemknn_self": {
+          "@1": {
+            "mean": 0.247196,
+            "ci_low": 0.236173,
+            "ci_high": 0.258219
+          },
+          "@3": {
+            "mean": 0.496381,
+            "ci_low": 0.484987,
+            "ci_high": 0.507775
+          }
+        },
+        "mf": {
+          "@1": {
+            "mean": 0.243893,
+            "ci_low": 0.231575,
+            "ci_high": 0.256212
+          },
+          "@3": {
+            "mean": 0.48417,
+            "ci_low": 0.47559,
+            "ci_high": 0.49275
+          }
+        },
+        "sasrec_full": {
+          "@1": {
+            "mean": 0.39953,
+            "ci_low": 0.387012,
+            "ci_high": 0.412048
+          },
+          "@3": {
+            "mean": 0.578708,
+            "ci_low": 0.570277,
+            "ci_high": 0.58714
+          }
+        },
+        "sasrec_no_position": {
+          "@1": {
+            "mean": 0.398513,
+            "ci_low": 0.386569,
+            "ci_high": 0.410457
+          },
+          "@3": {
+            "mean": 0.579087,
+            "ci_low": 0.568731,
+            "ci_high": 0.589443
+          }
+        },
+        "sasrec_shuffled": {
+          "@1": {
+            "mean": 0.299784,
+            "ci_low": 0.28819,
+            "ci_high": 0.311377
+          },
+          "@3": {
+            "mean": 0.528165,
+            "ci_low": 0.519278,
+            "ci_high": 0.537051
+          }
+        },
+        "sasrec_meanpool": {
+          "@1": {
+            "mean": 0.264582,
+            "ci_low": 0.258563,
+            "ci_high": 0.270601
+          },
+          "@3": {
+            "mean": 0.507886,
+            "ci_low": 0.498457,
+            "ci_high": 0.517316
+          }
+        },
+        "sasrec_session_boundary": {
+          "@1": {
+            "mean": 0.399087,
+            "ci_low": 0.386671,
+            "ci_high": 0.411502
+          },
+          "@3": {
+            "mean": 0.579965,
+            "ci_low": 0.571526,
+            "ci_high": 0.588403
+          }
+        }
+      },
+      "paired_ndcg@1": {
+        "sasrec_full - personal_frequency": {
+          "mean": 0.164425,
+          "ci_low": 0.152392,
+          "ci_high": 0.176457,
+          "seeds_ci_above_0": 10,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_full - sasrec_shuffled": {
+          "mean": 0.099746,
+          "ci_low": 0.089047,
+          "ci_high": 0.110445,
+          "seeds_ci_above_0": 10,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_full - sasrec_meanpool": {
+          "mean": 0.134948,
+          "ci_low": 0.12372,
+          "ci_high": 0.146177,
+          "seeds_ci_above_0": 10,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_full - sasrec_no_position": {
+          "mean": 0.001017,
+          "ci_low": -0.001516,
+          "ci_high": 0.003551,
+          "seeds_ci_above_0": 1,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_session_boundary - sasrec_full": {
+          "mean": -0.000443,
+          "ci_low": -0.00143,
+          "ci_high": 0.000543,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        }
+      },
+      "strata_ndcg@1": {
+        "personal_frequency": {
+          "within_session": {
+            "mean": 0.212791,
+            "ci_low": 0.194913,
+            "ci_high": 0.230669
+          },
+          "cross_session": {
+            "mean": 0.24415,
+            "ci_low": 0.236759,
+            "ci_high": 0.251541
+          }
+        },
+        "sasrec_full": {
+          "within_session": {
+            "mean": 0.868256,
+            "ci_low": 0.847676,
+            "ci_high": 0.888837
+          },
+          "cross_session": {
+            "mean": 0.205966,
+            "ci_low": 0.199672,
+            "ci_high": 0.21226
+          }
+        }
+      },
+      "strata_cases_per_seed": {
+        "within_session": [
+          361,
+          431
+        ],
+        "cross_session": [
+          913,
+          1000
+        ]
+      }
+    },
+    "transition_dominant/next_event/nbp": {
+      "test_cases_per_seed": [
+        247,
+        301
+      ],
+      "random_floor_ndcg@1": 0.171286,
+      "ndcg": {
+        "popularity": {
+          "@1": {
+            "mean": 0.203044,
+            "ci_low": 0.179982,
+            "ci_high": 0.226106
+          },
+          "@3": {
+            "mean": 0.413455,
+            "ci_low": 0.393805,
+            "ci_high": 0.433105
+          }
+        },
+        "personal_frequency": {
+          "@1": {
+            "mean": 0.233302,
+            "ci_low": 0.213751,
+            "ci_high": 0.252852
+          },
+          "@3": {
+            "mean": 0.436866,
+            "ci_low": 0.425213,
+            "ci_high": 0.448519
+          }
+        },
+        "itemknn_self": {
+          "@1": {
+            "mean": 0.233907,
+            "ci_low": 0.218673,
+            "ci_high": 0.249141
+          },
+          "@3": {
+            "mean": 0.432236,
+            "ci_low": 0.422119,
+            "ci_high": 0.442352
+          }
+        },
+        "mf": {
+          "@1": {
+            "mean": 0.204836,
+            "ci_low": 0.183217,
+            "ci_high": 0.226456
+          },
+          "@3": {
+            "mean": 0.407384,
+            "ci_low": 0.388612,
+            "ci_high": 0.426156
+          }
+        },
+        "sasrec_full": {
+          "@1": {
+            "mean": 0.218279,
+            "ci_low": 0.203553,
+            "ci_high": 0.233006
+          },
+          "@3": {
+            "mean": 0.426248,
+            "ci_low": 0.407705,
+            "ci_high": 0.444791
+          }
+        },
+        "sasrec_no_position": {
+          "@1": {
+            "mean": 0.217748,
+            "ci_low": 0.199848,
+            "ci_high": 0.235648
+          },
+          "@3": {
+            "mean": 0.423972,
+            "ci_low": 0.408438,
+            "ci_high": 0.439507
+          }
+        },
+        "sasrec_shuffled": {
+          "@1": {
+            "mean": 0.208855,
+            "ci_low": 0.19849,
+            "ci_high": 0.219221
+          },
+          "@3": {
+            "mean": 0.418953,
+            "ci_low": 0.401083,
+            "ci_high": 0.436822
+          }
+        },
+        "sasrec_meanpool": {
+          "@1": {
+            "mean": 0.231496,
+            "ci_low": 0.21449,
+            "ci_high": 0.248502
+          },
+          "@3": {
+            "mean": 0.429963,
+            "ci_low": 0.417278,
+            "ci_high": 0.442649
+          }
+        },
+        "sasrec_session_boundary": {
+          "@1": {
+            "mean": 0.216948,
+            "ci_low": 0.199384,
+            "ci_high": 0.234512
+          },
+          "@3": {
+            "mean": 0.426403,
+            "ci_low": 0.410422,
+            "ci_high": 0.442385
+          }
+        }
+      },
+      "paired_ndcg@1": {
+        "sasrec_full - personal_frequency": {
+          "mean": -0.015022,
+          "ci_low": -0.037109,
+          "ci_high": 0.007064,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        },
+        "sasrec_full - sasrec_shuffled": {
+          "mean": 0.009424,
+          "ci_low": -0.001861,
+          "ci_high": 0.020709,
+          "seeds_ci_above_0": 1,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_full - sasrec_meanpool": {
+          "mean": -0.013216,
+          "ci_low": -0.030493,
+          "ci_high": 0.00406,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_full - sasrec_no_position": {
+          "mean": 0.000531,
+          "ci_low": -0.008058,
+          "ci_high": 0.00912,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_session_boundary - sasrec_full": {
+          "mean": -0.001331,
+          "ci_low": -0.007436,
+          "ci_high": 0.004773,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        }
+      },
+      "strata_ndcg@1": {
+        "personal_frequency": {
+          "within_session": {
+            "mean": 0.099337,
+            "ci_low": 0.051521,
+            "ci_high": 0.147154
+          },
+          "cross_session": {
+            "mean": 0.24817,
+            "ci_low": 0.225255,
+            "ci_high": 0.271086
+          }
+        },
+        "sasrec_full": {
+          "within_session": {
+            "mean": 0.204998,
+            "ci_low": 0.091981,
+            "ci_high": 0.318014
+          },
+          "cross_session": {
+            "mean": 0.218465,
+            "ci_low": 0.201921,
+            "ci_high": 0.23501
+          }
+        }
+      },
+      "strata_cases_per_seed": {
+        "within_session": [
+          17,
+          33
+        ],
+        "cross_session": [
+          222,
+          270
+        ]
+      }
+    },
+    "transition_dominant/window/nbs": {
+      "test_cases_per_seed": [
+        347,
+        372
+      ],
+      "random_floor_ndcg@1": 0.521755,
+      "ndcg": {
+        "popularity": {
+          "@1": {
+            "mean": 0.633649,
+            "ci_low": 0.617795,
+            "ci_high": 0.649502
+          },
+          "@3": {
+            "mean": 0.673524,
+            "ci_low": 0.660809,
+            "ci_high": 0.686238
+          }
+        },
+        "personal_frequency": {
+          "@1": {
+            "mean": 0.596672,
+            "ci_low": 0.570814,
+            "ci_high": 0.62253
+          },
+          "@3": {
+            "mean": 0.669295,
+            "ci_low": 0.650197,
+            "ci_high": 0.688392
+          }
+        },
+        "itemknn_self": {
+          "@1": {
+            "mean": 0.620594,
+            "ci_low": 0.594131,
+            "ci_high": 0.647057
+          },
+          "@3": {
+            "mean": 0.679105,
+            "ci_low": 0.661045,
+            "ci_high": 0.697164
+          }
+        },
+        "mf": {
+          "@1": {
+            "mean": 0.602226,
+            "ci_low": 0.575534,
+            "ci_high": 0.628917
+          },
+          "@3": {
+            "mean": 0.664791,
+            "ci_low": 0.647643,
+            "ci_high": 0.681938
+          }
+        },
+        "sasrec_full": {
+          "@1": {
+            "mean": 0.575521,
+            "ci_low": 0.561206,
+            "ci_high": 0.589837
+          },
+          "@3": {
+            "mean": 0.647302,
+            "ci_low": 0.639287,
+            "ci_high": 0.655317
+          }
+        },
+        "sasrec_no_position": {
+          "@1": {
+            "mean": 0.576642,
+            "ci_low": 0.561557,
+            "ci_high": 0.591726
+          },
+          "@3": {
+            "mean": 0.652697,
+            "ci_low": 0.63795,
+            "ci_high": 0.667445
+          }
+        },
+        "sasrec_shuffled": {
+          "@1": {
+            "mean": 0.588985,
+            "ci_low": 0.574431,
+            "ci_high": 0.603538
+          },
+          "@3": {
+            "mean": 0.664958,
+            "ci_low": 0.654014,
+            "ci_high": 0.675902
+          }
+        },
+        "sasrec_meanpool": {
+          "@1": {
+            "mean": 0.631392,
+            "ci_low": 0.616228,
+            "ci_high": 0.646555
+          },
+          "@3": {
+            "mean": 0.684719,
+            "ci_low": 0.671458,
+            "ci_high": 0.697979
+          }
+        },
+        "sasrec_session_boundary": {
+          "@1": {
+            "mean": 0.574387,
+            "ci_low": 0.560367,
+            "ci_high": 0.588407
+          },
+          "@3": {
+            "mean": 0.649939,
+            "ci_low": 0.638255,
+            "ci_high": 0.661624
+          }
+        }
+      },
+      "paired_ndcg@1": {
+        "sasrec_full - personal_frequency": {
+          "mean": -0.02115,
+          "ci_low": -0.037999,
+          "ci_high": -0.004301,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_full - sasrec_shuffled": {
+          "mean": -0.013463,
+          "ci_low": -0.024566,
+          "ci_high": -0.002361,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        },
+        "sasrec_full - sasrec_meanpool": {
+          "mean": -0.055871,
+          "ci_low": -0.064794,
+          "ci_high": -0.046947,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 5
+        },
+        "sasrec_full - sasrec_no_position": {
+          "mean": -0.00112,
+          "ci_low": -0.003655,
+          "ci_high": 0.001414,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        },
+        "sasrec_session_boundary - sasrec_full": {
+          "mean": -0.001134,
+          "ci_low": -0.002564,
+          "ci_high": 0.000295,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        }
+      }
+    },
+    "transition_dominant/window/nbp": {
+      "test_cases_per_seed": [
+        145,
+        172
+      ],
+      "random_floor_ndcg@1": 0.261169,
+      "ndcg": {
+        "popularity": {
+          "@1": {
+            "mean": 0.3343,
+            "ci_low": 0.312292,
+            "ci_high": 0.356308
+          },
+          "@3": {
+            "mean": 0.483416,
+            "ci_low": 0.465144,
+            "ci_high": 0.501687
+          }
+        },
+        "personal_frequency": {
+          "@1": {
+            "mean": 0.36134,
+            "ci_low": 0.339474,
+            "ci_high": 0.383207
+          },
+          "@3": {
+            "mean": 0.50197,
+            "ci_low": 0.480017,
+            "ci_high": 0.523923
+          }
+        },
+        "itemknn_self": {
+          "@1": {
+            "mean": 0.363967,
+            "ci_low": 0.342202,
+            "ci_high": 0.385731
+          },
+          "@3": {
+            "mean": 0.490482,
+            "ci_low": 0.469638,
+            "ci_high": 0.511327
+          }
+        },
+        "mf": {
+          "@1": {
+            "mean": 0.29693,
+            "ci_low": 0.272466,
+            "ci_high": 0.321394
+          },
+          "@3": {
+            "mean": 0.46458,
+            "ci_low": 0.437814,
+            "ci_high": 0.491346
+          }
+        },
+        "sasrec_full": {
+          "@1": {
+            "mean": 0.31827,
+            "ci_low": 0.301106,
+            "ci_high": 0.335435
+          },
+          "@3": {
+            "mean": 0.4734,
+            "ci_low": 0.454921,
+            "ci_high": 0.491879
+          }
+        },
+        "sasrec_no_position": {
+          "@1": {
+            "mean": 0.323255,
+            "ci_low": 0.303331,
+            "ci_high": 0.343178
+          },
+          "@3": {
+            "mean": 0.476713,
+            "ci_low": 0.456312,
+            "ci_high": 0.497115
+          }
+        },
+        "sasrec_shuffled": {
+          "@1": {
+            "mean": 0.314007,
+            "ci_low": 0.297129,
+            "ci_high": 0.330884
+          },
+          "@3": {
+            "mean": 0.473613,
+            "ci_low": 0.449316,
+            "ci_high": 0.497909
+          }
+        },
+        "sasrec_meanpool": {
+          "@1": {
+            "mean": 0.352884,
+            "ci_low": 0.333408,
+            "ci_high": 0.372361
+          },
+          "@3": {
+            "mean": 0.486367,
+            "ci_low": 0.474058,
+            "ci_high": 0.498675
+          }
+        },
+        "sasrec_session_boundary": {
+          "@1": {
+            "mean": 0.322086,
+            "ci_low": 0.305781,
+            "ci_high": 0.338392
+          },
+          "@3": {
+            "mean": 0.476234,
+            "ci_low": 0.455545,
+            "ci_high": 0.496924
+          }
+        }
+      },
+      "paired_ndcg@1": {
+        "sasrec_full - personal_frequency": {
+          "mean": -0.04307,
+          "ci_low": -0.067844,
+          "ci_high": -0.018297,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 1
+        },
+        "sasrec_full - sasrec_shuffled": {
+          "mean": 0.004264,
+          "ci_low": -0.011698,
+          "ci_high": 0.020226,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_full - sasrec_meanpool": {
+          "mean": -0.034614,
+          "ci_low": -0.053294,
+          "ci_high": -0.015935,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_full - sasrec_no_position": {
+          "mean": -0.004984,
+          "ci_low": -0.016728,
+          "ci_high": 0.00676,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        },
+        "sasrec_session_boundary - sasrec_full": {
+          "mean": 0.003816,
+          "ci_low": -0.005861,
+          "ci_high": 0.013493,
+          "seeds_ci_above_0": 0,
+          "seeds_ci_below_0": 0
+        }
+      }
+    }
+  }
+}

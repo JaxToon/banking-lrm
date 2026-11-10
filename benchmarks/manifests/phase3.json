@@ -1,0 +1,1479 @@
+{
+  "configs": {
+    "next_event": {
+      "config": {
+        "evaluation": "next_event",
+        "key_comparisons": [
+          [
+            "itemknn_self",
+            "personal_frequency"
+          ],
+          [
+            "itemknn_noself",
+            "personal_frequency"
+          ],
+          [
+            "mf",
+            "personal_frequency"
+          ],
+          [
+            "popularity",
+            "personal_frequency"
+          ],
+          [
+            "itemknn_self",
+            "itemknn_noself"
+          ]
+        ],
+        "models": {
+          "itemknn_noself": {
+            "family": "itemknn",
+            "grid": [
+              {
+                "include_self": false,
+                "signal": "target"
+              }
+            ]
+          },
+          "itemknn_self": {
+            "family": "itemknn",
+            "grid": [
+              {
+                "include_self": true,
+                "signal": "target"
+              }
+            ]
+          },
+          "mf": {
+            "family": "mf",
+            "grid": [
+              {
+                "alpha": 5.0,
+                "factors": 2,
+                "reg": 0.1,
+                "signal": "target"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 2,
+                "reg": 0.1,
+                "signal": "target"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 2,
+                "reg": 1.0,
+                "signal": "target"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 2,
+                "reg": 1.0,
+                "signal": "target"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 3,
+                "reg": 0.1,
+                "signal": "target"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 3,
+                "reg": 0.1,
+                "signal": "target"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 3,
+                "reg": 1.0,
+                "signal": "target"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 3,
+                "reg": 1.0,
+                "signal": "target"
+              }
+            ]
+          },
+          "personal_frequency": {
+            "family": "personal_frequency",
+            "grid": [
+              {
+                "signal": "target"
+              }
+            ]
+          },
+          "popularity": {
+            "family": "popularity",
+            "grid": [
+              {
+                "signal": "target"
+              }
+            ]
+          }
+        },
+        "protocol": {
+          "bootstrap_unit": "customer",
+          "confidence": 0.95,
+          "evaluation": "next_event",
+          "final": "test",
+          "fit": "train",
+          "ks": [
+            1,
+            3
+          ],
+          "n_boot": 1000,
+          "next_event_version": "0.1.0",
+          "random_seeds": 5,
+          "reference_model": "popularity",
+          "seed": 42,
+          "select_k": 3,
+          "select_metric": "ndcg",
+          "selection": "val"
+        },
+        "suite": "phase3-next-event"
+      },
+      "config_sha256": "f13fcf03a2c82a75a3aea23870d583174b2c0b12f908fb31689b2dcb86670343"
+    },
+    "sasrec": {
+      "config": {
+        "evaluation": "sasrec",
+        "key_comparisons": [
+          [
+            "sasrec_full",
+            "personal_frequency"
+          ],
+          [
+            "sasrec_no_position",
+            "personal_frequency"
+          ],
+          [
+            "sasrec_shuffled",
+            "personal_frequency"
+          ],
+          [
+            "sasrec_meanpool",
+            "personal_frequency"
+          ],
+          [
+            "sasrec_session_boundary",
+            "personal_frequency"
+          ],
+          [
+            "sasrec_full",
+            "sasrec_no_position"
+          ],
+          [
+            "sasrec_full",
+            "sasrec_shuffled"
+          ],
+          [
+            "sasrec_full",
+            "sasrec_meanpool"
+          ],
+          [
+            "sasrec_session_boundary",
+            "sasrec_full"
+          ],
+          [
+            "sasrec_full",
+            "itemknn_self"
+          ],
+          [
+            "sasrec_full",
+            "mf"
+          ],
+          [
+            "sasrec_full",
+            "popularity"
+          ],
+          [
+            "itemknn_self",
+            "personal_frequency"
+          ],
+          [
+            "itemknn_noself",
+            "personal_frequency"
+          ],
+          [
+            "mf",
+            "personal_frequency"
+          ],
+          [
+            "popularity",
+            "personal_frequency"
+          ]
+        ],
+        "models": {
+          "sasrec_full": {
+            "family": "sasrec",
+            "grid": [
+              {
+                "frozen_config_sha256": "46fa3eca387ed2bf8e1a5e12cacb652084022cb4acf0c2fb8ae0a65d9b133d59"
+              }
+            ]
+          },
+          "sasrec_meanpool": {
+            "family": "sasrec",
+            "grid": [
+              {
+                "frozen_config_sha256": "46fa3eca387ed2bf8e1a5e12cacb652084022cb4acf0c2fb8ae0a65d9b133d59"
+              }
+            ]
+          },
+          "sasrec_no_position": {
+            "family": "sasrec",
+            "grid": [
+              {
+                "frozen_config_sha256": "46fa3eca387ed2bf8e1a5e12cacb652084022cb4acf0c2fb8ae0a65d9b133d59"
+              }
+            ]
+          },
+          "sasrec_session_boundary": {
+            "family": "sasrec",
+            "grid": [
+              {
+                "frozen_config_sha256": "46fa3eca387ed2bf8e1a5e12cacb652084022cb4acf0c2fb8ae0a65d9b133d59"
+              }
+            ]
+          },
+          "sasrec_shuffled": {
+            "family": "sasrec",
+            "grid": [
+              {
+                "frozen_config_sha256": "46fa3eca387ed2bf8e1a5e12cacb652084022cb4acf0c2fb8ae0a65d9b133d59"
+              }
+            ]
+          }
+        },
+        "protocol": {
+          "boot_seed": 42,
+          "ks": [
+            1,
+            3
+          ],
+          "n_boot": 1000
+        },
+        "suite": "phase3-sasrec"
+      },
+      "config_sha256": "4bcfa1f83f85eb6d80ca1281a54ed631f0f6cf6a34abec9d38fa23a1925aa530"
+    },
+    "window": {
+      "config": {
+        "evaluation": "window",
+        "key_comparisons": [
+          [
+            "itemknn_self",
+            "personal_frequency"
+          ],
+          [
+            "itemknn_noself",
+            "personal_frequency"
+          ],
+          [
+            "mf",
+            "personal_frequency"
+          ],
+          [
+            "popularity",
+            "personal_frequency"
+          ],
+          [
+            "itemknn_self",
+            "itemknn_noself"
+          ]
+        ],
+        "models": {
+          "itemknn_noself": {
+            "family": "itemknn",
+            "grid": [
+              {
+                "include_self": false,
+                "signal": "target"
+              },
+              {
+                "include_self": false,
+                "signal": "item_event"
+              }
+            ]
+          },
+          "itemknn_self": {
+            "family": "itemknn",
+            "grid": [
+              {
+                "include_self": true,
+                "signal": "target"
+              },
+              {
+                "include_self": true,
+                "signal": "item_event"
+              }
+            ]
+          },
+          "mf": {
+            "family": "mf",
+            "grid": [
+              {
+                "alpha": 5.0,
+                "factors": 2,
+                "reg": 0.1,
+                "signal": "target"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 2,
+                "reg": 0.1,
+                "signal": "target"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 2,
+                "reg": 1.0,
+                "signal": "target"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 2,
+                "reg": 1.0,
+                "signal": "target"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 3,
+                "reg": 0.1,
+                "signal": "target"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 3,
+                "reg": 0.1,
+                "signal": "target"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 3,
+                "reg": 1.0,
+                "signal": "target"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 3,
+                "reg": 1.0,
+                "signal": "target"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 2,
+                "reg": 0.1,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 2,
+                "reg": 0.1,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 2,
+                "reg": 1.0,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 2,
+                "reg": 1.0,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 3,
+                "reg": 0.1,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 3,
+                "reg": 0.1,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 3,
+                "reg": 1.0,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 3,
+                "reg": 1.0,
+                "signal": "item_event"
+              }
+            ]
+          },
+          "personal_frequency": {
+            "family": "personal_frequency",
+            "grid": [
+              {
+                "signal": "target"
+              },
+              {
+                "signal": "item_event"
+              }
+            ]
+          },
+          "popularity": {
+            "family": "popularity",
+            "grid": [
+              {
+                "signal": "target"
+              },
+              {
+                "signal": "item_event"
+              }
+            ]
+          }
+        },
+        "protocol": {
+          "confidence": 0.95,
+          "evaluation": "window",
+          "final": "test",
+          "fit": "train",
+          "ks": [
+            1,
+            3
+          ],
+          "n_boot": 1000,
+          "random_seeds": 5,
+          "reference_model": "popularity",
+          "seed": 42,
+          "select_k": 3,
+          "select_metric": "ndcg",
+          "selection": "val"
+        },
+        "suite": "phase3"
+      },
+      "config_sha256": "ec399bda6a1e4e077382f83c83d8ae6001c80ea38ac396c29e446b63a75db782"
+    }
+  },
+  "datasets": [
+    {
+      "behavior_profile": "balanced",
+      "customers": 500,
+      "dataset_id": "balanced/seed20261130",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "ee77ada1712f8bc2d4d124d49143f70c55c231950ec4e7c68a1dff51f92921c7",
+      "processed_files_sha256": {
+        "eval_cases.csv": "1872e8164bd4d310370e44b8676f059110f0497aa5371800d20df990b7427629",
+        "eval_targets.csv": "872fc88f9ccbcce16ff509c81cef239a9c4de0754aef9456e91d3d0a42541924",
+        "interactions.csv": "570a9b9c236a21d44f66a217f7e1e1732748f34f61e1f538d3340cbcd633328e",
+        "train_examples.csv": "ef2a952eaf1631a725cccabde3b2140823172e3ef9edbec0770594cdcf548e40"
+      },
+      "seed": 20261130,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "d8c67157593064faeca26ad41df08c497d10fb4bd24b43ea1740c4038cc23f90",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "397c78d695d060ad2726efbab7e1da2455864707a3af290ef0b27290ebd0ea34",
+        "customers.csv": "042c41096e4f706b525a86cfb0bce4d624ac311f172becf66e7a84965b3fc756",
+        "events.csv": "1e7132c24e4945fda39a14212935c44be0466e41eea1b53fdae688162443681f"
+      }
+    },
+    {
+      "behavior_profile": "balanced",
+      "customers": 500,
+      "dataset_id": "balanced/seed20261131",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "a77fe11371ece1606488f4422f8a762f343e7d272181385b754ff51a4bd8effb",
+      "processed_files_sha256": {
+        "eval_cases.csv": "e832d693dfa3e283f456680b0111b34fc9d9e29f0798b434b22d00cbf0f62faa",
+        "eval_targets.csv": "62eb4966764d8070835b9ccdd77e566fb95909a9f39e7923e49462af22a8f9a0",
+        "interactions.csv": "8062c6182074efbfd435952d7a9d2408639d157e7e1968a6244457859bbe874e",
+        "train_examples.csv": "62f87e14bb55b40f24c4fe10b8eda342044a1633be90a9d9bc40ae6f0fffc91c"
+      },
+      "seed": 20261131,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "457145034988bd6cdfaa242eb68ce9c7725965106f3de55a50fd81d059ed07a8",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "11cb369b7a0e24be7023543e104451f493fa6e466286c1f905cd4147bd846db9",
+        "customers.csv": "50829e2bcea3b7f8ef73520f5dc7b4b8a362186b7cb2d8e56e243fa90b341923",
+        "events.csv": "a22664235d9f022a4a6f052dc8dc18617ff5d0b20769a8a1ea12105edc329a56"
+      }
+    },
+    {
+      "behavior_profile": "balanced",
+      "customers": 500,
+      "dataset_id": "balanced/seed20261132",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "3aa0bb41338df62a33ba9091bdd78e2e4bf3932c34258663ed36b49897e229ed",
+      "processed_files_sha256": {
+        "eval_cases.csv": "1699c2cede86cc968a38be7da818bc7b62ba7f88545cfb0d3939953f1d6ee37c",
+        "eval_targets.csv": "f9725be6e2ab5c9b7fe753e7347f1b118ee65c9ee47059dbd9dc88b051a47ad5",
+        "interactions.csv": "d1557c128b895640bf8aa1c1b95b6070e7ac0df64bf84ee13c09132836bf2c0a",
+        "train_examples.csv": "065858e0502a09e656ccafbe634cc1d7ca77bfd5ffb5df17f47ed06ab3462171"
+      },
+      "seed": 20261132,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "a9ab29efa513dd3ffab48ddbb93542fef092aa9f6b95146e72d7627b6c88eab2",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "7bd1ea0b8d69ed5e9319e57c53f7ad1e2dab28d30f5f3dc14327625409c68782",
+        "customers.csv": "f0daf34ca37defab7ac36dc788912ecaf7ed11e8eb7384db6be163436b92d046",
+        "events.csv": "f0053186106c2d300a0ab79da7d22fc1341b1d35dfb3989890edd26ab922a918"
+      }
+    },
+    {
+      "behavior_profile": "balanced",
+      "customers": 500,
+      "dataset_id": "balanced/seed20261133",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "02c9f86b8017dab891101b6748d99272b710592efc0474a99a4f6409097ef0f1",
+      "processed_files_sha256": {
+        "eval_cases.csv": "c454414a0b73bc2a39468b6a1d8b5414271f6d414f11c64bd2caf76d5e7a4a56",
+        "eval_targets.csv": "a8291f0aa9c7891e9fd17db066923617a7d898effdae2c8e50e8139bc19021c8",
+        "interactions.csv": "ffcc4ef1faae44aa0405ba5663e12dc289d94d4efc90709226672825a797be88",
+        "train_examples.csv": "769aa8cb3c0dbf04c10b1988f3214bea45872b18f588141a40a5d938db1331ee"
+      },
+      "seed": 20261133,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "9cc101b94b6217e22cf62037232e320addb8cf99dd47d1a2b2083c3db8965147",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "2839a9ad2b4fe4f962c90d0b788077658b167bda238db8444e00277a53c2e2ea",
+        "customers.csv": "f6ff9e7c53c5e8983e17b14dfbc96c3a61720520ee30b2b0b09eb927cc218856",
+        "events.csv": "204692467ae08dd45f2f7d04f81ef7054844a7367bf5306c52ceff0883f6a022"
+      }
+    },
+    {
+      "behavior_profile": "balanced",
+      "customers": 500,
+      "dataset_id": "balanced/seed20261134",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "55c3a73eaf429d2bd318217d56fa1ff7a40620607647979d6d792de2732da981",
+      "processed_files_sha256": {
+        "eval_cases.csv": "4cf07d62e0a51538ca80ed685ce5e11f9032e255679a379bdbef11a0fee6cc1e",
+        "eval_targets.csv": "1b453ff50bdb2d6ef6afcb234ce947f7b5fecd66029f49aca309284b3d0aaa73",
+        "interactions.csv": "67499ca32a0e2645b29bb442c994354e1de3662b0987ce5659a494347a5fb47b",
+        "train_examples.csv": "061b8518eac3e9c61f2e0e10bb2891888ee0bf8496d4d2cc0d2aa9f0222afdcc"
+      },
+      "seed": 20261134,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "24c3c509ce1fea1a0c92116271b63047d44ce99dae2269e7ab75adeff3b613d1",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "2587605ec34225aa23652090ab1d558021301519b76fe19d012952d7a7a542cc",
+        "customers.csv": "9d7609138e4b2e27eb464ef3bedcdc029b7dc31707b74fe3aa6cbe481346c54d",
+        "events.csv": "14533cebfa32543a094b3789cbcd4f82d8adbe967d01f043e6e0777f332cf83b"
+      }
+    },
+    {
+      "behavior_profile": "balanced",
+      "customers": 500,
+      "dataset_id": "balanced/seed20261135",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "762f6567426f1759101f5ba7fda6fa38da81f49e1e2ee5c33699a62c976c1100",
+      "processed_files_sha256": {
+        "eval_cases.csv": "42074b1795a5fb815cb890734e6afa03d9ab81daba1c790d551774aa4d502121",
+        "eval_targets.csv": "241c89a677e5bbc5341e6f6aa5476b7384cce0c23381046bf59f11605eab0f82",
+        "interactions.csv": "5d7e6b6be24ed523103a9cfbf06ee74418f28569bc2effcf08fc244f73adbe2a",
+        "train_examples.csv": "1b2c2ea950015543ac1250ada5f4e802b653060002d1545764387f42eecbcade"
+      },
+      "seed": 20261135,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "7e412b2b86eb4b4c462118e83b491a476a1058a70cf6957f115bb0e1b569154d",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "b9788154f6ddb6ca88177b8e2ca2fb847db3ba88e70ab972d93066e02755c9eb",
+        "customers.csv": "7a3e23ec971c2558d03b1fdadfcf14da7d8a1b1c202e374f9496ac8e7ff20c26",
+        "events.csv": "bd3bbc527efa348e6750fd8591ed1f0e79fda8377944a882d3dc47bf889bbb58"
+      }
+    },
+    {
+      "behavior_profile": "balanced",
+      "customers": 500,
+      "dataset_id": "balanced/seed20261136",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "cd7b312facc9a075b8a67e51166d55b77789aa9d455931d0f94a007b13e0ff2d",
+      "processed_files_sha256": {
+        "eval_cases.csv": "175223aaf15fd1504df3ba7cb347743cd789af8fb2ac63d9d7c473db7c1b704e",
+        "eval_targets.csv": "d358eed9dbb172be66742304f72c0ca453c1611f42b611ac2b44bbca473248a8",
+        "interactions.csv": "06b4e2969d2ce020aaed8492a8e7ba9979f6668faa2f483776b60c24f71db6a6",
+        "train_examples.csv": "96aea3e7354b2cdbc484d6993549dfec3ecb388815c678f14ab5b3d9e206421c"
+      },
+      "seed": 20261136,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "bf36683ec0d9fae04f9ae0631b291524d636873e1cd6dfc0d8f45ef71c82d6c2",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "bdcf5dc452bfb8114e5c5e87cfd004759e30ee9293420a8e1d5145d5e163c2f1",
+        "customers.csv": "60ea64228b4b644fa9251fe58f4d56e1ab958fd572bedce98e25ad18b1f2e187",
+        "events.csv": "381206e2c11988e9e19e1be05dfce91417ee58c50e8d6997292b82d5cd533fa5"
+      }
+    },
+    {
+      "behavior_profile": "balanced",
+      "customers": 500,
+      "dataset_id": "balanced/seed20261137",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "437504e864157b38b0acdfa02b76050c350e2602691ff602f6073e427bf84768",
+      "processed_files_sha256": {
+        "eval_cases.csv": "4820d507bcbe4abb7403c19685c434c6b7c4b6fe835ea1de00ec1396bee3c52e",
+        "eval_targets.csv": "e906299f5fb0dfdf3fa41d652a3716929c4ae997181f7c9f12d7addca8f3ed11",
+        "interactions.csv": "e3a00000078c570008e5aa41a5dccc039fcb134e48a60d760772ceab13e703cd",
+        "train_examples.csv": "c4c8abadf2e2d74a5e49c263fe1b6b74189888cc5e15d0dfa7b501669be84825"
+      },
+      "seed": 20261137,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "6fe491c181e408ad74e95905c2f745a4ac7e1a3e7c1cf18e875ab6036de7538b",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "5ae66b4ac8637afd8959d079a009a9bcb6356021952d6a7e7072e9a6ca302e58",
+        "customers.csv": "681fc3b6e6f9a16dfdb4de98b905bdec778fba948d83935bb37a195a973e1a49",
+        "events.csv": "6916795c0e3f8441d01f7861ca380257ec31deaf8a2b421b64329d68da32a4bc"
+      }
+    },
+    {
+      "behavior_profile": "balanced",
+      "customers": 500,
+      "dataset_id": "balanced/seed20261138",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "8a7929eb409491c8a61563195a4f64527058611b9bc3bd03cbbbc6b7b61a6475",
+      "processed_files_sha256": {
+        "eval_cases.csv": "dc363f711a0c7a689387d0f257e9fa9dfe43540a9886f1d357b4528f4420c619",
+        "eval_targets.csv": "4709f50d259b59da994237ba263b652f0a95ba4224531a2119e2d03c98974f42",
+        "interactions.csv": "969ad4692dc4c1efe5cdce74c306726acb30e27392dc2f7792d21b2209f93621",
+        "train_examples.csv": "81be33c31b63c2f8ffdb8b5b1e82ee81af20ceefb4caa17be4474362612cfd5c"
+      },
+      "seed": 20261138,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "c95b2102ac02562edae8397e19255f83600ed6dfd755d5a8a4bdebc8229f3768",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "615bd2b29023469ba0c3883a7bf8aa33dea010bf501a93b01edb0b42f6096fce",
+        "customers.csv": "f380e9033c31df5777e44fcb14c9c0ad5b295c95ba6686475e0b7db4ec88aeea",
+        "events.csv": "ddb32bb76447dc68ba7c3f77eb177655f077daf3494185c5677f30687130a895"
+      }
+    },
+    {
+      "behavior_profile": "balanced",
+      "customers": 500,
+      "dataset_id": "balanced/seed20261139",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "70d07b4015aed224772b7f541137f39470642633ece5c9dd82dff24e9de7cf82",
+      "processed_files_sha256": {
+        "eval_cases.csv": "270f485231196c93e8f4e0b5069adfa1b20f869b93de02127b9f09f9250a58e7",
+        "eval_targets.csv": "cb352e4a3c667e9463fe97451c454daf7ca40c4197e2e2118eae2ff43d902b03",
+        "interactions.csv": "cfa5f2a59af5c64ab4b658c5778e1b17d1a06718c2f04ba922c9a2c780d964e3",
+        "train_examples.csv": "7e18d859687dd2387a8d4383d78cfa6289ce06c4a0778bd25d007db7dab94246"
+      },
+      "seed": 20261139,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "3597f74fbbc266390830f072d84ab5e599475a5e11602d88e997aeed0b07a804",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "a84c908983b5d0a01ecbd8af917e868d0c14128bae44f6ba9e0ad1d0227e11ab",
+        "customers.csv": "1daa1c4fde73c1ecaf1a1fc466de23c8a367fb48cd20e9ed384b6524e700e4e0",
+        "events.csv": "c68c5a5357dfbff472cfafea755c177265f66aa04b336b946ec8c3958ab046a6"
+      }
+    },
+    {
+      "behavior_profile": "habit_dominant",
+      "customers": 500,
+      "dataset_id": "habit_dominant/seed20261130",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "5f4c54373391ad19b1472560257f13f3445917248a0bb0ec62cc47faed4b70c0",
+      "processed_files_sha256": {
+        "eval_cases.csv": "6dc6a45312b2e4b3b0564d0a9e64b42f38c982e8a9bd44aa570be5cb39f96253",
+        "eval_targets.csv": "4f73f672a6c8dc0f32f4b3758df50bb9eab8378f382aa4eb923db697b1184c5f",
+        "interactions.csv": "d7c7fbdd7945a0ba04ddbd341b56a8e2e221ca48e073905976037cb563d997dc",
+        "train_examples.csv": "1ba268ddd4710d91ed668507c8d90b1c233301fa859cdfa50bdf6658dba4a433"
+      },
+      "seed": 20261130,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "eb27cc5f79b58bfa3048016c2d576471779e276cc05d55da795014600e78044e",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "397c78d695d060ad2726efbab7e1da2455864707a3af290ef0b27290ebd0ea34",
+        "customers.csv": "042c41096e4f706b525a86cfb0bce4d624ac311f172becf66e7a84965b3fc756",
+        "events.csv": "93df8f1dd47d6b1d4c2f15d9d3ef14e1cac9c835b1e6f4cfe1da5ce6dd18fb2e"
+      }
+    },
+    {
+      "behavior_profile": "habit_dominant",
+      "customers": 500,
+      "dataset_id": "habit_dominant/seed20261131",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "ddd8d244ad73033441d43cd511baf72c015807d3312d54579470e68af8295476",
+      "processed_files_sha256": {
+        "eval_cases.csv": "33cdee6d77d3810e3b93a6fce3e2febefa8ce1b5233eb60a5214092dea1d70bc",
+        "eval_targets.csv": "eedaaff1d539607fefeb35d6d611804b80e487fba24b8421859842ec1a4e58bf",
+        "interactions.csv": "59304e1165b0db44bb49da489aac1fea1fcb3fc9f77e74fd6653e1b3c17fa06d",
+        "train_examples.csv": "4b79034fb756e960ac7b2971b4bafbc39822eaa4d6ccee1a14a869260cea204d"
+      },
+      "seed": 20261131,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "9610e05821b4661176e56a52d6a7f1a843d0e975380bf796fbd6088f45718698",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "11cb369b7a0e24be7023543e104451f493fa6e466286c1f905cd4147bd846db9",
+        "customers.csv": "50829e2bcea3b7f8ef73520f5dc7b4b8a362186b7cb2d8e56e243fa90b341923",
+        "events.csv": "77848b5063f9d63786988e3ff7c3480f4f6b22f902cdb7755279066d430e840f"
+      }
+    },
+    {
+      "behavior_profile": "habit_dominant",
+      "customers": 500,
+      "dataset_id": "habit_dominant/seed20261132",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "7169cc9ec5fff1b9d9d3734bce0cc6c482f9ae813810566f2ca06447db096c8f",
+      "processed_files_sha256": {
+        "eval_cases.csv": "2d8d4607442e2ed8c425a37a48622b7f6b7844c223b3660187209ab385662577",
+        "eval_targets.csv": "bb9415d9eb494703a3a396ced555acebd8e009047ae7914102148f3f1bc0c2c4",
+        "interactions.csv": "0ab8b3509eaace34273bc9a10987aaaa746901a90a6ca90c41b145f8882b628d",
+        "train_examples.csv": "3164fe7e3c9b1d0986a487f2cc8fd1b2d42ef915c3bee7d276f151d3f1b6f910"
+      },
+      "seed": 20261132,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "d5a7993beae571a0c567007ae8b722c39dfe24aa62bd9ef9b4d131ffb4d03d30",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "7bd1ea0b8d69ed5e9319e57c53f7ad1e2dab28d30f5f3dc14327625409c68782",
+        "customers.csv": "f0daf34ca37defab7ac36dc788912ecaf7ed11e8eb7384db6be163436b92d046",
+        "events.csv": "4538bb98e49686d853da40ed5bc4fa25259d7b6aaee9142ab17dd96c4068e40b"
+      }
+    },
+    {
+      "behavior_profile": "habit_dominant",
+      "customers": 500,
+      "dataset_id": "habit_dominant/seed20261133",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "9e1d62b4a25899297de9395ddf46839993fc315d49c285a04042286fcce0b5cc",
+      "processed_files_sha256": {
+        "eval_cases.csv": "f2a3c9b8f8a68b0bac04b7eeca1592c09ea8de9bda04aeb033b449b7d074b737",
+        "eval_targets.csv": "20a23a8da47eb4050bf7d67933e76a8c420d0f46d91d5d6d6e202071fd17ea22",
+        "interactions.csv": "3f502aedf28654c3711ff7cc11944fb0bef561af0484b24d4b5d4d940f81d427",
+        "train_examples.csv": "79c8c927b53cd19a2c435bd92f9e9aca41e7479520db2030bf316154835d977e"
+      },
+      "seed": 20261133,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "974bf44daa4294c03deb7fecd39c2077ba15cea8d27fa290b92af346cc1bd2dd",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "2839a9ad2b4fe4f962c90d0b788077658b167bda238db8444e00277a53c2e2ea",
+        "customers.csv": "f6ff9e7c53c5e8983e17b14dfbc96c3a61720520ee30b2b0b09eb927cc218856",
+        "events.csv": "91db8a8cd42b9fd0a19d89d7402eb37d69600f5335e1dab1d4d4d51f08d2211c"
+      }
+    },
+    {
+      "behavior_profile": "habit_dominant",
+      "customers": 500,
+      "dataset_id": "habit_dominant/seed20261134",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "7f9b2f16142957642ca07afef70c0a7fbd3a37eb5850472da2e1879176cfc0b4",
+      "processed_files_sha256": {
+        "eval_cases.csv": "a07babebda2b8db8f1eb470d3eaf5c9f9970492b0ad82ef682ea40ce627a4219",
+        "eval_targets.csv": "08370cf952fb185da07740da439857f1007a386c0ed376ab96f2cdf2b6b36e76",
+        "interactions.csv": "d1be09b4522f006fff67d0f5bdcb24ed212602cb3610fb47adcecdb63d71d75b",
+        "train_examples.csv": "8c69b0f7cf0959b213e45bc880dce4caebc0d31093ef04d85a3ac194a1d262a1"
+      },
+      "seed": 20261134,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "302b8371873eebbc12eb096acc1378ed842a7802bb43f57a1c22b433073b35e4",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "2587605ec34225aa23652090ab1d558021301519b76fe19d012952d7a7a542cc",
+        "customers.csv": "9d7609138e4b2e27eb464ef3bedcdc029b7dc31707b74fe3aa6cbe481346c54d",
+        "events.csv": "fb92109d67a89da9b02f31c8babf53fb5b2b3679af79e40cfe72b9b641344a3b"
+      }
+    },
+    {
+      "behavior_profile": "habit_dominant",
+      "customers": 500,
+      "dataset_id": "habit_dominant/seed20261135",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "c91784370e11841c3be106055de7f07776186fea46baad27d7aff5173c8707f0",
+      "processed_files_sha256": {
+        "eval_cases.csv": "eb537a26b0afc1bc8b632da6ead0339fcf6b49720e2e12f38f3d96341502473c",
+        "eval_targets.csv": "da8295929458e6fdcb689442a46667454659a8a6644840628f2a4bdcda857a75",
+        "interactions.csv": "4b4c8c08337f93ca3d1b75427aa9c2e2a00f05361cbb34ae70c80d5db241aae4",
+        "train_examples.csv": "cd26badc4f36b52f8e8a4e03b9b8e55e795d6caaed2e9e2599e6510f190bf8d8"
+      },
+      "seed": 20261135,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "d03369beb7d35bd32532a0bd990ed70261971dd082da8a6b664b84e57682e5fe",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "b9788154f6ddb6ca88177b8e2ca2fb847db3ba88e70ab972d93066e02755c9eb",
+        "customers.csv": "7a3e23ec971c2558d03b1fdadfcf14da7d8a1b1c202e374f9496ac8e7ff20c26",
+        "events.csv": "18304a216e87938d8aa20f9a9a65cb477799fbeae149757a8dd6dab6d58ffff5"
+      }
+    },
+    {
+      "behavior_profile": "habit_dominant",
+      "customers": 500,
+      "dataset_id": "habit_dominant/seed20261136",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "1576e5c010f56948a2eecca291cf8f5abaf081ff678687f6fe33c3169f3a25b9",
+      "processed_files_sha256": {
+        "eval_cases.csv": "1635602edcde9ebb3859b9b59217dcdac93eb1b6a45f8e9e0d144502fcf8a9ca",
+        "eval_targets.csv": "21de59f46328514138839912f8ffe8792d3580eb0c5eaa3bca5ffccdd5834029",
+        "interactions.csv": "9ab522ac2463580b4af61f88067cdf11b1a4fe4d01cfac90313f0e5f5af41103",
+        "train_examples.csv": "bb431f1116989ff1a3917d5f37be7c00295669de90e0f1e67ef7db8a2a2969bb"
+      },
+      "seed": 20261136,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "f3e3fe595ed7b4ebdf828881668fc1c1906dee9ae69117e44ce24dae61381921",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "bdcf5dc452bfb8114e5c5e87cfd004759e30ee9293420a8e1d5145d5e163c2f1",
+        "customers.csv": "60ea64228b4b644fa9251fe58f4d56e1ab958fd572bedce98e25ad18b1f2e187",
+        "events.csv": "b27591f11b610a9f17fcb7a0bbe95c31ad2ff80048817ff18040a7c5949b2675"
+      }
+    },
+    {
+      "behavior_profile": "habit_dominant",
+      "customers": 500,
+      "dataset_id": "habit_dominant/seed20261137",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "1570c272c7495e58d533cb5243b990b8036622e87c1271ec905af16e31aa4b65",
+      "processed_files_sha256": {
+        "eval_cases.csv": "906e11894e4e0111a8aca54946bfcff6a72ffb1d93579f005bfb2c2dd3ea0ca3",
+        "eval_targets.csv": "64e1e7c4ba81428f1a0e1cd3270eaea8faed7d9a7a5e51272b475efa6c9294fc",
+        "interactions.csv": "c4f9ca2a342a9ad05d03e66ad8d842cba04c4e4f0d3ff0d9bf8a3d97c2a31121",
+        "train_examples.csv": "9126a6cd4c4849e634daffac5e35f7e5fc49720e6f2b4480312cf7026ed9def5"
+      },
+      "seed": 20261137,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "77c90d1d67e200f990f6b93c2569b3eb7fa1f24fb73b02892f64a06130d7624a",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "5ae66b4ac8637afd8959d079a009a9bcb6356021952d6a7e7072e9a6ca302e58",
+        "customers.csv": "681fc3b6e6f9a16dfdb4de98b905bdec778fba948d83935bb37a195a973e1a49",
+        "events.csv": "cafdaa8121f12fcd5b405b0e874737c0c8f31bc130c6905e387d1c9a767cf8a5"
+      }
+    },
+    {
+      "behavior_profile": "habit_dominant",
+      "customers": 500,
+      "dataset_id": "habit_dominant/seed20261138",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "97d31a89581b944a50ab7c700cbf0b4ca81dbd1ba15461fac59dce2279b582be",
+      "processed_files_sha256": {
+        "eval_cases.csv": "2d4a47c663ef7f088d684bd43977764b022fcedb65230e02d2445d4c1792f966",
+        "eval_targets.csv": "c66859719d473c937e0c103d455dcff6f3ea788ddb7492396c57aad612642b25",
+        "interactions.csv": "acefb1093c5106a7f661edb1b74612adab4c152e4dc31406b0523e72a3873e55",
+        "train_examples.csv": "d7fe7c93c0c5cd3868149effb4b1be0c99fc1b7f34391d087e39d91220adc9fd"
+      },
+      "seed": 20261138,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "d82aeeb4ce21b161a5a234404a8aa3f2fca5e0cc68b9b867bfedaddb98fbcf5d",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "615bd2b29023469ba0c3883a7bf8aa33dea010bf501a93b01edb0b42f6096fce",
+        "customers.csv": "f380e9033c31df5777e44fcb14c9c0ad5b295c95ba6686475e0b7db4ec88aeea",
+        "events.csv": "71b5b4d17586007e92f2c65e532a501d544d48e23e7938c4e94e96545ab74b08"
+      }
+    },
+    {
+      "behavior_profile": "habit_dominant",
+      "customers": 500,
+      "dataset_id": "habit_dominant/seed20261139",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "100ecf6a49ead3443718d168439e5eaeb99346343d2ee92546f07adcf947ab91",
+      "processed_files_sha256": {
+        "eval_cases.csv": "b8424cd491b4f72e8e93b384c918c91c519a97d8de589bb474eca3911c3d0909",
+        "eval_targets.csv": "d0b37d0ae13fae229969d8d3e15f844cdf81d394a8828a224b4d9f81d4aa941e",
+        "interactions.csv": "6411a2090f3f228319766560cf99bad29af7e282e87bcc626a388917e31c2de5",
+        "train_examples.csv": "989289539cffc2722b3926ddf081efd924d6dc854109e087240ffb9a88909210"
+      },
+      "seed": 20261139,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "23bd0b63b6ff036981803e85a76ab7c740aa0483ad69243e2a9233b5208825ba",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "a84c908983b5d0a01ecbd8af917e868d0c14128bae44f6ba9e0ad1d0227e11ab",
+        "customers.csv": "1daa1c4fde73c1ecaf1a1fc466de23c8a367fb48cd20e9ed384b6524e700e4e0",
+        "events.csv": "6a967cddcea295350ded1c688f219395187ed33330fdf339568fa55cabbe3950"
+      }
+    },
+    {
+      "behavior_profile": "transition_dominant",
+      "customers": 500,
+      "dataset_id": "transition_dominant/seed20261130",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "74409f146d48ce498b901ac0049ba6c2d4e67e42e069c5c730e6a9963d3b6fc2",
+      "processed_files_sha256": {
+        "eval_cases.csv": "a01b1c2f7bf77fbb70b95f3b9f7f71d13bc38d786f8e06147e72ae609ff4924a",
+        "eval_targets.csv": "f1e54aed1fc03268c52b56239e2a5cd1ed6d8201105c000d98817de7a64673c0",
+        "interactions.csv": "77a642bd7fe6a013b52c711bdc9a73f82ebdf5f137415bc9c543dbffaa657b08",
+        "train_examples.csv": "b5c50824db7851a01fda59dc35e516d15d5bedd282c6d4e6f3b598bfc4b4664c"
+      },
+      "seed": 20261130,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "4d50870599cc9ccec0d8964c0710b60026ea2a4028661fb8f5b2bdc0f722f60d",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "397c78d695d060ad2726efbab7e1da2455864707a3af290ef0b27290ebd0ea34",
+        "customers.csv": "042c41096e4f706b525a86cfb0bce4d624ac311f172becf66e7a84965b3fc756",
+        "events.csv": "3ad1172c890f5f4e25512a27cb0548e877d4e75c8b6a0b52a569e115deb79b7c"
+      }
+    },
+    {
+      "behavior_profile": "transition_dominant",
+      "customers": 500,
+      "dataset_id": "transition_dominant/seed20261131",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "b14df5475af7934eac8d451d31144013c5a031dfa4dd6a2635a706a11b7eb341",
+      "processed_files_sha256": {
+        "eval_cases.csv": "41a4b0a2a76e2ce2d1f0a765f8d02e86b477a4dc2948d4f563ca7653633b2dfc",
+        "eval_targets.csv": "e075d662777c52804a13f1f1fc100e564416fd057c3998c1527c3577456a0ce8",
+        "interactions.csv": "513f6d7b09ed989008571dc6582c0b8dc9571a4dd7f2ebd3e9e3a3d356215d9b",
+        "train_examples.csv": "564016ad9c1b62c0f4564fc57eb8ff1fc0d0be7a4efc7de284e4c1dae9219a05"
+      },
+      "seed": 20261131,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "845c6182b89ee6455ebdbae8cea18ba22ce19e796079344aaf7dfd3e56b0ea50",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "11cb369b7a0e24be7023543e104451f493fa6e466286c1f905cd4147bd846db9",
+        "customers.csv": "50829e2bcea3b7f8ef73520f5dc7b4b8a362186b7cb2d8e56e243fa90b341923",
+        "events.csv": "278a4bc849dccdc14e284f6a25ab8006cf49b0c39155f64a4f595eb36fe10e0a"
+      }
+    },
+    {
+      "behavior_profile": "transition_dominant",
+      "customers": 500,
+      "dataset_id": "transition_dominant/seed20261132",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "8f70295675bdc12682253f682c1fd79be99faeff1f7a75503e6ab391c61a6992",
+      "processed_files_sha256": {
+        "eval_cases.csv": "85c1bdb69b9fbcfc81b9936212a2262c43b2bfdc42c428fe03c8bb44368d4e45",
+        "eval_targets.csv": "e0f804aea245625b8c5cba105275d68207ff09be0b68fbbb83d7e751c69d3ccc",
+        "interactions.csv": "c3cafa29eff8c16d436a77244140cdfbad29ff329a4d24fe1a2a6c019b6dad30",
+        "train_examples.csv": "f4f61f1beac26945158cabae58083237b954965663166b4b09fca8bb404698a8"
+      },
+      "seed": 20261132,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "189343c23f958b9d228c6840265f7771e2e9c1fa701280590bbb8f2b1587b8dd",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "7bd1ea0b8d69ed5e9319e57c53f7ad1e2dab28d30f5f3dc14327625409c68782",
+        "customers.csv": "f0daf34ca37defab7ac36dc788912ecaf7ed11e8eb7384db6be163436b92d046",
+        "events.csv": "d4114fb221a0b62e0204acfad44a3a9fc5dbb003d0c77ac5b17e5fa4c72bbfda"
+      }
+    },
+    {
+      "behavior_profile": "transition_dominant",
+      "customers": 500,
+      "dataset_id": "transition_dominant/seed20261133",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "38e05665071f0c2bce2d9f9203c6a244dd2be3a2568eb0686c7d60c4187e920f",
+      "processed_files_sha256": {
+        "eval_cases.csv": "45f62a53a1248c7022bd2838b05342d23f6edfcb1309354e197c3c95ad038410",
+        "eval_targets.csv": "13e751ceb0d4e028238f951ed0d3a19c509c7b508a132fc393a3a2891ef4fba9",
+        "interactions.csv": "113753fd963427ac15c9143dde8776ac9e39b7a6f9e22711a7ec4cb16e6a72c2",
+        "train_examples.csv": "af6a4bc11721bdc297096813cbbe0acbc99f6d976dc362f7a487d540a5024b63"
+      },
+      "seed": 20261133,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "a3397e82017448cc1ba7d1f0eb09d891d4a01c7ef532813c11477fd695c813ae",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "2839a9ad2b4fe4f962c90d0b788077658b167bda238db8444e00277a53c2e2ea",
+        "customers.csv": "f6ff9e7c53c5e8983e17b14dfbc96c3a61720520ee30b2b0b09eb927cc218856",
+        "events.csv": "d52b8539fb92932c6f888157baa51c75ead8dc8d05859439928ad7269e04c66e"
+      }
+    },
+    {
+      "behavior_profile": "transition_dominant",
+      "customers": 500,
+      "dataset_id": "transition_dominant/seed20261134",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "acce3f4d16c693b50646e6574a885dbbd94c060ca7951c9e2411d1f7cacc41d6",
+      "processed_files_sha256": {
+        "eval_cases.csv": "8ad67bcf8e6f931de1becc761d833bb128094a5eb3827d7e3fe155e8c9d52229",
+        "eval_targets.csv": "8330738f83a03cf18229f1867b26f282093c7477a9089643a9563fa1add46cd9",
+        "interactions.csv": "0ad6016129ce3a97d7e026ea94f070266b7ed737eb748602b231dbac5a79be7f",
+        "train_examples.csv": "83c61d6ad0fcc50a6513bede4d38c56c467425f06805bd01f31c94e47e7e8c4a"
+      },
+      "seed": 20261134,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "0b20de4f76de57cf23cbd72ecf405e0797d843e49bffe758f286e5ab6b5f6d40",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "2587605ec34225aa23652090ab1d558021301519b76fe19d012952d7a7a542cc",
+        "customers.csv": "9d7609138e4b2e27eb464ef3bedcdc029b7dc31707b74fe3aa6cbe481346c54d",
+        "events.csv": "7beda168e70ab4f01d91f482c95e639f48b2c36fcb6c93486720fa96dd0b1c80"
+      }
+    },
+    {
+      "behavior_profile": "transition_dominant",
+      "customers": 500,
+      "dataset_id": "transition_dominant/seed20261135",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "f78ae51b6651cb9d3492ddc13c0985efd4c4d66cb5cad294e5cc01683ffe8164",
+      "processed_files_sha256": {
+        "eval_cases.csv": "ac015ae2cc48aadbf5bfa851e80d2b6f5209be5fd8a9f82e84740dd1eafb9bc3",
+        "eval_targets.csv": "776696a89305f7beb79c6f83c152a55d3723e3509a95ecf3f3d2a65e7a24f236",
+        "interactions.csv": "15df19dbbf686a34414d941fa3069c34d7900f0b0c1b3e88f152ad5987291907",
+        "train_examples.csv": "4d72af88d9ba545714f088543f3946486faadf4bda06759705db265dd5872847"
+      },
+      "seed": 20261135,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "36413d07d1973d5655e00d6679548349fd6370a9bbea96312f2a74f3f9b5d2bb",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "b9788154f6ddb6ca88177b8e2ca2fb847db3ba88e70ab972d93066e02755c9eb",
+        "customers.csv": "7a3e23ec971c2558d03b1fdadfcf14da7d8a1b1c202e374f9496ac8e7ff20c26",
+        "events.csv": "2eb50e2625a0b2e5167cb9416da35d40349434dfd5d49255f03747488b7dc5e6"
+      }
+    },
+    {
+      "behavior_profile": "transition_dominant",
+      "customers": 500,
+      "dataset_id": "transition_dominant/seed20261136",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "bbff110b634301728e29d79d8d4d46ecbcaf3d37e9eab735cf375bb81ad55eae",
+      "processed_files_sha256": {
+        "eval_cases.csv": "ca5f55807de3056af8ea1a66f080557e9bd7fa30fdaf850465adeefe008c4355",
+        "eval_targets.csv": "c7fa4ab47c284452b8a04f350ce2537dcc9dc802e91d61f5bfbee761245affef",
+        "interactions.csv": "b81f3e9f5c876196b156cd1a84ec392aad1b8643f0eea2e12c7abd67731ced50",
+        "train_examples.csv": "4a5a644d9e869cb18a883a5dd52428a4b94a845fd36799abfbb79d60b8de281a"
+      },
+      "seed": 20261136,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "fcfe3d6b729fa52235df46c1507d3847887564e9fce462ae88ae56a0b101d75f",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "bdcf5dc452bfb8114e5c5e87cfd004759e30ee9293420a8e1d5145d5e163c2f1",
+        "customers.csv": "60ea64228b4b644fa9251fe58f4d56e1ab958fd572bedce98e25ad18b1f2e187",
+        "events.csv": "659817d7fa012c1daa9e5e6cc637cd88c12d162e16afd49bccfce91018a5b5c3"
+      }
+    },
+    {
+      "behavior_profile": "transition_dominant",
+      "customers": 500,
+      "dataset_id": "transition_dominant/seed20261137",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "2abed6879d35c9cc078385e57532badb08cb5a8e5a8fbae7ec9fb8c1bf2c87ee",
+      "processed_files_sha256": {
+        "eval_cases.csv": "8c7fd34a005d34a10edcd6932ef4a44a2e59d8aa81424dd2c84385180db8e82c",
+        "eval_targets.csv": "ab345847de4b98e2e5b039ce9c895625b50f6c2b742a08af19e6648778da6a04",
+        "interactions.csv": "a27f5aa5fc04f05ebf46bbf909d78ee820ca67052b70e8c1aedf9df5d6f1bc65",
+        "train_examples.csv": "8ba41fc5309f1c8faafd960f911b5ed7dc5a05c384eb5d980107e984b1f70b97"
+      },
+      "seed": 20261137,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "9bdb61b37681ffc2320c0edb7e8fc42e18687f438e48015798b326ca0242408e",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "5ae66b4ac8637afd8959d079a009a9bcb6356021952d6a7e7072e9a6ca302e58",
+        "customers.csv": "681fc3b6e6f9a16dfdb4de98b905bdec778fba948d83935bb37a195a973e1a49",
+        "events.csv": "52465a60e8bf683a602ddcdc3111092b30370fd258b58475ceb43ba5b389a1ac"
+      }
+    },
+    {
+      "behavior_profile": "transition_dominant",
+      "customers": 500,
+      "dataset_id": "transition_dominant/seed20261138",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "2c06b831052cb8eb42c9d7fb45565f402ea8b05afa1bcc197bf59eacc9a35afb",
+      "processed_files_sha256": {
+        "eval_cases.csv": "b508a957a490706206d82bfb05cde582e36859df1c65634ccbc6474f89c3933b",
+        "eval_targets.csv": "cfc28f363c7c451a3e9eb68e55cd5461e2c99243ea47da779ac3bc9b9fcb5c59",
+        "interactions.csv": "1f35f5cb57a865da612660aa50f49aa90dae04d3af9c7e1b8d5d91b3eb3bed2f",
+        "train_examples.csv": "ebb11066adcead9b7e9fbd66e4af829cde237118bf1b4229411ee507294716b7"
+      },
+      "seed": 20261138,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "cb7cb4c376f553d7fc81f73158cbce5a1f4d5894f6cb8db5aec32f0022409ecf",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "615bd2b29023469ba0c3883a7bf8aa33dea010bf501a93b01edb0b42f6096fce",
+        "customers.csv": "f380e9033c31df5777e44fcb14c9c0ad5b295c95ba6686475e0b7db4ec88aeea",
+        "events.csv": "916ec15d4b235d03e929e24ec4abc5ffe2e709493545e8f7a0f97ed8104aa522"
+      }
+    },
+    {
+      "behavior_profile": "transition_dominant",
+      "customers": 500,
+      "dataset_id": "transition_dominant/seed20261139",
+      "days": 30,
+      "evaluations": [
+        "window",
+        "next_event",
+        "sasrec"
+      ],
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "2aa06b6bede2248fb97fa0c380b12b88a31378061037aa6fa6e7206658fa1eca",
+      "processed_files_sha256": {
+        "eval_cases.csv": "c19c99d543eb5fbb5afba64b39ca7991cbf4f5dc96cef9a18454a3ae9a820aa7",
+        "eval_targets.csv": "87d0c224efbc0a00c56d65f89d5b7b17be025841c35d3586650e79b70ee4335b",
+        "interactions.csv": "74b42700dac9fb4550c4729054375a58ffd392624c8fc59acdcefc8908114be6",
+        "train_examples.csv": "38ccbff1c586043fc807fed0ba087d37831e8b4b91f2885c70e16e5d64eb270d"
+      },
+      "seed": 20261139,
+      "seed_namespace": "phase3_final",
+      "source_composite_sha256": "d7342f839132918f06920f1253726212d49c438da44eccd90bf4da519f600bda",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "a84c908983b5d0a01ecbd8af917e868d0c14128bae44f6ba9e0ad1d0227e11ab",
+        "customers.csv": "1daa1c4fde73c1ecaf1a1fc466de23c8a367fb48cd20e9ed384b6524e700e4e0",
+        "events.csv": "0063436613c918a08828c819914f93b2b9eef6a365a1ee0ddb0f3f494f66a2f1"
+      }
+    }
+  ],
+  "frozen_report_dir": "benchmarks/phase3",
+  "frozen_report_sha256": {
+    "FROZEN": "2224f246fe1619129079de97b0c85bde746d25da7115de95ff4f1efd5f0616bd",
+    "phase3_report.json": "7531fae97591323a454c59cee0dc6401729fb8cd5b6fa0c41ed7f91059510e1e",
+    "phase3_report.md": "7172c5487591847aaa13521cf129c9ad55c82aac759a2db69d3e01bbda6a3316"
+  },
+  "label": "SYNTHETIC-DATA EXPERIMENT: metrics reflect patterns deliberately embedded by the synthetic generator. They are not evidence of real customer behavior or of real-world recommendation effectiveness.",
+  "manifest_format": 1,
+  "notes": "Phase 3 final evaluation; every listed test split used once, after the SASRec configuration was frozen.",
+  "phase3_run_config": {
+    "classical_configs_sha256": {
+      "next_event": "f13fcf03a2c82a75a3aea23870d583174b2c0b12f908fb31689b2dcb86670343",
+      "window": "ec399bda6a1e4e077382f83c83d8ae6001c80ea38ac396c29e446b63a75db782"
+    },
+    "customers": 500,
+    "days": 30,
+    "frozen_config_sha256": "46fa3eca387ed2bf8e1a5e12cacb652084022cb4acf0c2fb8ae0a65d9b133d59",
+    "namespace": "phase3_final",
+    "phase3_version": "0.1.0",
+    "profiles": [
+      "balanced",
+      "habit_dominant",
+      "transition_dominant"
+    ],
+    "runtime_sha256": "bb54dbb1553a0499485e26317f683452b85244e19462e1ed2d1493b8d72e030f",
+    "sasrec": {
+      "boot_seed": 42,
+      "comparisons": [
+        [
+          "sasrec_full",
+          "personal_frequency"
+        ],
+        [
+          "sasrec_no_position",
+          "personal_frequency"
+        ],
+        [
+          "sasrec_shuffled",
+          "personal_frequency"
+        ],
+        [
+          "sasrec_meanpool",
+          "personal_frequency"
+        ],
+        [
+          "sasrec_session_boundary",
+          "personal_frequency"
+        ],
+        [
+          "sasrec_full",
+          "sasrec_no_position"
+        ],
+        [
+          "sasrec_full",
+          "sasrec_shuffled"
+        ],
+        [
+          "sasrec_full",
+          "sasrec_meanpool"
+        ],
+        [
+          "sasrec_session_boundary",
+          "sasrec_full"
+        ],
+        [
+          "sasrec_full",
+          "itemknn_self"
+        ],
+        [
+          "sasrec_full",
+          "mf"
+        ],
+        [
+          "sasrec_full",
+          "popularity"
+        ],
+        [
+          "itemknn_self",
+          "personal_frequency"
+        ],
+        [
+          "itemknn_noself",
+          "personal_frequency"
+        ],
+        [
+          "mf",
+          "personal_frequency"
+        ],
+        [
+          "popularity",
+          "personal_frequency"
+        ]
+      ],
+      "ks": [
+        1,
+        3
+      ],
+      "n_boot": 1000,
+      "variants": [
+        "sasrec_full",
+        "sasrec_no_position",
+        "sasrec_shuffled",
+        "sasrec_meanpool",
+        "sasrec_session_boundary"
+      ],
+      "window": "same model as next-event, next-item scores rank the window set"
+    },
+    "seeds": [
+      20261130,
+      20261131,
+      20261132,
+      20261133,
+      20261134,
+      20261135,
+      20261136,
+      20261137,
+      20261138,
+      20261139
+    ],
+    "split_days": [
+      16,
+      7,
+      7
+    ],
+    "versions": {
+      "model": "0.2.0",
+      "next_event": "0.1.0",
+      "runner": "0.3.0",
+      "seq_data": "0.2.0",
+      "train": "0.1.0"
+    }
+  },
+  "phase3_run_config_sha256": "6cac84785e492ba155bf59add59821a419d9932bf052ce66801c4ac51ef1b7d4",
+  "runtime": {
+    "environment": {
+      "numpy": "2.4.6",
+      "optuna": "4.9.0",
+      "pandas": "2.3.3",
+      "platform": "Windows-10-10.0.26300-SP0",
+      "python": "3.11.9",
+      "torch": "2.11.0+cu128",
+      "torch_cuda_build": "12.8"
+    },
+    "runtime": {
+      "compute_capability": "12.0",
+      "cpu_threads": 10,
+      "cudnn": 91900,
+      "determinism": {
+        "cublas_workspace_config": ":4096:8",
+        "cudnn_allow_tf32": false,
+        "cudnn_benchmark": false,
+        "cudnn_deterministic": true,
+        "matmul_allow_tf32": false,
+        "precision": "fp32",
+        "use_deterministic_algorithms": true
+      },
+      "device": "cuda:0",
+      "device_name": "NVIDIA GeForce RTX 5050 Laptop GPU",
+      "torch": "2.11.0+cu128",
+      "torch_cuda_build": "12.8"
+    },
+    "runtime_sha256": "bb54dbb1553a0499485e26317f683452b85244e19462e1ed2d1493b8d72e030f"
+  },
+  "suite": "phase3",
+  "suite_definition_sha256": {
+    "next_event": "0bf4242c33004bb769935fa6488a3e1cda004987bc1fd4a863af0cb07c571ad6",
+    "sasrec": "ec5841e184ada7c03b41a3a51424f6fd6bf6e15d2cdaff22e8cd270a89fbfd5f",
+    "window": "a7c9b1bf4e85304b4681cdf01e76d5261b038fa6d327bf79fe0efbb12c73e440"
+  },
+  "versions": {
+    "model": "0.2.0",
+    "next_event": "0.1.0",
+    "runner": "0.3.0",
+    "seq_data": "0.2.0",
+    "train": "0.1.0"
+  }
+}
