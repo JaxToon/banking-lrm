@@ -53,6 +53,9 @@ MANIFEST_SHA256: dict[str, str] = {
     "phase3-config": "dadfe7555c0d930aa1479a2aabb533dcf4ee748f6efd2471b0049ac1833271db",
     # Phase 3 final evaluation (30 phase3_final datasets), written after the run.
     "phase3": "0f8112a1942f364bd10423e81250ba68b8bc86d7606f801274b33870db25dc49",
+    # Phase 3.1 pre-registration (design doc revision 4), pinned before any Phase 3.1
+    # seed reservation, dataset or training.
+    "phase3_1-prereg": "9834e435dd8ba0a51b2123c57e7b9ae4522e6ec7aa7c8965ee875ab1616840eb",
 }
 
 
@@ -405,6 +408,12 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{suite}: seed reservation ok, " + ", ".join(
                 f"{ns} {min(v['seeds'])}-{max(v['seeds'])} ({len(v['seeds'])} seeds)"
                 for ns, v in m["seed_namespaces"].items()))
+            continue
+        if "design_document" in m:
+            doc = REPO_ROOT / m["design_document"]["path"]
+            state = "matches" if doc.exists() and sha256_file(doc) == m["design_document"]["sha256"] else "DIFFERS FROM"
+            print(f"{suite}: pre-registration ok (design document {m['design_document']['path']} {state} "
+                  f"recorded sha256 {m['design_document']['sha256'][:12]}...; no seeds reserved)")
             continue
         if "frozen_config" in m:
             print(f"{suite}: frozen configuration ok (trial {m['selection']['trial']}, "
