@@ -173,6 +173,9 @@ SUITES: dict[str, dict[str, tuple[str, list[dict]]]] = {
         "mf": ("mf", [g for g in _MF_GRID if g["signal"] == "target"]),
     },
 }
+# Phase 3 (phase3_final seeds): classical models re-run unchanged, Phase 2.3 grids.
+SUITES["phase3"] = SUITES["phase2.3"]
+SUITES["phase3-next-event"] = SUITES["phase2.3-next-event"]
 
 _PF_REFERENCE_COMPARISONS = [
     ("itemknn_self", "personal_frequency", "Does co-usage add value on top of repeat usage?"),
@@ -193,6 +196,8 @@ KEY_COMPARISONS: dict[str, list[tuple[str, str, str]]] = {
     # Personal Frequency is the mandatory reference baseline in Phase 2.3.
     "phase2.3": _PF_REFERENCE_COMPARISONS,
     "phase2.3-next-event": _PF_REFERENCE_COMPARISONS,
+    "phase3": _PF_REFERENCE_COMPARISONS,
+    "phase3-next-event": _PF_REFERENCE_COMPARISONS,
 }
 
 # Kept for backward compatibility: the benchmark-v1 grids by family name.

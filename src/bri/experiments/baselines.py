@@ -315,18 +315,23 @@ def run_baselines(
     confidence: float = 0.95,
     suite: str = DEFAULT_SUITE,
     manifests: dict | None = None,
-) -> dict:
-    """Window evaluation (the Phase 2 protocol). Report format unchanged since Phase 2.2."""
+    return_per_case: bool = False,
+):
+    """Window evaluation (the Phase 2 protocol). Report format unchanged since Phase 2.2.
+
+    With return_per_case, returns (report, per_case) where per_case[task][model][k] is
+    the test per-case metric frame (used for paired comparisons in Phase 3).
+    """
     _check_args(suite, ks, select_metric, select_k, random_seeds)
     data = load_processed(processed_dir)
     meta = data["meta"]
     config = experiment_config(suite, "window", protocol_config(
         "window", ks, select_metric, select_k, n_boot, seed, random_seeds, confidence))
     integrity_gate(processed_dir, meta, suite, "window", config, manifests)
-    tasks_out, _ = evaluate_suite(data, suite, ks, select_metric, select_k, n_boot, seed, random_seeds,
-                                  confidence)
+    tasks_out, per_case = evaluate_suite(data, suite, ks, select_metric, select_k, n_boot, seed, random_seeds,
+                                         confidence)
     stats = meta["counts"]["eval_stats"]["test"]
-    return {
+    report = {
         "label": SYNTHETIC_LABEL,
         "suite": suite,
         "protocol": {
@@ -345,6 +350,7 @@ def run_baselines(
         "data": {"source": meta["source"], "cutoffs": meta["cutoffs"], "prep_sha256": meta["sha256"]},
         "tasks": tasks_out,
     }
+    return (report, per_case) if return_per_case else report
 
 
 def next_event_data(data: dict) -> tuple[dict, dict]:
