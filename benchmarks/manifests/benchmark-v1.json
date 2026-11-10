@@ -1,0 +1,212 @@
+{
+  "configs": {
+    "window": {
+      "config": {
+        "evaluation": "window",
+        "key_comparisons": [],
+        "models": {
+          "itemknn": {
+            "family": "itemknn",
+            "grid": [
+              {
+                "include_self": true,
+                "signal": "target"
+              },
+              {
+                "include_self": false,
+                "signal": "target"
+              },
+              {
+                "include_self": true,
+                "signal": "item_event"
+              },
+              {
+                "include_self": false,
+                "signal": "item_event"
+              }
+            ]
+          },
+          "mf": {
+            "family": "mf",
+            "grid": [
+              {
+                "alpha": 5.0,
+                "factors": 2,
+                "reg": 0.1,
+                "signal": "target"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 2,
+                "reg": 0.1,
+                "signal": "target"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 2,
+                "reg": 1.0,
+                "signal": "target"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 2,
+                "reg": 1.0,
+                "signal": "target"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 3,
+                "reg": 0.1,
+                "signal": "target"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 3,
+                "reg": 0.1,
+                "signal": "target"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 3,
+                "reg": 1.0,
+                "signal": "target"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 3,
+                "reg": 1.0,
+                "signal": "target"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 2,
+                "reg": 0.1,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 2,
+                "reg": 0.1,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 2,
+                "reg": 1.0,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 2,
+                "reg": 1.0,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 3,
+                "reg": 0.1,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 3,
+                "reg": 0.1,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 5.0,
+                "factors": 3,
+                "reg": 1.0,
+                "signal": "item_event"
+              },
+              {
+                "alpha": 20.0,
+                "factors": 3,
+                "reg": 1.0,
+                "signal": "item_event"
+              }
+            ]
+          },
+          "popularity": {
+            "family": "popularity",
+            "grid": [
+              {
+                "signal": "target"
+              },
+              {
+                "signal": "item_event"
+              }
+            ]
+          }
+        },
+        "protocol": {
+          "confidence": 0.95,
+          "evaluation": "window",
+          "final": "test",
+          "fit": "train",
+          "ks": [
+            1,
+            3
+          ],
+          "n_boot": 1000,
+          "random_seeds": 5,
+          "reference_model": "popularity",
+          "seed": 42,
+          "select_k": 3,
+          "select_metric": "ndcg",
+          "selection": "val"
+        },
+        "suite": "benchmark-v1"
+      },
+      "config_sha256": "e69ac7a805403547d8203b2e88dd77f22131648c58a0ae8cfae90c4333fcae75"
+    }
+  },
+  "datasets": [
+    {
+      "behavior_profile": null,
+      "customers": 500,
+      "dataset_id": "seed42",
+      "days": 30,
+      "evaluations": [
+        "window"
+      ],
+      "generator_version": "0.2.0",
+      "prep_fingerprint": "619d8bb973164ccb0da3a5083512b32532d4a94d915129cc36fec126e5ccdb55",
+      "processed_files_sha256": {
+        "eval_cases.csv": "bab302c9bd23251b9db41b693b404e68a01cc8c098c59624f57b25487067dea4",
+        "eval_targets.csv": "1b6dd0d8ee8f4bfe3263e565ab13351e4c6c308b3b1a8bac8bdea08e5a7d929c",
+        "interactions.csv": "073e740ca1ccbff65a67dec0ee4cfb0290545c4bb18a2a5f8e00c13438b6c156",
+        "train_examples.csv": "310aa2b4c15b8b392eeb060e323ccdfc3ced0cf6e6c49c8dc980a1341376a59b"
+      },
+      "seed": 42,
+      "source_composite_sha256": "4794efdc9f75133721ed5f74c61c7d9ff15e399877f240d9c8d1e2df69e79118",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "df40666833de4c634daf48585464fd67cee2fcc1b9f71ad5cf33298e11674190",
+        "customers.csv": "680ceb798705dda8eb2dd58651d4e16264db39f81c999e0c2af4c95863f56ad5",
+        "events.csv": "ca53375dd030f13627ae3b7748ccdf209f32f2007657a3d918d84c3682a34fa8"
+      }
+    }
+  ],
+  "frozen_report_dir": "benchmarks/benchmark-v1",
+  "frozen_report_sha256": {
+    "FROZEN": "7f43a2941e2821727d26bc9c207e421bf0ce96ccef0b8c488ea93764d50bd6f8",
+    "baseline_report.json": "77df5a941fc1efddc58b1a7f044e056e5ede90ae5b8f51e65e36cede832d8369",
+    "baseline_report.md": "945b743c262354d0c2cfac1ed8e9bf7dbd991e517979d2541a31e5978070a4dd"
+  },
+  "label": "SYNTHETIC-DATA EXPERIMENT: metrics reflect patterns deliberately embedded by the synthetic generator. They are not evidence of real customer behavior or of real-world recommendation effectiveness.",
+  "manifest_format": 1,
+  "manifest_written": "2026-11-10",
+  "notes": "RETROSPECTIVE PROVENANCE: manifest written in Phase 2.3 (2026-11-10), after the original run. It pins the data, configuration and frozen reports as they exist now; it cannot prove what the original run used. Supporting evidence: the original suite reproduces the frozen results from this data. Phase 2.1 final evaluation; test split used once. Protocol = runner defaults.",
+  "provenance": "retrospective",
+  "suite": "benchmark-v1",
+  "suite_definition_sha256": {
+    "window": "7005b476dfa08be3c2581f00fb33625942c6e4fde5c3a91157fd83e3e0e6744c"
+  },
+  "versions": {
+    "generator": "0.2.0",
+    "prep_at_freeze": "0.1.0",
+    "prep_note": "prep 0.2.0 output CSVs are byte-identical; it adds source fingerprints",
+    "runner_at_freeze": "git tag benchmark-v1"
+  }
+}

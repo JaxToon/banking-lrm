@@ -20,7 +20,7 @@ from bri.prep.examples import build_eval_cases, build_interactions, build_train_
 from bri.prep.split import compute_cutoffs
 from bri.tasks import SYNTHETIC_LABEL, TASKS
 
-PREP_VERSION = "0.1.0"
+PREP_VERSION = "0.2.0"  # 0.2.0 adds source fingerprints; processed CSVs unchanged
 PREP_METADATA_FILE = "prep_metadata.json"
 
 
@@ -57,6 +57,8 @@ def _write_csv(df: pd.DataFrame, path: Path) -> str:
 def build(data_dir: Path, output_dir: Path, val_days: int, test_days: int, min_history: int) -> dict:
     data = load_dataset(data_dir)
     meta = data["metadata"]
+    # Hash the source files actually read (not the checksums claimed in their metadata).
+    source_files = {name: hashlib.sha256((data_dir / name).read_bytes()).hexdigest() for name in S.TABLES}
     cutoffs = compute_cutoffs(meta["window_start_utc"], meta["window_end_utc"], val_days, test_days)
     candidates = candidate_sets(data["catalog"])
 
@@ -89,6 +91,12 @@ def build(data_dir: Path, output_dir: Path, val_days: int, test_days: int, min_h
             "schema_version": meta.get("schema_version"),
             "seed": meta.get("seed"),
             "events_sha256": meta.get("sha256", {}).get("events.csv"),
+        },
+        "source_files_sha256": source_files,
+        "source_generation": {
+            "customers": meta.get("customers"),
+            "days": meta.get("days"),
+            "behavior_profile": meta.get("behavior_profile"),
         },
         "params": {"val_days": val_days, "test_days": test_days, "min_history": min_history},
         "cutoffs": cutoffs.to_dict(),
