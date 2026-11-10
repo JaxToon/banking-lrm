@@ -21,6 +21,7 @@ data/raw/
 data/processed/
 data/phase2_3/
 data/phase3/
+data/phase3_1/
 data/synthetic/*
 !data/synthetic/.gitkeep
 *.parquet

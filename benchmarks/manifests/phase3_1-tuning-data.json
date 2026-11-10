@@ -1,0 +1,237 @@
+{
+  "configs": {},
+  "datasets": [],
+  "frozen_report_dir": null,
+  "frozen_report_sha256": {},
+  "label": "SYNTHETIC-DATA EXPERIMENT: metrics reflect patterns deliberately embedded by the synthetic generator. They are not evidence of real customer behavior or of real-world recommendation effectiveness.",
+  "manifest_format": 1,
+  "notes": "Fingerprints of the 9 Phase 3.1 tuning datasets, recorded at Checkpoint 2 before any Phase 3.1 model was trained. Their test splits are never evaluated.",
+  "references": {
+    "prereg_sha256": "9834e435dd8ba0a51b2123c57e7b9ae4522e6ec7aa7c8965ee875ab1616840eb",
+    "seeds_sha256": "a345f976499bd089cd3165a3a692cbcdcd9adb986f7c1751770327452a32ae85"
+  },
+  "suite": "phase3_1-tuning-data",
+  "suite_definition_sha256": {},
+  "tuning_datasets": [
+    {
+      "behavior_profile": "habit_dominant",
+      "customers": 500,
+      "dataset_id": "habit_dominant/seed20261140",
+      "days": 30,
+      "generation_metadata_sha256": "fca7f4d53dac96925ca2acc3a89273579b879d0e64a6688628a5d8bfb71eb2fe",
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "63a01a07e60cc236e6b1dce9cf2b1ad9340ff8f871b696716a5666184df59485",
+      "processed_files_sha256": {
+        "eval_cases.csv": "51a30c68125bd38fe8be4b8c4ba741076e56ce125702aff4f13f8711ea9d9072",
+        "eval_targets.csv": "743572d146030d06e852e31a0875c31d70fc278026fd0e307b7276e132d3c599",
+        "interactions.csv": "94f618f07cf5f80ae6c1af3d9ac843071dbd0206dff094b024f9ee35db111b0c",
+        "train_examples.csv": "cdc53a567c03da981696afbc848a12c4dca809a3a854fda0fe458c046c0c529f"
+      },
+      "seed": 20261140,
+      "seed_namespace": "phase3_1_tuning",
+      "source_composite_sha256": "9f78b8b18a5ad3eeb235f391fbe98ba839413bba77376007b144c09ee158294e",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "d49478328473f185148392e6f157962fd3f3a8ae0dcc69883edf3c1f72f1c9fb",
+        "customers.csv": "7d700fbf3e368062dc2dbabd0b326cc414960889a6952667f1d20a787a011226",
+        "events.csv": "eda358dac59a1c9d0f75625f981f449e357882e31398cb4a7e98d8ac6f8f0445"
+      }
+    },
+    {
+      "behavior_profile": "habit_dominant",
+      "customers": 500,
+      "dataset_id": "habit_dominant/seed20261141",
+      "days": 30,
+      "generation_metadata_sha256": "8fbaf5dae6e49c57d49a0c05054855df00fab9182f6041d88e990fe0a997621a",
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "2f5d3c7851732f65ad74a0d424ac1c3d05b48d46f236f4c20724eced6333ac92",
+      "processed_files_sha256": {
+        "eval_cases.csv": "78cd3fedcc0406a7c2eac52d5aac1f2cadff5179d309c8cb4523f315144ba8be",
+        "eval_targets.csv": "b3191649b75ad855b4fb6fe4d63992dee76907b2e9cd432ed781c65396fdcb7e",
+        "interactions.csv": "750893ffae3f97f5194390d74fc67348176824141116d3b892291bb12b0fd0ab",
+        "train_examples.csv": "587699678cc9007d9829566f99b003e64e546c3a1bcfc5bf5df3a65a51073819"
+      },
+      "seed": 20261141,
+      "seed_namespace": "phase3_1_tuning",
+      "source_composite_sha256": "d2dbc895a4a3064649ab946bcb5adbdf2740be7f40a5509cd30fc891fb3c66f6",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "bd4ae80914876c5b78c2b8043e965ef581773416416a9ab870441857a7cf61a1",
+        "customers.csv": "6206fa71f2ba4e291dcf5bb343b14ca4fd967f13504a270d3b7407593b7b49f2",
+        "events.csv": "88cb8d3ef1fead72cd4a8ecab9f0d3bc7dc06337211990b66a435b623422d996"
+      }
+    },
+    {
+      "behavior_profile": "habit_dominant",
+      "customers": 500,
+      "dataset_id": "habit_dominant/seed20261142",
+      "days": 30,
+      "generation_metadata_sha256": "bd719965e51f0e623fe8d7c8a98dbddf51166672f1b458c0750376626305f801",
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "18653b1a7d71a3f9867f6ee49e8393582a1b106f1663b9258d39c0cd1182b928",
+      "processed_files_sha256": {
+        "eval_cases.csv": "9f04509f00aea943a0c5fb29fd13ca5546802d1365f02e3b8dfed205ed25e56a",
+        "eval_targets.csv": "14c2fabbde2f1e045ee502012b77b747d54c06bcc64a17c95f85b292b30d8561",
+        "interactions.csv": "e677b67f30209eb3b3b844a034d2e6c6da813913a50e6fc5db75298c0c55b7cb",
+        "train_examples.csv": "ecb3601bf722edb74a1d356c14d7d0cb132d4d867aaf68b97867c9b3e38ab49b"
+      },
+      "seed": 20261142,
+      "seed_namespace": "phase3_1_tuning",
+      "source_composite_sha256": "5aaee68c2b7dec66d6c51c59d272fcddd4625c376af58b4c590a95ae7d1e2e58",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "5eb084b07821917f8cffb43f49815550adf5799c276bd1aa0ebaab5eae1a951d",
+        "customers.csv": "02ee48c7a27781f908cd6f7a2c222547abad71be75dd52512c07559220f73ef3",
+        "events.csv": "90a762af84e1bcfbfead127efad4fcf2c192087401f53f41ace76ab0004b431d"
+      }
+    },
+    {
+      "behavior_profile": "balanced",
+      "customers": 500,
+      "dataset_id": "balanced/seed20261140",
+      "days": 30,
+      "generation_metadata_sha256": "2d3cf21a9535131d5941fde2ab529070ccb558f3138be8ba744b309819488c7f",
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "ecce16a125529239f8ce0e52300b3ae63dbaa2e1219db06219cf8f215a952c27",
+      "processed_files_sha256": {
+        "eval_cases.csv": "dacad493bba24a3fea934c28f09072ea124d11d4bab641743a9cb4ebad35b5d3",
+        "eval_targets.csv": "963f09554961ac0d0e5db965dd238b8a2e4d1491a86945e13731ee138d4b9133",
+        "interactions.csv": "6505fc56898a6c7746ad622fc698098a44f92dcf7e55f3c8be34d96829f615b8",
+        "train_examples.csv": "9e807363550b96db4e9e87960a6a7b0d0c0a6f2e991d098d4b34c9480ea132b5"
+      },
+      "seed": 20261140,
+      "seed_namespace": "phase3_1_tuning",
+      "source_composite_sha256": "bdd3e943bf297d57abb3f3c21f4f5421751d6758c5e490272ac9a34d0fc64940",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "d49478328473f185148392e6f157962fd3f3a8ae0dcc69883edf3c1f72f1c9fb",
+        "customers.csv": "7d700fbf3e368062dc2dbabd0b326cc414960889a6952667f1d20a787a011226",
+        "events.csv": "ee2bde7528e530e469380996de37b43d4dc19a096ebabb72f3632c16e5ba6cd0"
+      }
+    },
+    {
+      "behavior_profile": "balanced",
+      "customers": 500,
+      "dataset_id": "balanced/seed20261141",
+      "days": 30,
+      "generation_metadata_sha256": "3a2c4e080e7e7422ded7baf869273fae30b4c3b4361fc17e2ea37deb7fc07f95",
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "632eba1a21c4c6be5cb64015a80bfa9dcb17a3e5820a359137ac58788c1ebd62",
+      "processed_files_sha256": {
+        "eval_cases.csv": "9ff4eb93dcdb46b8c150325674a9c8284989d11914c27a772d66f69087283526",
+        "eval_targets.csv": "89a791080e915309d59a95b1f3b5e31f9c35b1f729fa48249a98df21a4bf800d",
+        "interactions.csv": "2576a69e73d707c5c1bec242a1691b9377e5c58f4c52f264afcccac12166c2e9",
+        "train_examples.csv": "533c9f0fa4978dbd40dc98f4bbbf95aff9ee2f098f954d688c854ffb156b0826"
+      },
+      "seed": 20261141,
+      "seed_namespace": "phase3_1_tuning",
+      "source_composite_sha256": "69fb4fc0d0912c61b0f3a745a0de9b83c2c5dc25755f454b4af59da143f375a0",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "bd4ae80914876c5b78c2b8043e965ef581773416416a9ab870441857a7cf61a1",
+        "customers.csv": "6206fa71f2ba4e291dcf5bb343b14ca4fd967f13504a270d3b7407593b7b49f2",
+        "events.csv": "d2b8cf93f6b05dcc6abe832d713f1a7684b1b85a5538063a1d9106961ab4b05a"
+      }
+    },
+    {
+      "behavior_profile": "balanced",
+      "customers": 500,
+      "dataset_id": "balanced/seed20261142",
+      "days": 30,
+      "generation_metadata_sha256": "46e992e4d811e355017568da1e53e98de8b494f7e7f93083864573e82e77d6ec",
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "aa6859a03fd9e6cb6a98b8c3f47b92cceee4e0135ba43d419b41c295effba39f",
+      "processed_files_sha256": {
+        "eval_cases.csv": "d4c98119b0a2971fd432985a26da4fa076e85a6cbf3e2790679593536a8c74cb",
+        "eval_targets.csv": "2fe12e0d40748f3c4f077a0ebb661435afcb16f7913010a6666c9a2f32d86760",
+        "interactions.csv": "b96f403e4120f9c54cb2a3b9d9ee38a446b5c18f97db9823bb2faea57ffa98e0",
+        "train_examples.csv": "8f98d53964650544d480cbff9a9bdb701cd6c750eb9f2c574b46a3105eb1a89d"
+      },
+      "seed": 20261142,
+      "seed_namespace": "phase3_1_tuning",
+      "source_composite_sha256": "06dd5903aca6683c8b80357f73790eb71ecf33c8dbc5b68027fbc87d1c2f51a2",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "5eb084b07821917f8cffb43f49815550adf5799c276bd1aa0ebaab5eae1a951d",
+        "customers.csv": "02ee48c7a27781f908cd6f7a2c222547abad71be75dd52512c07559220f73ef3",
+        "events.csv": "51770ebd70bf9f75ed9b82c45e7ea1c080bc2b1fd7084b8403ae17d7d180072d"
+      }
+    },
+    {
+      "behavior_profile": "transition_dominant",
+      "customers": 500,
+      "dataset_id": "transition_dominant/seed20261140",
+      "days": 30,
+      "generation_metadata_sha256": "ba52b7185cb91850124ed82c6d2c749687cd75fa19faf806512b1fed4f7712fe",
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "12bf2121ef44d793ed9db1000ad0c464d26b2e78c2f6cedf0caead90019583d7",
+      "processed_files_sha256": {
+        "eval_cases.csv": "3969d21a8fc44b27f4cdc8370c6947a3a3f2aad3bc97a99775688990474a67b2",
+        "eval_targets.csv": "a3ec1e97e27cd9a649dc96320976a55ed9224937f60902af80f6b51e2c228a83",
+        "interactions.csv": "cacba0578c4f34616970472a0afa14c49c2d9db4e1f589cd2ee8d13e1a0d36a1",
+        "train_examples.csv": "54d4cc63eda32448c5c57260f162a6619f1eb23882ceded5155ae65aa29aefbe"
+      },
+      "seed": 20261140,
+      "seed_namespace": "phase3_1_tuning",
+      "source_composite_sha256": "c396f1b25643c7bcec9416e7afd24290ae148a0aa2a40ba8345d27770e905119",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "d49478328473f185148392e6f157962fd3f3a8ae0dcc69883edf3c1f72f1c9fb",
+        "customers.csv": "7d700fbf3e368062dc2dbabd0b326cc414960889a6952667f1d20a787a011226",
+        "events.csv": "330e73cd67e6749efde9c19231d455dc02bd74e3deb43a050bf98cdd236ec45c"
+      }
+    },
+    {
+      "behavior_profile": "transition_dominant",
+      "customers": 500,
+      "dataset_id": "transition_dominant/seed20261141",
+      "days": 30,
+      "generation_metadata_sha256": "938a869dfdc7fd9be79ae39f3f44770373402b9053def097d7027ed7c79ed0b5",
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "207b27c92ace34762834d70e882aa99ef1f28354eddcd3ff96bed9dd411abe22",
+      "processed_files_sha256": {
+        "eval_cases.csv": "2176995a01f3901193f0aa2327c47ab64a4c292b012a1b2ae2adbcbce0ba8f38",
+        "eval_targets.csv": "574048202cf6652b67654d54d69d8d8f92f9bbfeeef73a8fc69d1fafca201abf",
+        "interactions.csv": "9fa8924f849d6e4b5f73c11f11bed5a4d64686c82b97cadfe4464e0d9d2fe978",
+        "train_examples.csv": "36b278776f5a2b12fab5f69a1c0724e3a1f16920a330b2afae033a6eccb5df3b"
+      },
+      "seed": 20261141,
+      "seed_namespace": "phase3_1_tuning",
+      "source_composite_sha256": "f26129ef6a1d189479551ad16221675ee1d0e635e3a1d975964e3efee3bbd426",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "bd4ae80914876c5b78c2b8043e965ef581773416416a9ab870441857a7cf61a1",
+        "customers.csv": "6206fa71f2ba4e291dcf5bb343b14ca4fd967f13504a270d3b7407593b7b49f2",
+        "events.csv": "77a673d10d2e04d56f6191531d80926121e9bbb7aa346a849532965cfd374fd0"
+      }
+    },
+    {
+      "behavior_profile": "transition_dominant",
+      "customers": 500,
+      "dataset_id": "transition_dominant/seed20261142",
+      "days": 30,
+      "generation_metadata_sha256": "67b45c310f4f710b6fbc9f14919ce3f36706ae647202d19d6a4974974fa1bc5c",
+      "generator_version": "0.3.0",
+      "prep_fingerprint": "29142d19d3f98cbfc547b805ffbba78179ada52f9024897c01dd98fb085538f5",
+      "processed_files_sha256": {
+        "eval_cases.csv": "fda9392d279ebb30f3bf8dbf2a0f7b61c2fb78e6a7055558fca5e16734243b8a",
+        "eval_targets.csv": "2d9d3138e9b2729fd5a1864c5b3c482583403c38f8d6b3753e49cc00dab26131",
+        "interactions.csv": "7788b0e2f0ad41574b0772a0037b48d14bf8573e236e54b33ffb137abbbc950f",
+        "train_examples.csv": "25746816ef30ada136455a060908400ac2ea3f96e2138e9e93690aa9c599a752"
+      },
+      "seed": 20261142,
+      "seed_namespace": "phase3_1_tuning",
+      "source_composite_sha256": "d84816df5e491017997f92abb340dc98ef1a8c8c7a7eccd8e31f8347425204a0",
+      "source_files_sha256": {
+        "catalog.csv": "0c2849e0339809bc46a3ef05d62f3cf3524b31e1e582129f30c53a334762b169",
+        "consent_preferences.csv": "5eb084b07821917f8cffb43f49815550adf5799c276bd1aa0ebaab5eae1a951d",
+        "customers.csv": "02ee48c7a27781f908cd6f7a2c222547abad71be75dd52512c07559220f73ef3",
+        "events.csv": "78f432218df36b759f1601f9b6b50656accccd59b92462bfda97819480b13ba0"
+      }
+    }
+  ],
+  "versions": {
+    "generator": "0.3.0",
+    "prep": "0.2.0"
+  }
+}

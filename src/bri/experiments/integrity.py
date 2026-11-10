@@ -59,6 +59,8 @@ MANIFEST_SHA256: dict[str, str] = {
     # Phase 3.1 seed reservation (phase3_1_tuning 20261140-20261142, phase3_1_final
     # 20261150-20261159; values approved at Checkpoint 1), before any Phase 3.1 dataset.
     "phase3_1-seeds": "a345f976499bd089cd3165a3a692cbcdcd9adb986f7c1751770327452a32ae85",
+    # Phase 3.1 tuning-data fingerprints (Checkpoint 2), before any Phase 3.1 model.
+    "phase3_1-tuning-data": "77e235d7b3c8799be8df1b445d25cc31daa09d045ff704b2f9111d74d797ca3e",
 }
 
 
@@ -417,6 +419,10 @@ def main(argv: list[str] | None = None) -> int:
             state = "matches" if doc.exists() and sha256_file(doc) == m["design_document"]["sha256"] else "DIFFERS FROM"
             print(f"{suite}: pre-registration ok (design document {m['design_document']['path']} {state} "
                   f"recorded sha256 {m['design_document']['sha256'][:12]}...; reserves no seeds itself)")
+            continue
+        if "tuning_datasets" in m:
+            print(f"{suite}: tuning-data fingerprints ok, {len(m['tuning_datasets'])} dataset(s) "
+                  "(test splits never evaluated; not a locked benchmark)")
             continue
         if "frozen_config" in m:
             print(f"{suite}: frozen configuration ok (trial {m['selection']['trial']}, "
