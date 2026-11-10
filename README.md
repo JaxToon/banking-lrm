@@ -119,6 +119,39 @@ benchmark directory. See [benchmarks/README.md](benchmarks/README.md),
 [docs/10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md](docs/10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md).
 All results are synthetic-data experiments.
 
+## Phase 2.3: benchmark integrity and multi-seed behavioral robustness
+
+Verify the immutable benchmark manifests and frozen reports:
+
+```bash
+python -m bri.experiments.integrity
+```
+
+Generator 0.3.0 adds behavior profiles (invented experimental assumptions, not real
+banking behavior); omitting `--profile` keeps generator 0.2.0, byte-identical:
+
+```bash
+python -m bri.data.generate_synthetic --customers 500 --days 30 --seed 20261110 --profile transition_dominant --output-dir data/phase2_3/transition_dominant/seed20261110/synthetic
+```
+
+Run the whole robustness experiment (3 profiles x 10 seeds; generate, validate, split,
+window + next-event evaluation of all five classical baselines; about 20 minutes on a
+laptop CPU):
+
+```bash
+python -m bri.experiments.robustness --data-root data/phase2_3 --output-dir artifacts/phase2_3
+```
+
+The Phase 2.3 test splits are locked (`benchmarks/manifests/phase2.3.json`): the
+command above with its default configuration is a reproduction; any other configuration
+on those seeds is refused. A single dataset's next-event evaluation can be run with
+`python -m bri.experiments.baselines --suite phase2.3-next-event --evaluation next_event --processed-dir DIR --output-dir DIR`.
+Before reading any data, every experiment checks that processed files match their prep
+checksums, that registered suites keep their grids, and that locked datasets are only
+reproduced with unmodified data and configuration. Results:
+[docs/11_PHASE_2_3_ROBUSTNESS_REPORT.md](docs/11_PHASE_2_3_ROBUSTNESS_REPORT.md).
+All results are synthetic-data experiments.
+
 ## Repository map
 
 ```text
@@ -140,10 +173,12 @@ All results are synthetic-data experiments.
 │   ├── 07_PHASE_1_DESIGN_DECISIONS.md
 │   ├── 08_PHASE_2_FOUNDATIONS_REPORT.md
 │   ├── 09_PHASE_2_1_BASELINES_REPORT.md
-│   └── 10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md
-├── benchmarks/              # frozen, locked benchmark reports (benchmark-v1, phase2.2)
+│   ├── 10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md
+│   └── 11_PHASE_2_3_ROBUSTNESS_REPORT.md
+├── benchmarks/              # frozen reports + immutable manifests (benchmark-v1, phase2.2, phase2.3)
 ├── data/synthetic/          # generated output (git-ignored)
 ├── data/processed/          # Phase 2 outputs (git-ignored)
+├── data/phase2_3/           # Phase 2.3 datasets (git-ignored)
 ├── src/bri/
 │   ├── tasks.py                 # NBS/NBP task definitions
 │   ├── data/
@@ -158,18 +193,21 @@ All results are synthetic-data experiments.
 │   ├── eval/
 │   │   ├── metrics.py           # ranking + catalog metrics
 │   │   ├── evaluate.py          # recommendation validation, reports, CLI
-│   │   └── bootstrap.py         # paired bootstrap CIs over cases
+│   │   ├── next_event.py        # next-event cases + strict-history counts
+│   │   └── bootstrap.py         # paired (and customer-cluster) bootstrap CIs
 │   ├── models/
 │   │   ├── common.py            # train/history matrices, deterministic ranking
 │   │   └── baselines.py         # popularity, personal frequency, item-item CF, implicit MF, suites
 │   └── experiments/
-│       └── baselines.py         # train-fit / val-select / test-evaluate runner
+│       ├── baselines.py         # train-fit / val-select / test-evaluate runner (window, next-event)
+│       ├── integrity.py         # fingerprints, config hashes, immutable manifests
+│       └── robustness.py        # Phase 2.3 multi-seed orchestration + statistics
 └── tests/                       # unit + integration tests
 ```
 
 ## Roadmap after Phase 1
 
-- Phase 2: temporal splits, consent-aware examples, and evaluation framework (done); Phase 2.1 classical baselines (done, benchmark-v1); Phase 2.2 personal frequency + ItemKNN ablation (done, pending review); Phase 2.3 multi-seed robustness (planned).
+- Phase 2: temporal splits, consent-aware examples, and evaluation framework (done); Phase 2.1 classical baselines (done, benchmark-v1); Phase 2.2 personal frequency + ItemKNN ablation (done); Phase 2.3 benchmark integrity + multi-seed behavioral robustness (done, pending review).
 - Phase 3: sequential recommendation (SASRec-style baseline).
 - Phase 4: multi-behavior LRM-inspired Transformer and scaling experiments.
 - Phase 5: LLM product-catalog explanation with strict context minimization.

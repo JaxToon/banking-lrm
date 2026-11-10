@@ -11,30 +11,31 @@ This repository must remain safe for a public GitHub portfolio. Treat all data a
 - Behavioral scope: both mobile-app navigation behavior and service-use behavior.
 - Recommendation scope: both Next Best Service (NBS) and Next Best Product (NBP).
 - Local development target: laptop with 16 GB RAM.
-- Completed: Phase 0 and Phase 1 (project foundation, synthetic dataset generator, schema validation); Phase 2 foundations (temporal split, consent-aware examples, shared evaluation framework); Phase 2.1 classical baselines (popularity, item-item CF, implicit MF, paired bootstrap), merged and frozen as `benchmark-v1`.
+- Completed: Phase 0 and Phase 1 (project foundation, synthetic dataset generator, schema validation); Phase 2 foundations (temporal split, consent-aware examples, shared evaluation framework); Phase 2.1 classical baselines (popularity, item-item CF, implicit MF, paired bootstrap), frozen as `benchmark-v1`; Phase 2.2 Personal Frequency & ItemKNN ablation, frozen as `phase2.2`.
 
-### Current delivery: Phase 2.2 — Personal Frequency & ItemKNN Ablation
+### Current delivery: Phase 2.3 — Multi-Seed Behavioral Robustness
 
 Authorized:
-- Personal Frequency recommender: rank items by the customer's own same-task, consent-permitted, pre-cutoff interaction counts; signal `target` or `item_event` selected on validation; no recency weighting; ties and empty history fall back to train popularity, then item_id.
-- ItemKNN ablation: `include_self=True` and `include_self=False` evaluated as separate variants.
-- Re-running Popularity, ItemKNN (both variants), MF, and Personal Frequency together on a NEW dataset: generator 0.2.0, seed `20261109`, 500 customers, 30 days, split 16/7/7.
-- Paired bootstrap comparisons per task, at minimum: ItemKNN self=True vs Personal Frequency; ItemKNN self=False vs Personal Frequency; ItemKNN self=True vs self=False.
+- Benchmark integrity: composite source fingerprints, processed-file fingerprints, prep-metadata fingerprint, canonical experiment-config hash, version identifiers, immutable manifests (`benchmarks/manifests/`, sha256 pinned in `bri.experiments.integrity`), adversarial tampering tests.
+- Generator 0.3.0 behavior profiles `habit_dominant`, `balanced`, `transition_dominant` (Dirichlet affinity concentration, service/product transition probabilities, task-specific transition maps). Generator 0.2.0 must stay byte-identical. Profile parameters are invented experimental assumptions.
+- Multi-seed experiments: 10 seeds per profile (20261110-20261119), 500 customers, 30 days, split 16/7/7; Popularity, Personal Frequency (mandatory reference), ItemKNN self=True, ItemKNN self=False, implicit MF; suites `phase2.3` (window) and `phase2.3-next-event`.
+- Next-event evaluation protocol (one case per eligible target event, history strictly before it, signal fixed to `target`, customer-cluster bootstrap), alongside the unchanged window protocol.
+- Across-seed reporting (mean, SD, Student-t interval over seeds) next to within-seed paired bootstrap CIs; never pooled.
 
 Not yet authorized:
 - LightGBM ranking, PyTorch, SASRec / sequential models, Transformer or LRM, LLM integration and RAG, API, dashboard, production deployment.
-- Multi-seed robustness studies (planned as Phase 2.3).
 
-Locked test data:
-- The seed-42 test split (`benchmark-v1`) is locked: it may be re-run only with the original `benchmark-v1` suite for reproducibility, never for model selection, tuning, or new winner claims.
-- `benchmarks/benchmark-v1/` is frozen; never overwrite it.
-- The seed-20261109 test split is used once for the Phase 2.2 final evaluation and is locked afterwards.
+Locked test data (enforced by manifests; never overwrite frozen reports or manifests):
+- `benchmark-v1` (generator 0.2.0, seed 42): re-run only with suite `benchmark-v1` for reproducibility.
+- `phase2.2` (generator 0.2.0, seed 20261109): re-run only with suite `phase2.2`.
+- `phase2.3` (generator 0.3.0, 3 profiles x seeds 20261110-20261119): used once for the Phase 2.3 final evaluation; re-run only with suites `phase2.3` / `phase2.3-next-event` and the registered configuration.
+- New model-selection work needs fresh seeds that are not in any manifest.
 
 Protocol (unchanged): all models use the existing temporal split, consent-filtered interactions, task-specific candidate sets, and shared evaluation framework. Fit on train, select on validation, evaluate the selected configuration once on test. Every reported result is labelled as a synthetic-data experiment.
 
 Standing requirements:
 - Model comparisons use paired bootstrap CIs with the customer/case as resampling unit; the random floor is reported over several seeds.
-- CIs capture case-to-case variation within one dataset seed only, not variation across generator seeds, dataset sizes, or populations.
+- Within-seed CIs capture case-to-case variation within one dataset seed only. Across-seed intervals capture variation between synthetic datasets of one profile at a fixed size, not across profiles, sizes, generator versions, or real populations. Do not pool the two levels.
 - `exposure_diversity` measures catalog exposure evenness, not per-customer semantic diversity.
 - Results cover only customers with sufficient history; cold start is an explicit limitation.
 - Never trade away NBS/NBP purpose separation to improve scores.

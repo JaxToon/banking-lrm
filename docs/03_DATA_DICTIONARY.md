@@ -110,6 +110,32 @@ layer, not the data generator, enforces consent.
 `sha256` per CSV. It contains no wall-clock timestamp, so the whole output directory is
 byte-identical for the same arguments on any OS.
 
+Generator 0.3.0 (`--profile habit_dominant|balanced|transition_dominant`, Phase 2.3)
+adds `behavior_profile`, `behavior_params` (the full `BehaviorProfile`) and
+`behavior_note`. Without `--profile` the generator is 0.2.0 and its files, including
+this metadata, are byte-identical to earlier releases.
+
+### Behavior profiles (generator 0.3.0) — invented experimental assumptions
+
+These parameters create contrasting synthetic regimes for robustness experiments. They
+are **not** estimates of real banking customer behavior.
+
+| Parameter | habit_dominant | balanced | transition_dominant | Meaning |
+|---|---|---|---|---|
+| service_concentration | 0.15 | 0.6 | 5.0 | Symmetric Dirichlet concentration of a customer's service affinity. Higher = weaker customer-specific preference (near-uniform) |
+| product_concentration | 0.15 | 0.6 | 5.0 | Same for products (still multiplied by the segment tilt) |
+| service_transition_p | 0.10 | 0.40 | 0.85 | P(next service intent in a session follows the service transition map) |
+| product_transition_p | 0.05 | 0.30 | 0.75 | P(next product intent in a session follows the product transition map) |
+
+Transition maps are task-specific and never cross tasks:
+- NBS: TRANSFER→BILLPAY, BILLPAY→TOPUP, QR→TOPUP, TOPUP→QR, SCHEDULED→TRANSFER (the 0.2.0 map).
+- NBP: SAVINGS→DEBIT→CREDIT→PERSONALFIN→HOMEFIN→DEPOSIT→SAVINGS (a fictional cycle).
+
+Generator 0.2.0 equals the profile `legacy_v0_2_0` (0.6, 0.6, 0.4, 0.0). The session
+process (sessions per day, 1-3 intents per session, journey funnels, consent) is the
+same in every profile; for one seed, customer attributes and consent are identical
+across profiles, and only item choice differs.
+
 ## 6. Validation rules (`python -m bri.data.validate_dataset`)
 
 1. Required files present (four CSVs + metadata); CSVs parseable.
@@ -164,6 +190,9 @@ Sorted by task, customer, timestamp, event_id.
 Synthetic label, source dataset version/seed/checksum, parameters, cutoffs, per-task
 purpose/targets/candidates, consent-filter report (kept and excluded counts by
 reason), counts, and output SHA-256 hashes. No wall-clock timestamp.
+Prep 0.2.0 adds `source_files_sha256` (hash of every source CSV as actually read, not
+as claimed by its metadata) and `source_generation` (`customers`, `days`,
+`behavior_profile`). Processed CSVs are byte-identical to prep 0.1.0.
 
 ### Recommendations input (for `python -m bri.eval.evaluate --recommendations`)
 CSV with `case_id,item_id,rank`; ranks unique and contiguous from 1 per case; items
@@ -181,3 +210,39 @@ same as ASCII tables.
 Evaluation reports use the key `exposure_diversity` (renamed from `diversity` in
 Phase 2.1) for normalized exposure entropy. It is not a semantic, per-list diversity
 measure.
+
+## 9. Phase 2.3 outputs
+
+### Next-event cases (built in memory by `bri.eval.next_event`, never written as CSV)
+| Field | Description |
+|---|---|
+| case_id | `SYN_NE_<split>_<task>_<customer_token>_<nnnnn>` |
+| split, task, customer_token | Split window of the target, task, customer |
+| cutoff_utc | Target timestamp; history = same-task interactions strictly before it |
+| session_id | Session of the target |
+| history_length | Earlier same-task first targets (ties excluded) |
+| n_relevant | Distinct items targeted at this timestamp (1 unless timestamps tie) |
+| within_session | Previous first target is in the same session |
+
+They are derived deterministically from the fingerprinted `interactions.csv`, so the
+processed-file fingerprints also pin them (with `next_event_version`).
+
+### Run records and summaries (git-ignored `artifacts/`)
+- `<report>.run_manifest.json` (written by `bri.experiments.baselines`): suite,
+  evaluation, canonical config and its sha256, generator/prep/runner versions, source
+  file hashes and composite fingerprint, processed fingerprints, prep fingerprint.
+- `next_event_report.json`: same structure as `baseline_report.json` plus
+  `evaluation`, `case_stats` (eligible targets, tie merges, cold-start exclusions,
+  within/cross-session counts, single-target sessions) per split.
+- `robustness_report.json` (`bri.experiments.robustness`): config and hash, versions,
+  statistical design, per profile and evaluation: across-seed mean/SD/t-interval of
+  every metric per model, selection counts, random floor, paired differences with
+  counts of seeds whose within-seed CI excludes 0, per-seed metrics, cold-start
+  totals, next-event session strata; and dataset fingerprints per seed.
+
+### Benchmark manifests (`benchmarks/manifests/<name>.json`, tracked, immutable)
+`suite`, `versions`, per evaluation the canonical config and its sha256, suite
+definition hashes, frozen report file hashes, and per locked dataset: generator
+identity (version, seed, customers, days, profile), source file hashes and composite,
+processed file hashes, and prep fingerprint. The sha256 of each manifest file is pinned
+in `bri.experiments.integrity.MANIFEST_SHA256`.

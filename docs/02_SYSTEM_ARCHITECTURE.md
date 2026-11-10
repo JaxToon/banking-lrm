@@ -94,6 +94,42 @@ flowchart LR
   suite. Frozen benchmark reports live in `benchmarks/`. Phase 2.2 added Personal
   Frequency as the reference baseline: [10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md](10_PHASE_2_2_PERSONAL_FREQUENCY_REPORT.md).
 
+### 5.1 Benchmark integrity and robustness experiments (Phase 2.3)
+
+```mermaid
+flowchart LR
+    P[Behavior profile + seed] --> G[Generator 0.3.0]
+    G --> V[Validator] --> B[Prep: consent filter + temporal split]
+    B --> K{Integrity gate}
+    M[(Immutable manifests<br/>pinned sha256)] --> K
+    K -->|ok| W[Window evaluation]
+    K -->|ok| N[Next-event evaluation]
+    K -->|tampered / locked| X[Refuse]
+    W --> S[Per-seed reports]
+    N --> S
+    S --> R[Across-seed summary]
+```
+
+- **Integrity gate** (`bri.experiments.integrity`), run before any evaluation data is
+  read: registered suite identifiers must keep their model grids and key comparisons;
+  processed files must match their own prep checksums; a dataset belonging to a locked
+  benchmark (matched by events checksum or by generator identity) may only be re-run by
+  its own suite, with its registered canonical configuration, and with source,
+  processed and prep fingerprints identical to the manifest. Manifests are write-once
+  and their own sha256 is pinned in code.
+- **Generator 0.3.0** exposes behavior profiles (customer affinity concentration and
+  task-specific transition probabilities/maps). Generator 0.2.0 is preserved byte for
+  byte. Profiles are invented experimental assumptions.
+- **Two evaluation protocols share one fit/select/test core**: the seven-day window
+  protocol and the next-event protocol (one case per eligible target event, history
+  strictly before it, customer-cluster bootstrap). Both keep NBS and NBP separate and
+  use the same candidate sets and model interface.
+- **Two-level statistics**: within-seed bootstrap CIs describe case/customer variation
+  in one dataset; across-seed Student-t intervals describe variation between synthetic
+  datasets of one profile. They are never pooled, and profiles are not combined.
+- Synthetic robustness results are evidence about the generator regimes only, never
+  about real customers. Details: [11_PHASE_2_3_ROBUSTNESS_REPORT.md](11_PHASE_2_3_ROBUSTNESS_REPORT.md).
+
 ## 6. Local PoC topology
 
 - CSV/Parquet synthetic files.
