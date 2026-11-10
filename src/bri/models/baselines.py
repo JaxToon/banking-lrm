@@ -155,7 +155,32 @@ SUITES: dict[str, dict[str, tuple[str, list[dict]]]] = {
         "itemknn_noself": ("itemknn", [{"signal": s, "include_self": False} for s in _SIGNALS]),
         "mf": ("mf", _MF_GRID),
     },
+    # Phase 2.3 window evaluation (generator 0.3.0 profiles, multi-seed): Phase 2.2 models.
+    "phase2.3": {
+        "popularity": ("popularity", _POPULARITY_GRID),
+        "personal_frequency": ("personal_frequency", [{"signal": s} for s in _SIGNALS]),
+        "itemknn_self": ("itemknn", [{"signal": s, "include_self": True} for s in _SIGNALS]),
+        "itemknn_noself": ("itemknn", [{"signal": s, "include_self": False} for s in _SIGNALS]),
+        "mf": ("mf", _MF_GRID),
+    },
+    # Phase 2.3 next-event evaluation: the same five models with the signal fixed to
+    # `target` (see bri.eval.next_event for why item_event history is excluded).
+    "phase2.3-next-event": {
+        "popularity": ("popularity", [{"signal": "target"}]),
+        "personal_frequency": ("personal_frequency", [{"signal": "target"}]),
+        "itemknn_self": ("itemknn", [{"signal": "target", "include_self": True}]),
+        "itemknn_noself": ("itemknn", [{"signal": "target", "include_self": False}]),
+        "mf": ("mf", [g for g in _MF_GRID if g["signal"] == "target"]),
+    },
 }
+
+_PF_REFERENCE_COMPARISONS = [
+    ("itemknn_self", "personal_frequency", "Does co-usage add value on top of repeat usage?"),
+    ("itemknn_noself", "personal_frequency", "Is the collaborative signal alone enough?"),
+    ("mf", "personal_frequency", "Does a latent-factor model beat the customer's own frequency?"),
+    ("popularity", "personal_frequency", "How much does personalization by own frequency add over popularity?"),
+    ("itemknn_self", "itemknn_noself", "How much does self-similarity contribute?"),
+]
 
 # Comparisons each suite must report with paired bootstrap on all rank metrics: (a, b, question).
 KEY_COMPARISONS: dict[str, list[tuple[str, str, str]]] = {
@@ -165,6 +190,9 @@ KEY_COMPARISONS: dict[str, list[tuple[str, str, str]]] = {
         ("itemknn_noself", "personal_frequency", "Is the collaborative signal alone enough?"),
         ("itemknn_self", "itemknn_noself", "How much does self-similarity contribute?"),
     ],
+    # Personal Frequency is the mandatory reference baseline in Phase 2.3.
+    "phase2.3": _PF_REFERENCE_COMPARISONS,
+    "phase2.3-next-event": _PF_REFERENCE_COMPARISONS,
 }
 
 # Kept for backward compatibility: the benchmark-v1 grids by family name.
