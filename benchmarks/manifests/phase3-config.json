@@ -1,0 +1,393 @@
+{
+  "configs": {},
+  "datasets": [],
+  "frozen_config": {
+    "applies_to_variants": [
+      "full",
+      "no_position",
+      "shuffled",
+      "meanpool",
+      "session_boundary"
+    ],
+    "device": "cuda:0",
+    "model": {
+      "blocks": 3,
+      "dim": 64,
+      "dropout": 0.042734518774772565,
+      "heads": 2,
+      "max_len": 20
+    },
+    "precision": "fp32",
+    "train": {
+      "batch_size": 64,
+      "grad_clip": 1.0,
+      "lr": 0.00016340808773409658,
+      "max_epochs": 40,
+      "patience": 5,
+      "seed": 1,
+      "select_k": 3,
+      "select_metric": "ndcg",
+      "weight_decay": 0.0002739494641598398
+    },
+    "variant_hyperparameters_from": "full"
+  },
+  "frozen_config_sha256": "46fa3eca387ed2bf8e1a5e12cacb652084022cb4acf0c2fb8ae0a65d9b133d59",
+  "frozen_report_dir": null,
+  "frozen_report_sha256": {},
+  "label": "SYNTHETIC-DATA EXPERIMENT: metrics reflect patterns deliberately embedded by the synthetic generator. They are not evidence of real customer behavior or of real-world recommendation effectiveness.",
+  "manifest_format": 1,
+  "notes": "Frozen SASRec configuration selected by Optuna on phase3_tuning validation splits only, before any phase3_final dataset existed. Never changed after final results.",
+  "runtime": {
+    "environment": {
+      "numpy": "2.4.6",
+      "optuna": "4.9.0",
+      "pandas": "2.3.3",
+      "platform": "Windows-10-10.0.26300-SP0",
+      "python": "3.11.9",
+      "torch": "2.11.0+cu128",
+      "torch_cuda_build": "12.8"
+    },
+    "runtime": {
+      "compute_capability": "12.0",
+      "cpu_threads": 10,
+      "cudnn": 91900,
+      "determinism": {
+        "cublas_workspace_config": ":4096:8",
+        "cudnn_allow_tf32": false,
+        "cudnn_benchmark": false,
+        "cudnn_deterministic": true,
+        "matmul_allow_tf32": false,
+        "precision": "fp32",
+        "use_deterministic_algorithms": true
+      },
+      "device": "cuda:0",
+      "device_name": "NVIDIA GeForce RTX 5050 Laptop GPU",
+      "torch": "2.11.0+cu128",
+      "torch_cuda_build": "12.8"
+    },
+    "runtime_sha256": "bb54dbb1553a0499485e26317f683452b85244e19462e1ed2d1493b8d72e030f"
+  },
+  "selection": {
+    "group_scores": {
+      "balanced/nbp": 0.546918,
+      "balanced/nbs": 0.633798,
+      "habit_dominant/nbp": 0.750845,
+      "habit_dominant/nbs": 0.820598,
+      "transition_dominant/nbp": 0.430775,
+      "transition_dominant/nbs": 0.584735
+    },
+    "objective": 0.627945,
+    "rule": "max objective, ties -> lowest trial number",
+    "trial": 21
+  },
+  "study": {
+    "name": "phase3-sasrec-full-hpo-v1",
+    "protocol": {
+      "data_sha256": "51b3dee64b06db6bd1d39f95b7d0b9e5a2da3b21e50edf73d94ffed87163dd0e",
+      "hpo_version": "0.1.0",
+      "model_version": "0.2.0",
+      "namespace": "phase3_tuning",
+      "objective": "unweighted mean over (profile, task) groups of the mean best val NDCG@3 over tuning seeds",
+      "runtime_sha256": "bb54dbb1553a0499485e26317f683452b85244e19462e1ed2d1493b8d72e030f",
+      "sampler": {
+        "seed": 31,
+        "type": "TPESampler"
+      },
+      "search_space": {
+        "batch_size": [
+          32,
+          64,
+          128
+        ],
+        "blocks": [
+          1,
+          2,
+          3
+        ],
+        "dim": [
+          16,
+          32,
+          64
+        ],
+        "dropout": [
+          0.0,
+          0.3
+        ],
+        "heads": [
+          1,
+          2,
+          4
+        ],
+        "lr": [
+          0.0001,
+          0.005
+        ],
+        "max_len": [
+          10,
+          20,
+          30
+        ],
+        "weight_decay": [
+          1e-06,
+          0.001
+        ]
+      },
+      "train_fixed": {
+        "grad_clip": 1.0,
+        "max_epochs": 40,
+        "patience": 5,
+        "select_k": 3,
+        "select_metric": "ndcg"
+      },
+      "train_seed": 1,
+      "train_version": "0.1.0",
+      "variant": "full"
+    },
+    "storage_file_sha256_at_freeze": "f1772dfd9aa99193218bb98147696716aa9f81d9ab66f39477ceb49c07b1d0d7",
+    "trials_by_state": {
+      "COMPLETE": 30,
+      "FAIL": 0,
+      "PRUNED": 0,
+      "RUNNING": 0,
+      "WAITING": 0
+    }
+  },
+  "suite": "phase3-config",
+  "suite_definition_sha256": {},
+  "tuning_data": {
+    "datasets": {
+      "balanced/seed20261120": {
+        "prep": "16692a4197756734d6e46e66571bc020d469e4cc642e2bdc7da0fce7dd5c7e34",
+        "processed_composite": "274a9b18ab7c849b05e31f55a8402c0a13eae47e5276505e58b004a7a01c6d70",
+        "sequences": {
+          "10": {
+            "nbp/train": "c396d13a8af4e1ac43797daba55c363ca3d63b9e391ccdea04b5ab7cdbe3bbb2",
+            "nbp/val": "59b67d4388dd416fb946e5d18b2a1bf5c8e1beb04e8ed0b23e0b47aac42ad560",
+            "nbs/train": "844c20c2b828a566241e45134318490f81456f33576b233a72c3ffd4521dc028",
+            "nbs/val": "70b5a91b70ed1642862f25fab66cd9add875841fb9a484e49965c12a2742720d"
+          },
+          "20": {
+            "nbp/train": "e96a8b2ed5c5c901d4fd703048691f1c9d2876abd3eb047749cca324771cfd0d",
+            "nbp/val": "233c0b636a19fe9cdbefc6c5a1a45d91c578e435d67b0780e065a6ef901175fe",
+            "nbs/train": "187ba88d109c42d2cc49f7382ee41835085a51bfabbee692041a6f8743f2ce63",
+            "nbs/val": "84e63a16015b35755c9bfa96c91c84e9d2a78995a25cb3f5b6928da9081b7a40"
+          },
+          "30": {
+            "nbp/train": "405deaa1fbe7d7c66c108d3c1ca88e748f7a1c935b22fa4ddd6fd3ac1ff7b706",
+            "nbp/val": "d97917885d69b0ed1d693c1ed9b9cd0cf9328e68382d093d1ed21f62b70da6a1",
+            "nbs/train": "ab460f809faf236a6ae6b907fe8354f59a4a79f4217c7da3b4bb19f7879e7529",
+            "nbs/val": "c0e185eb5fa1e67a10b1196615254e7680432165892937df0f2013b572527c76"
+          }
+        },
+        "source_composite": "50da96ebeb6813dd2de809f146b5a14b6e1672f0e07861555f3855547c805a31"
+      },
+      "balanced/seed20261121": {
+        "prep": "680b787a2e19e85eb6ed3c5ac2a71fb2353acd8664b2a73525342df2cd039db7",
+        "processed_composite": "f714319111a97b873db6cefa24d5e685264ba98f3df200a97a1960e9af937bae",
+        "sequences": {
+          "10": {
+            "nbp/train": "d0c56f9bd0c1aa164d259847bad823fccb8edcb7d2561cec8192b7725c0f958d",
+            "nbp/val": "8296843b73ee8268427f76a612f8bf328f7cdbe85db2a4233395d5f4a41332a1",
+            "nbs/train": "a70fd1a1c6d64053466e70ebf0415d75e08f2a5064a2ea7cb10a0cdceaa1f79e",
+            "nbs/val": "ad2480a0de7d3a5107ec1623654c43b13413bc5137c85a66a2df40f4c7674dce"
+          },
+          "20": {
+            "nbp/train": "e54f9fa8cb10638693fd63f7b59909bbbc5c70827a4cc75eab6a9ecde7216b96",
+            "nbp/val": "317ca70c6778707a9a9da931cb504c658cfee501fb0b0219916e8f3112346c81",
+            "nbs/train": "6ebc16d2cb90b5c42faa6173b06a57e984db8ebebf8a4f186f0bf0e108ec2bc5",
+            "nbs/val": "50932598f712ef5b374547a56e2f3c252ad67be2587f0859c964ec3ed8aacac2"
+          },
+          "30": {
+            "nbp/train": "6fa48a0189c1db4b2a8956cf858f820e8d657a739995a7d3eb3f784ae8fcd6e2",
+            "nbp/val": "0d103a45cba851e2105e16dce6d6267025ab83cb76e24659cbf7c77aba189da9",
+            "nbs/train": "a54a24cbd81a855be3bb5373ed7020a605cc8145b2c866748454ab2b2bb01c44",
+            "nbs/val": "7af31f4de6ef1da5654562146ef281ef9060fa58ed342e1b018d9e44528422a8"
+          }
+        },
+        "source_composite": "861a5e59e3c5c9308c8cfd882792d5d12c8b853ef44dfccb73cb8ecd83f4c4e4"
+      },
+      "balanced/seed20261122": {
+        "prep": "9209531ee8d13de3c9692499e29afd4ba295310acdcdce1b7289df91117793d1",
+        "processed_composite": "944f530a12d1772baad57c0e7487a47a1951a34d4f342ec6ad0b93b3977fe718",
+        "sequences": {
+          "10": {
+            "nbp/train": "342b8d005f7bca007be73e7a1a56bef2c863ab192c7ac7494753993ef346c3a5",
+            "nbp/val": "131c94bbce7cbc31cf5c30005a1a5b04fb40b70f2905b68593387d20954b8125",
+            "nbs/train": "6cc6eec18b52766fe54274b2b9e4d65246867071fca588af7b0b1aff19347f13",
+            "nbs/val": "e0361f19e196adea8b5e0257c4b464d7568cd52767fa679b7a7d9f0d96bc70af"
+          },
+          "20": {
+            "nbp/train": "04480ca473e648eeea59d986e8a8c43882efe9257a15c55db642aab84e7b2bd1",
+            "nbp/val": "6b6f72d9292a5ef84f1cde1f7c5457aa3e7d2fa65cf5d00e9c6cbe41862557e3",
+            "nbs/train": "4fa8b99b32c98ca2a04c11e808ef1c95991495fe73eecaf5d49e795d17d91806",
+            "nbs/val": "4ea63c0dd6cba1c1992907eaf4a34dd971fade7d7d58136975313f495a470b64"
+          },
+          "30": {
+            "nbp/train": "81b4e6add78970d554a67fe1c1f9e7930a767159221abbdd5184a4f56e6ea9b7",
+            "nbp/val": "7d0c2a12dc627b12fd6a6ad363efa8f3043b7078174925bb6b2e935d54ea1b3d",
+            "nbs/train": "56d1312c98172f73d91eb750a23eff80475a063c8152ebfe0582584c15724e23",
+            "nbs/val": "f419f838ac9ebf04f8c196953060b9933ee0ca19d918034cfd729c7eff35d158"
+          }
+        },
+        "source_composite": "dac880dd00262e7aeadb187384e49896895dbc846198edb2754c3c52d847ec3a"
+      },
+      "habit_dominant/seed20261120": {
+        "prep": "f189872be9f635be9e7f3ca7325e61232e31b358c0d03a9534a154bb08ec5c8e",
+        "processed_composite": "3cadcd77a9d3f5cfc8651670320bcdbd7e5eef6deb8970d29a714261d038b8b8",
+        "sequences": {
+          "10": {
+            "nbp/train": "313a8a6d9c15551319ce0798acf8cafa56307dd1ea01c407a96a8ac24519ae7c",
+            "nbp/val": "3c7ee78e16775ae3aec28ced64231a7e32b36c98c6830b3cba8f67b1c6353681",
+            "nbs/train": "73952e36befa4c48910ef0a3cd61e8919272c70c5be774e05aa84d8b9f493cc9",
+            "nbs/val": "c2988da10dea0523b7c7dab0e3de734ce0dd148cbce028b90580201104adf66a"
+          },
+          "20": {
+            "nbp/train": "29f3ee7294476c8ab9d4fb7ea9aa9366cf4ecdda0e6d7a09762c354931590075",
+            "nbp/val": "ab13a08361ea9bb1c31021a6dc1dbb5bf866bcd5c85cb63dc40ca3f633a84405",
+            "nbs/train": "f114341a4eab7a3796655009231179c1f1641083e3ce1d4b3b2c32ab8efcba56",
+            "nbs/val": "165c89f90046070648928486fcdab060cebad34388d49e6f13236f6671709e75"
+          },
+          "30": {
+            "nbp/train": "433e0638c841db56ef45c23a74cf96b482a803412540d967c167ba620f9f5240",
+            "nbp/val": "08d9858f811f45ce37bccc20f9ffb3ae3c2789e5c627a08c3fdf96fbb4b34c4b",
+            "nbs/train": "334c808820992036021ab08466a08287447850616293f426340112463d1752ef",
+            "nbs/val": "90e9f3418d7b10467a6efcd2dadab24c2b744f99e308e0b7ed6203fc4509a0bc"
+          }
+        },
+        "source_composite": "04ed015d7db9f880004fc5d6585018363b25d0daf1113e62ceea433a33c5b493"
+      },
+      "habit_dominant/seed20261121": {
+        "prep": "57b4af375eeebaa2972d4928983473aa50457b7dd21925c5932b639bf2a0bebd",
+        "processed_composite": "da2297feff9f9d8c13314e5f6dd113a2a5e9e73ab0dac3cf46a97ae1694d2b79",
+        "sequences": {
+          "10": {
+            "nbp/train": "7e21fadfd81611af737f363fa6921e6c5863fae460ff907493ee32cf7c746cca",
+            "nbp/val": "d306e52ebe8c519098443abfe601c935e148b71d76e590048ca28913efb5c7a7",
+            "nbs/train": "328581e8a3d2aa550a6cf376aace619607e6c766bbe81c854d22ad835adddaeb",
+            "nbs/val": "2c669f93ce2e53d27b54a0380c16a8db9854d836111abda6082392121b7de4b4"
+          },
+          "20": {
+            "nbp/train": "3a24eda0844297180d5550000f4d193b2f6ca70c7701bd88a2af93ab039acae8",
+            "nbp/val": "88a4e7c6c2ec796b415b3de5bca0f677e7d00e0a0117697ce185bf5255967e56",
+            "nbs/train": "be46a355bcc1cf67675ba0a781738167698ebf89ba50f4baf2a2b5873091f2b0",
+            "nbs/val": "9d512998d32407f32200dc055c725e07eb353f44130f8427514928ebe2c10176"
+          },
+          "30": {
+            "nbp/train": "5e217ef59b2703c1fb87d3e406227dec8fe75df618243cadbe82bdb761f0538b",
+            "nbp/val": "3a86569c28ce05277dda8205a7233c783f749a74e8223283668f4a4e3a1d5277",
+            "nbs/train": "5ff0db408bee4a56648b1e6fc627359f17072fd4a677737b24a758158186cfec",
+            "nbs/val": "ef1c23c548f940c29012a53c6f186b6de8c9fe8056b792b0e7c66aa8a14c41e0"
+          }
+        },
+        "source_composite": "054a2dd44697022f3ed8577d869b0388087cfd380d1b975fbd83e422c23a3c30"
+      },
+      "habit_dominant/seed20261122": {
+        "prep": "97a805f238968de804e3260705d91b0289605fbf3eb63defc341794578843ed2",
+        "processed_composite": "580170b2eb8708fac48b70061f87a22f5ddfae292737ffd9e9cce6b1f7825ce6",
+        "sequences": {
+          "10": {
+            "nbp/train": "21d6f16d9e43e3a43dddcc6ff3acf9f6ee2f7a5bf61dc42ffb8a2476175b0d36",
+            "nbp/val": "eaa927293058b318bc66166213bbd59985d14185a15bb973abf1bb9829a3fa89",
+            "nbs/train": "af1d8757a3f1c87c43daf36f6c4b4849ab200588048a67cff50919a34700d86f",
+            "nbs/val": "fe34016d742af9037d6c8857aab7910222f4834d75a42ef8811d9302ad0e8625"
+          },
+          "20": {
+            "nbp/train": "79f887a34c26aca382e00a539af64e68c3a4c7910fce3d94f02569fc0f62d0d7",
+            "nbp/val": "d88e895a56620ebfa8bd4fafafd9327d77bc82d893ae411c8f3f030ef9ce72af",
+            "nbs/train": "83650cfc9cf7df5dbc1aacfdbbba19e6864f1d09cfbd77276a52f7aceae79eb3",
+            "nbs/val": "3c6623af6a658325b499e623f9e3403a82e055bcb6113325b6908215024e2dc5"
+          },
+          "30": {
+            "nbp/train": "bf0e156e55a74dd0a7b1cd65e389fde5f4dde285d2897001ce816f3f5a3d22e8",
+            "nbp/val": "e13f064d852d275ae08667e3cc3e230031aaf736feafe5832782a8b5e0c35894",
+            "nbs/train": "ff514b4f35982c196a39603780686b93bd7df5d25f424c6652570ffd19b2feaa",
+            "nbs/val": "a1632c17515c76453adfe44a0dfdc09b1e8df3dab86f9ec50ef232ddcefef5ff"
+          }
+        },
+        "source_composite": "8407aa933a57f6198b331e6e1d8f30a6999f1747f82f9290b08f9821567dfbc7"
+      },
+      "transition_dominant/seed20261120": {
+        "prep": "0b14f3b82c31bd03efbcb2ba1077e9f541f12756b2e068cc85ec4fb38dee1cb2",
+        "processed_composite": "39bdc81d5285ab69ccb504707a3f879a7ee5a24e3ef0f951a86d62c7ba89dfd5",
+        "sequences": {
+          "10": {
+            "nbp/train": "63fc4dc32117ce8ccb5716d80a13f842fa765ee835218e37f1001215187dc701",
+            "nbp/val": "1e17af1c9f6b942640a1534c0f29cdf9a4f39382a72e6492052c3725909be6c9",
+            "nbs/train": "56abcc133ff05af62f3b23d7db220003fd8edb183744701774ddad8741e11b0f",
+            "nbs/val": "f330aee13fdb8063db988ad541e0869175bbe6875598510cc809bea588bce34a"
+          },
+          "20": {
+            "nbp/train": "60d99f9239cb53739725a639109ac1c4da7ccb534f13f13f0cbd3fc10d57d2e2",
+            "nbp/val": "ff0a12dd2c11053e7c6852b6680546f0613680435de14b1987ab944a1a4c0691",
+            "nbs/train": "e0faf11a09f14dc57ebe62f59f624c241d1a4c02785540dab45b8aff798a6f90",
+            "nbs/val": "c5ec3f33b09f3db54780ce86ec518ce57a56c1189e2760e869afd69f31aec1d4"
+          },
+          "30": {
+            "nbp/train": "0198b4b627adb2b1817446be798bccbace8a897fbc5ef2155cc8e31eb2789090",
+            "nbp/val": "b6f57eac59cb724abef7222075ab6f8e943dd55b8832c1adc3281b3a1392e225",
+            "nbs/train": "79fe48c3003083e01eca689d3ee550f478b5b01528338e4fd5217211886cd9f0",
+            "nbs/val": "7786325058e9f56c60f29160f281ce69edca1c27f142a33778f414115b928e67"
+          }
+        },
+        "source_composite": "377f102dfccacc0f8128276b96bb8ea58e3f9f5178e1abed0b22f96dc64dd557"
+      },
+      "transition_dominant/seed20261121": {
+        "prep": "81fa59acd5c1fdece157e041ee3a1a84f4d4a66adc62a8f107c9c826510a0d1c",
+        "processed_composite": "4d5c8238308f60b69985c2503f1fbc2f25471ffd91fc77b743bf5cc7fe33cd62",
+        "sequences": {
+          "10": {
+            "nbp/train": "6afe6ef594bf08bda3ac87e07d2639dca8121ff44d65e0ce3a41f5ee6b8cdfcf",
+            "nbp/val": "0d7703c3293208ad4fd40edffda65a67c97e56c4cd6bf3feaef972bf80a638e7",
+            "nbs/train": "93eef15507349ed67c2477f7aecc985b74215333009807662cade1f7622afded",
+            "nbs/val": "4bee195ed92a536a80065afb3d590b833e14266eb9dce490e460e5e108328147"
+          },
+          "20": {
+            "nbp/train": "c047a3a7e831e527d0422599bed3ae65e67e6c7a4001a9961ae27f3e2d4f104b",
+            "nbp/val": "2a617fbaf294c99dfb06b066e404eb3478b442f38b149733a99d9d4dd94bd72e",
+            "nbs/train": "facd87e42f04adee19e4efe8ac33bf81179cb22fdced23f02d44450b90fef4c3",
+            "nbs/val": "314b2fc997c9f8e2e60a1648a0ce6b50d339d415b086e4b3cb93257626519d59"
+          },
+          "30": {
+            "nbp/train": "3e7f0c220ce449f71718c1a1d03579ad8d58f0c641172f0e16beaea12eeaf667",
+            "nbp/val": "b251dc69061cffca0273e27e08e23b3b0c96944c411f5bb104dd48e284cac5ab",
+            "nbs/train": "647744e7e602e4e95075d8d3633c3849c73c8226d8a990cf5d31e643e17749c6",
+            "nbs/val": "ef06f355ef0ce1b829a331413b53fc3ecd65ed3eb4c84f0e725a74bb8c705e63"
+          }
+        },
+        "source_composite": "d274c46705aed2fb7102b46f4b79f0b15b55b861cfcb320ab167a09498c1e586"
+      },
+      "transition_dominant/seed20261122": {
+        "prep": "764d35bc7f2ae35a991a60f93fa98bec57b3ff2d7ec2189ab0a80992e33fc5de",
+        "processed_composite": "fc0fd7048cedea73e7d62d2569817ae4200fbd0790f72a69b506d0f61ece9084",
+        "sequences": {
+          "10": {
+            "nbp/train": "649738f8de5e3ed7c3263eed771e0350aad53007f60ff03a6c440232fff95030",
+            "nbp/val": "72c5c1645299d0310151486b7fc6e7994a10e61b2411f8e78196cc310d822124",
+            "nbs/train": "04b9eb001c915a184d396d94c96a09bff024f1c7747a13ab4d227bcdf43cd335",
+            "nbs/val": "21898683aca73b1b66be1fc8b639cd6aca1daa47d877ac30cf181e866058382f"
+          },
+          "20": {
+            "nbp/train": "7b1d63c4debd0f8d4622bc06254360d9e5be67d53b98aac535ba00e3f0d4b641",
+            "nbp/val": "300bbc6cfc525289c67759a0e89ac1a3bf30ad5171e89ccf0032fa70031f8102",
+            "nbs/train": "9fa05a16cd7822f399a46aa142d74a594cf91f4008e26fa10385c7879980868e",
+            "nbs/val": "b563b931652793b57cb84132f3e0140e76265fe068bf38c7794dec42dabe2d77"
+          },
+          "30": {
+            "nbp/train": "d3e9a69be454e17f17ca9e667ad27387c17b8baf1ce2b07e67ac38a040a9dd2d",
+            "nbp/val": "d379526882508b4d95c907a3afa104b36f28cab290fc338da1347ba1329544e4",
+            "nbs/train": "82bfe2e6666b792fe9894d8b3c2cab92ccc45060cafd77525213d713bb1397e5",
+            "nbs/val": "ce7dc628947403ffc8fb195a7020d592477d2cade53cd36d95dbd7ba2ffa87b6"
+          }
+        },
+        "source_composite": "4baca296cfb108bcf3c4b387f65e1e5b99b0e687421488d43f6edc2b3067ea4b"
+      }
+    },
+    "seq_data_version": "0.2.0"
+  },
+  "versions": {
+    "hpo": "0.1.0",
+    "model": "0.2.0",
+    "optuna": "4.9.0",
+    "train": "0.1.0"
+  }
+}
