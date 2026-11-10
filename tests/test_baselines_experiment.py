@@ -1,3 +1,4 @@
+import hashlib
 import json
 import shutil
 import subprocess
@@ -91,6 +92,9 @@ def test_test_split_never_influences_model_selection(processed_dir, report, tmp_
     is_test = targets["case_id"].isin(test_ids)
     targets.loc[is_test, "item_id"] = [first_cand[task_of[c]] for c in targets.loc[is_test, "case_id"]]
     targets.drop_duplicates().to_csv(altered / "eval_targets.csv", index=False, lineterminator="\n")
+    # Re-record the checksum, as a rebuild would; otherwise the integrity gate refuses.
+    meta["sha256"]["eval_targets.csv"] = hashlib.sha256((altered / "eval_targets.csv").read_bytes()).hexdigest()
+    (altered / "prep_metadata.json").write_text(json.dumps(meta), encoding="utf-8")
 
     other = run_baselines(altered, **FAST, suite="phase2.2")
     for task in report["tasks"]:
