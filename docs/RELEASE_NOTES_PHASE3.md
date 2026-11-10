@@ -52,6 +52,15 @@ session-boundary embeddings add nothing measurable in this setup.
 6. Classical-model training cost was not instrumented, so the cost comparison is
    qualitative on the classical side.
 
+## Repository state
+
+The validated state of this release is the branch HEAD containing all eight Phase 3
+commits (`5d791e4`..`d646fba`): there the full test suite, the CUDA validation run, the
+integrity check and the reproduction audit pass. The commits are grouped by component
+for reviewability, and intermediate commits are **not** claimed to be independently
+testable. For example, the seed-namespace commit already pins manifests that arrive in
+later commits.
+
 ## Reproduce
 
 See `docs/12_PHASE_3_SEQUENTIAL_REPORT.md` §10. In short: install the `seq` extra, run
