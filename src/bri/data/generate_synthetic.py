@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 import sys
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -18,7 +19,9 @@ import pandas as pd
 
 from bri.data import schema as S
 
-GENERATOR_VERSION = "0.2.0"
+LEGACY_GENERATOR_VERSION = "0.2.0"  # profile=None: byte-identical to the original 0.2.0 output
+PROFILE_GENERATOR_VERSION = "0.3.0"  # configurable behavior profiles (Phase 2.3)
+GENERATOR_VERSION = LEGACY_GENERATOR_VERSION
 WINDOW_END = datetime(2025, 1, 1, tzinfo=timezone.utc)  # fixed so output is reproducible
 LOCAL_UTC_OFFSET_HOURS = 7  # fictional app operates in UTC+7; storage stays UTC
 MAX_CUSTOMERS = 200_000
@@ -63,6 +66,73 @@ SERVICE_TRANSITION = {
     "SVC_QR": "SVC_TOPUP",
     "SVC_TOPUP": "SVC_QR",
     "SVC_SCHEDULED": "SVC_TRANSFER",
+}
+
+# --- Behavior profiles (generator 0.3.0) ----------------------------------------
+# INVENTED EXPERIMENTAL ASSUMPTIONS. These parameters exist to create contrasting
+# synthetic behavioral regimes for robustness experiments. They are not estimates of,
+# and must not be read as claims about, real banking customer behavior.
+
+# Next product in the same session tends to follow this map (a fictional cycle).
+PRODUCT_TRANSITION = {
+    "PRD_SAVINGS": "PRD_DEBIT",
+    "PRD_DEBIT": "PRD_CREDIT",
+    "PRD_CREDIT": "PRD_PERSONALFIN",
+    "PRD_PERSONALFIN": "PRD_HOMEFIN",
+    "PRD_HOMEFIN": "PRD_DEPOSIT",
+    "PRD_DEPOSIT": "PRD_SAVINGS",
+}
+
+
+@dataclass(frozen=True)
+class BehaviorProfile:
+    """Behavior parameters of one synthetic regime (invented, see note above).
+
+    service_concentration / product_concentration:
+        symmetric Dirichlet concentration of each customer's item affinity. Lower values
+        give peaked, customer-specific habits; higher values give near-uniform affinity,
+        i.e. WEAKER customer-specific item preference.
+    service_transition_p / product_transition_p:
+        probability that a service (product) intent following an earlier service
+        (product) intent in the same session follows the task's transition map instead
+        of the customer's affinity. Transitions never cross tasks.
+    service_transition_map / product_transition_map:
+        task-specific deterministic item -> next item maps.
+    """
+    name: str
+    service_concentration: float
+    product_concentration: float
+    service_transition_p: float
+    product_transition_p: float
+    service_transition_map: dict[str, str] = field(default_factory=lambda: dict(SERVICE_TRANSITION))
+    product_transition_map: dict[str, str] = field(default_factory=lambda: dict(PRODUCT_TRANSITION))
+
+    def __post_init__(self) -> None:
+        for attr in ("service_concentration", "product_concentration"):
+            if not getattr(self, attr) > 0:
+                raise ValueError(f"{attr} must be > 0")
+        for attr in ("service_transition_p", "product_transition_p"):
+            if not 0 <= getattr(self, attr) <= 1:
+                raise ValueError(f"{attr} must be in [0, 1]")
+        for ids, mapping in ((SERVICE_IDS, self.service_transition_map),
+                             (PRODUCT_IDS, self.product_transition_map)):
+            if set(mapping) != set(ids) or not set(mapping.values()) <= set(ids):
+                raise ValueError("a transition map must map every item of its task to an item of the same task")
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+# The original 0.2.0 behavior expressed as a profile (used when profile=None).
+LEGACY_PROFILE = BehaviorProfile("legacy_v0_2_0", 0.6, 0.6, 0.4, 0.0)
+
+PROFILES: dict[str, BehaviorProfile] = {
+    # Strong personal habits, rare in-session transitions.
+    "habit_dominant": BehaviorProfile("habit_dominant", 0.15, 0.15, 0.10, 0.05),
+    # Moderate habits and moderate transitions in both tasks.
+    "balanced": BehaviorProfile("balanced", 0.6, 0.6, 0.40, 0.30),
+    # Near-uniform personal affinity; in-session transitions dominate.
+    "transition_dominant": BehaviorProfile("transition_dominant", 5.0, 5.0, 0.85, 0.75),
 }
 # Diurnal profile in local time (hours 0..23).
 HOUR_WEIGHTS = np.array([1, 0.5, 0.3, 0.3, 0.5, 1.5, 3, 5, 6, 6, 5, 5,
@@ -125,10 +195,15 @@ def _customer_events(
     engagement: str,
     window_start: datetime,
     days: int,
+    profile: BehaviorProfile = LEGACY_PROFILE,
 ) -> list[list[tuple[datetime, str, str | None]]]:
-    """Return a list of sessions; each session is a list of (ts, event_type, item_id)."""
-    service_aff = rng.dirichlet(np.full(len(SERVICE_IDS), 0.6))
-    product_aff = rng.dirichlet(np.full(len(PRODUCT_IDS), 0.6)) * PRODUCT_TILT[segment]
+    """Return a list of sessions; each session is a list of (ts, event_type, item_id).
+
+    Random draws happen in the same order as generator 0.2.0, and a transition draw is
+    skipped when its probability is 0, so LEGACY_PROFILE reproduces 0.2.0 exactly.
+    """
+    service_aff = rng.dirichlet(np.full(len(SERVICE_IDS), profile.service_concentration))
+    product_aff = rng.dirichlet(np.full(len(PRODUCT_IDS), profile.product_concentration)) * PRODUCT_TILT[segment]
     product_aff /= product_aff.sum()
     p_service = SERVICE_JOURNEY_P[segment]
 
@@ -153,17 +228,24 @@ def _customer_events(
         s.add("app_open")
         s.add("home_view")
         last_service: str | None = None
+        last_product: str | None = None
         for _ in range(int(rng.integers(1, 4))):  # 1-3 intents per session
             if rng.random() < p_service:
-                if last_service and rng.random() < 0.4:
-                    item = SERVICE_TRANSITION[last_service]
+                p_t = profile.service_transition_p
+                if last_service and p_t > 0 and rng.random() < p_t:
+                    item = profile.service_transition_map[last_service]
                 else:
                     item = SERVICE_IDS[int(rng.choice(len(SERVICE_IDS), p=service_aff))]
                 _service_journey(s, rng, item)
                 last_service = item
             else:
-                item = PRODUCT_IDS[int(rng.choice(len(PRODUCT_IDS), p=product_aff))]
+                p_t = profile.product_transition_p
+                if last_product and p_t > 0 and rng.random() < p_t:
+                    item = profile.product_transition_map[last_product]
+                else:
+                    item = PRODUCT_IDS[int(rng.choice(len(PRODUCT_IDS), p=product_aff))]
                 _product_journey(s, rng, item)
+                last_product = item
         if s.t >= window_end:
             break  # session would spill past the window; drop it and later ones
         sessions.append(s.events)
@@ -171,10 +253,27 @@ def _customer_events(
     return sessions
 
 
+def resolve_profile(profile: str | BehaviorProfile | None) -> BehaviorProfile | None:
+    if profile is None or isinstance(profile, BehaviorProfile):
+        return profile
+    if profile not in PROFILES:
+        raise ValueError(f"profile must be one of {sorted(PROFILES)}")
+    return PROFILES[profile]
+
+
+def generator_version(profile: str | BehaviorProfile | None) -> str:
+    return LEGACY_GENERATOR_VERSION if profile is None else PROFILE_GENERATOR_VERSION
+
+
 def generate_dataset(
-    customers: int, days: int, seed: int
+    customers: int, days: int, seed: int, profile: str | BehaviorProfile | None = None
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Return (customers, catalog, consent_preferences, events) DataFrames."""
+    """Return (customers, catalog, consent_preferences, events) DataFrames.
+
+    profile=None is generator 0.2.0 (unchanged output). A named profile or a custom
+    BehaviorProfile is generator 0.3.0.
+    """
+    behavior = resolve_profile(profile) or LEGACY_PROFILE
     if not 1 <= customers <= MAX_CUSTOMERS:
         raise ValueError(f"customers must be between 1 and {MAX_CUSTOMERS}")
     if not 1 <= days <= MAX_DAYS:
@@ -217,7 +316,7 @@ def generate_dataset(
             cons_cols["captured_at"].append(fmt_ts(captured))
             cons_cols["policy_version"].append("SYN_POLICY_1")
 
-        sessions = _customer_events(rng, segment, engagement, window_start, days)
+        sessions = _customer_events(rng, segment, engagement, window_start, days, behavior)
         for s_num, events in enumerate(sessions, start=1):
             session_id = f"SYN_SESS_{i + 1:06d}_{s_num:04d}"
             for ts, event_type, item_id in events:
@@ -245,10 +344,12 @@ def generate_dataset(
 
 
 def write_dataset(
-    output_dir: Path, customers: int, days: int, seed: int
+    output_dir: Path, customers: int, days: int, seed: int,
+    profile: str | BehaviorProfile | None = None,
 ) -> dict:
     """Generate and write all files. Returns the metadata dict."""
-    tables = dict(zip(S.TABLES, generate_dataset(customers, days, seed)))
+    behavior = resolve_profile(profile)
+    tables = dict(zip(S.TABLES, generate_dataset(customers, days, seed, behavior)))
     output_dir.mkdir(parents=True, exist_ok=True)
     checksums = {}
     for filename, df in tables.items():
@@ -259,7 +360,7 @@ def write_dataset(
 
     window_start = WINDOW_END - timedelta(days=days)
     metadata = {
-        "generator_version": GENERATOR_VERSION,
+        "generator_version": generator_version(behavior),
         "schema_version": S.SCHEMA_VERSION,
         "synthetic_only": True,
         "seed": seed,
@@ -270,6 +371,11 @@ def write_dataset(
         "row_counts": {name: len(df) for name, df in tables.items()},
         "sha256": checksums,
     }
+    if behavior is not None:  # 0.2.0 metadata stays byte-identical
+        metadata["behavior_profile"] = behavior.name
+        metadata["behavior_params"] = behavior.to_dict()
+        metadata["behavior_note"] = ("Behavior parameters are invented experimental assumptions, "
+                                     "not estimates of real banking behavior.")
     (output_dir / S.METADATA_FILE).write_text(
         json.dumps(metadata, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
@@ -282,14 +388,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--days", type=int, default=30, help="length of the event window in days")
     parser.add_argument("--seed", type=int, default=42, help="random seed (same seed = same data)")
     parser.add_argument("--output-dir", type=Path, default=Path("data/synthetic"))
+    parser.add_argument("--profile", choices=sorted(PROFILES), default=None,
+                        help="behavior profile (generator 0.3.0); omit for generator 0.2.0")
     args = parser.parse_args(argv)
     if args.seed < 0:
         parser.error("--seed must be >= 0")
     try:
-        metadata = write_dataset(args.output_dir, args.customers, args.days, args.seed)
+        metadata = write_dataset(args.output_dir, args.customers, args.days, args.seed, args.profile)
     except ValueError as exc:
         parser.error(str(exc))
-    print(f"Synthetic dataset written to {args.output_dir}")
+    print(f"Synthetic dataset written to {args.output_dir} "
+          f"(generator {metadata['generator_version']}, profile {args.profile or 'none'})")
     for name, count in metadata["row_counts"].items():
         print(f"  {name:<26} {count:>10,} rows")
     print(f"  window: {metadata['window_start_utc']} -> {metadata['window_end_utc']} (seed={args.seed})")
