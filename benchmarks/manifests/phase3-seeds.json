@@ -1,0 +1,83 @@
+{
+  "checked_against": {
+    "manifests": {
+      "benchmark-v1": "c257db0048161c61bf50f4ac56715d62a3c8ec99091e116508ef89415601d839",
+      "phase2.2": "e9fba9c76754989f9e495deefd7140fde1bd604e283babd1b9fdaea8a52928bf",
+      "phase2.3": "372094856d9f136c4d36392ac02b30e8a4b67be611a4ad6b0b208dd124a729ed"
+    },
+    "seeds_in_use": [
+      42,
+      20261109,
+      20261110,
+      20261111,
+      20261112,
+      20261113,
+      20261114,
+      20261115,
+      20261116,
+      20261117,
+      20261118,
+      20261119
+    ]
+  },
+  "configs": {},
+  "datasets": [],
+  "frozen_report_dir": null,
+  "frozen_report_sha256": {},
+  "label": "SYNTHETIC-DATA EXPERIMENT: metrics reflect patterns deliberately embedded by the synthetic generator. They are not evidence of real customer behavior or of real-world recommendation effectiveness.",
+  "manifest_format": 1,
+  "notes": "Phase 3 seed reservation, written 2026-11-10 before any Phase 3 dataset was generated. Seeds were checked against every pinned manifest (see checked_against). Tuning and final namespaces are disjoint.",
+  "seed_namespaces": {
+    "phase3_final": {
+      "customers": 500,
+      "days": 30,
+      "generator_version": "0.3.0",
+      "profiles": [
+        "balanced",
+        "habit_dominant",
+        "transition_dominant"
+      ],
+      "purpose": "Phase 3 final evaluation of all models after the SASRec configuration is frozen; each test split used once.",
+      "seeds": [
+        20261130,
+        20261131,
+        20261132,
+        20261133,
+        20261134,
+        20261135,
+        20261136,
+        20261137,
+        20261138,
+        20261139
+      ],
+      "split_days": [
+        16,
+        7,
+        7
+      ]
+    },
+    "phase3_tuning": {
+      "customers": 500,
+      "days": 30,
+      "generator_version": "0.3.0",
+      "profiles": [
+        "balanced",
+        "habit_dominant",
+        "transition_dominant"
+      ],
+      "purpose": "Optuna hyperparameter search for SASRec Full; validation splits only. Test splits of these datasets are never evaluated.",
+      "seeds": [
+        20261120,
+        20261121,
+        20261122
+      ],
+      "split_days": [
+        16,
+        7,
+        7
+      ]
+    }
+  },
+  "suite": "phase3-seeds",
+  "suite_definition_sha256": {}
+}

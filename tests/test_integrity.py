@@ -179,6 +179,8 @@ def test_repository_manifests_and_frozen_reports_are_intact():
     assert {"benchmark-v1", "phase2.2"} <= set(manifests)
     I.verify_frozen_reports(manifests)
     for m in manifests.values():
+        if "seed_namespaces" in m or "frozen_config" in m:  # reservations / frozen configs have no reports
+            continue
         assert m["frozen_report_sha256"], "every locked benchmark pins its frozen report files"
 
 
@@ -196,6 +198,11 @@ def test_registered_suites_still_match_their_manifests():
     for m in manifests.values():
         for evaluation, c in m["configs"].items():
             suite = c["config"]["suite"]
+            if suite == "phase3-sasrec":  # not a classical suite: pinned via the frozen configuration
+                frozen = manifests["phase3-config"]["frozen_config_sha256"]
+                assert all(g == [{"frozen_config_sha256": frozen}] for g in
+                           (v["grid"] for v in c["config"]["models"].values()))
+                continue
             I.check_suite_definition(suite, evaluation, SUITES[suite], KEY_COMPARISONS[suite], manifests)
 
 

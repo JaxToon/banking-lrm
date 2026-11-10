@@ -311,6 +311,7 @@ def preflight_lock_check(cfg: RobustnessConfig, manifests: dict) -> None:
     different customer count or window would re-expose locked test customers; it is
     refused rather than treated as a fresh dataset.
     """
+    I.refuse_reserved_seeds(cfg.seeds, manifests)  # e.g. Phase 3 tuning/final seeds
     configs = {e: I.canonical_hash(c) for e, c in cfg.experiment_configs().items()}
     for m in manifests.values():
         rc = m.get("robustness_config") or {}

@@ -45,6 +45,14 @@ MANIFEST_SHA256: dict[str, str] = {
     "phase2.2": "9e4747135c84cdf6e3a3f97daa94b1046061cfeebb74c57cae59e70bc912a2d4",
     # Written at the Phase 2.3 final evaluation.
     "phase2.3": "29e2f0c2c534c8f6c1d0c4c18afe54909b92b12c5c0b306a6d56ae3ca72a35f3",
+    # Phase 3 seed reservation (phase3_tuning 20261120-20261122, phase3_final 20261130-20261139),
+    # pinned before any Phase 3 dataset was generated.
+    "phase3-seeds": "013366971304eabe23691af5e5624de1cf81042f79fc31937fcc7633627dd781",
+    # Frozen SASRec configuration (Optuna trial 21 on phase3_tuning validation splits),
+    # pinned before any phase3_final dataset was generated.
+    "phase3-config": "dadfe7555c0d930aa1479a2aabb533dcf4ee748f6efd2471b0049ac1833271db",
+    # Phase 3 final evaluation (30 phase3_final datasets), written after the run.
+    "phase3": "0f8112a1942f364bd10423e81250ba68b8bc86d7606f801274b33870db25dc49",
 }
 
 
@@ -133,7 +141,100 @@ def load_manifests(manifest_dir: Path | None = None, pinned: dict[str, str] | No
             raise BenchmarkIntegrityError(f"benchmark manifest for suite '{suite}' was modified "
                                           "(sha256 differs from the pinned value)")
         manifests[suite] = json.loads(raw.decode("utf-8"))
+    verify_seed_reservations(manifests)
     return manifests
+
+
+# --- seed namespaces -----------------------------------------------------------------
+# A seed-reservation manifest has "seed_namespaces": {namespace: {"seeds": [...], ...}}.
+# It is pinned like every other manifest BEFORE any dataset with those seeds exists.
+# A dataset entry may use a reserved seed only if it declares the same "seed_namespace".
+
+def seed_uses(manifests: dict[str, dict]) -> dict[int, list[tuple[str, str | None]]]:
+    """seed -> [(manifest name, declared seed_namespace or None)] over all locked datasets."""
+    uses: dict[int, list[tuple[str, str | None]]] = {}
+    for name, m in manifests.items():
+        for e in m.get("datasets", []):
+            uses.setdefault(int(e["seed"]), []).append((name, e.get("seed_namespace")))
+    return uses
+
+
+def seed_reservations(manifests: dict[str, dict]) -> dict[int, str]:
+    """seed -> namespace over all reservation manifests (raises on any overlap)."""
+    owner: dict[int, str] = {}
+    for m in manifests.values():
+        for ns, spec in m.get("seed_namespaces", {}).items():
+            for s in spec["seeds"]:
+                if int(s) in owner:
+                    raise BenchmarkIntegrityError(f"seed {s} is reserved by both '{owner[int(s)]}' and '{ns}'")
+                owner[int(s)] = ns
+    return owner
+
+
+def verify_seed_reservations(manifests: dict[str, dict]) -> None:
+    """Reserved seeds must not collide with locked datasets of another namespace."""
+    owner = seed_reservations(manifests)
+    for seed, uses in seed_uses(manifests).items():
+        if seed in owner:
+            bad = [name for name, ns in uses if ns != owner[seed]]
+            if bad:
+                raise BenchmarkIntegrityError(
+                    f"seed {seed} is reserved for namespace '{owner[seed]}' but used by manifest(s) {bad}")
+
+
+def check_seed_namespace(seeds, namespace: str, manifests: dict[str, dict]) -> None:
+    """Refuse unless every seed is reserved for `namespace` (run before generating anything)."""
+    owner = seed_reservations(manifests)
+    if namespace not in set(owner.values()):
+        raise LockedTestSplitError(f"seed namespace '{namespace}' is not registered in any pinned manifest")
+    for s in seeds:
+        ns = owner.get(int(s))
+        if ns != namespace:
+            where = f"reserved for '{ns}'" if ns else "not reserved"
+            raise LockedTestSplitError(f"seed {s} is {where}; namespace '{namespace}' may only use its own "
+                                       "reserved seeds")
+
+
+def refuse_reserved_seeds(seeds, manifests: dict[str, dict]) -> None:
+    """For runners outside any namespace: reserved seeds are off-limits."""
+    owner = seed_reservations(manifests)
+    taken = sorted({int(s) for s in seeds} & set(owner))
+    if taken:
+        raise LockedTestSplitError(f"seed(s) {taken} are reserved for namespace(s) "
+                                   f"{sorted({owner[s] for s in taken})}; choose other seeds")
+
+
+def build_seed_reservation(name: str, namespaces: dict[str, dict], manifests: dict[str, dict], notes: str) -> dict:
+    """A seed-reservation manifest, verified against every seed already in `manifests`."""
+    used = seed_uses(manifests)
+    existing = seed_reservations(manifests)
+    seen: dict[int, str] = {}
+    for ns, spec in namespaces.items():
+        for s in spec["seeds"]:
+            s = int(s)
+            if s in used:
+                raise BenchmarkIntegrityError(f"seed {s} ({ns}) is already used by {sorted({u for u, _ in used[s]})}")
+            if s in existing:
+                raise BenchmarkIntegrityError(f"seed {s} ({ns}) is already reserved for '{existing[s]}'")
+            if s in seen:
+                raise BenchmarkIntegrityError(f"seed {s} appears in both '{seen[s]}' and '{ns}'")
+            seen[s] = ns
+    return {
+        "manifest_format": MANIFEST_FORMAT,
+        "label": SYNTHETIC_LABEL,
+        "suite": name,
+        "notes": notes,
+        "seed_namespaces": namespaces,
+        "checked_against": {
+            "manifests": {k: canonical_hash(v) for k, v in sorted(manifests.items())},
+            "seeds_in_use": sorted(used),
+        },
+        "configs": {},
+        "suite_definition_sha256": {},
+        "frozen_report_sha256": {},
+        "frozen_report_dir": None,
+        "datasets": [],
+    }
 
 
 def write_manifest(manifest: dict, path: Path) -> str:
@@ -300,6 +401,15 @@ def main(argv: list[str] | None = None) -> int:
         print(f"INTEGRITY CHECK FAILED: {exc}", file=sys.stderr)
         return 1
     for suite, m in manifests.items():
+        if "seed_namespaces" in m:
+            print(f"{suite}: seed reservation ok, " + ", ".join(
+                f"{ns} {min(v['seeds'])}-{max(v['seeds'])} ({len(v['seeds'])} seeds)"
+                for ns, v in m["seed_namespaces"].items()))
+            continue
+        if "frozen_config" in m:
+            print(f"{suite}: frozen configuration ok (trial {m['selection']['trial']}, "
+                  f"config sha256 {m['frozen_config_sha256'][:12]}...)")
+            continue
         provenance = m.get("provenance", "written at final evaluation")
         print(f"{suite}: manifest ok ({provenance}), {len(m['datasets'])} locked dataset(s), "
               f"{len(m.get('frozen_report_sha256', {}))} frozen report file(s) unchanged")
