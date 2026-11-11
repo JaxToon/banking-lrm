@@ -421,11 +421,39 @@ def criteria(groups: dict, interpretation: dict) -> dict:
             "RQ4": "see cost", "outcome": outcome}
 
 
+COST_DEFINITIONS = {
+    "sasrec_train_seconds_total": (
+        "sum over all SASRec fits of train_seconds: the training loop including per-epoch validation evaluation "
+        "for early stopping; excludes best-state reload and test scoring"),
+    "dataset_wall_seconds_total": (
+        "SUM of the per-dataset wall times (not a per-dataset value). Each is measured inside run_dataset from "
+        "after the gated-plan check to the end of both tasks: fingerprint verification, data loading, case and "
+        "sequence building, PF selection, SASRec fits, test scoring, metrics and bootstrap. Excludes gates 1-6, "
+        "process start-up, summary and report writing. Datasets run sequentially"),
+    "peak_gpu_memory_mib_max": (
+        "maximum over fits of torch.cuda.max_memory_allocated (tensor memory allocated through PyTorch's caching "
+        "allocator), reset at the start of each fit and read at its end (training + validation evaluation). "
+        "Excludes reserved-but-free cache, the CUDA context and other processes; test scoring runs after the read "
+        "and is not included. Not total GPU process memory"),
+    "test_inference_ms_per_case_mean": (
+        "unweighted mean over fits of (wall time of the one test scoring pass / number of test cases). The pass is "
+        "bri.seq.train.score: batch size 1024, eval mode, no_grad, inputs already on the GPU, each batch copied to "
+        "the host (.cpu(), which waits for that batch), plus a CPU softmax. No dedicated warm-up (the model had just "
+        "run validation inference in the same process) and no other explicit synchronization. Amortized batch "
+        "throughput on synthetic test sets; NOT single-request or online customer-facing latency (excludes request "
+        "handling, feature retrieval, model loading, batching delay and network)"),
+}
+
+
 def cost(records: list[dict]) -> dict:
     fits = [rt for r in records for t in r["tasks"].values() for rt in t["sasrec_runtime"]]
+    walls = [r["wall_seconds"] for r in records]
     return {"datasets": len(records), "sasrec_fits": len(fits),
             "sasrec_train_seconds_total": round(sum(f["train_seconds"] for f in fits), 3),
-            "dataset_wall_seconds_total": round(sum(r["wall_seconds"] for r in records), 3),
+            "dataset_wall_seconds_total": round(sum(walls), 3),
+            "dataset_wall_seconds_per_dataset": {"mean": round(float(np.mean(walls)), 3), "min": min(walls),
+                                                 "max": max(walls)} if walls else None,
+            "definitions": COST_DEFINITIONS,
             "peak_gpu_memory_mib_max": max((f["peak_gpu_memory_mib"] or 0) for f in fits) if fits else None,
             "parameters": sorted({f["parameters"] for f in fits}),
             "test_inference_ms_per_case_mean": {p: round(float(np.mean([f[f"{p}_test_inference_ms_per_case"]
@@ -455,6 +483,17 @@ def to_markdown(s: dict) -> str:
             o = g["diagnostics"]["oracle_router"]["@1"]["mean"]
             lines.append(f"| {key.removesuffix('/next_event')} | {m['personal_frequency']:.4f} | {m['sasrec_full']:.4f} "
                          f"| {m['static_hybrid']:.4f} | {o:.4f} |")
+    k = s["cost"]
+    lines += ["", "## Cost (RQ4)", "",
+              f"- SASRec fits: {k['sasrec_fits']}; training {k['sasrec_train_seconds_total']} s in total.",
+              f"- Sum of per-dataset wall times: {k['dataset_wall_seconds_total']} s (excludes gates).",
+              f"- Peak PyTorch-allocated GPU memory, max over fits: {k['peak_gpu_memory_mib_max']} MiB.",
+              f"- Amortized batch test inference (batch 1024), ms/case: {k['test_inference_ms_per_case_mean']}; "
+              "not online latency."]
+    if "run_wall_clock" in k:
+        lines.append(f"- Whole run, from file timestamps (not runner-instrumented): "
+                     f"{k['run_wall_clock']['seconds']} s, gates included.")
+    lines.append("- Definitions: see `cost.definitions` in the JSON report.")
     return "\n".join(lines) + "\n"
 
 

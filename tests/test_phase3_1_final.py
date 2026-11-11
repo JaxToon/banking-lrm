@@ -224,6 +224,11 @@ def test_criteria_follow_the_preregistration():
     assert "oracle_router" not in g["models"] and set(g["diagnostics"]) == {"oracle_router"}
     assert g["comparisons"]["static_hybrid - personal_frequency"]["@1/ndcg"]["n_seeds"] == 3  # seeds, not inits
     assert s["cost"]["sasrec_fits"] == 9 * 2 * 3
+    assert set(s["cost"]["definitions"]) == {"sasrec_train_seconds_total", "dataset_wall_seconds_total",
+                                             "peak_gpu_memory_mib_max", "test_inference_ms_per_case_mean"}
+    assert "SUM of the per-dataset" in s["cost"]["definitions"]["dataset_wall_seconds_total"]
+    assert "NOT single-request or online" in s["cost"]["definitions"]["test_inference_ms_per_case_mean"]
+    assert "not online latency" in F.to_markdown(s)
     assert "Phase 3.1 final evaluation" in F.to_markdown(s)
 
 
