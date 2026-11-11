@@ -282,7 +282,7 @@ before any Phase 3 dataset existed. Other runners refuse them.
 ## Roadmap after Phase 1
 
 - Phase 2: temporal splits, consent-aware examples, and evaluation framework (done); Phase 2.1 classical baselines (done, benchmark-v1); Phase 2.2 personal frequency + ItemKNN ablation (done); Phase 2.3 benchmark integrity + multi-seed behavioral robustness (done).
-- Phase 3: sequential recommendation (SASRec + ablations) — done, pending review. Phase 3.1 (hybrid Personal Frequency + SASRec with a gate on pre-recommendation features only, fresh seeds) is future work.
+- Phase 3: sequential recommendation (SASRec + ablations) — done, reviewed and released as v0.3.0. Phase 3.1 (hybrid Personal Frequency + SASRec with a gate on pre-recommendation features only, fresh seeds) is pre-registered and in development outside this release; no Phase 3.1 results exist yet.
 - Phase 4: multi-behavior LRM-inspired Transformer and scaling experiments.
 - Phase 5: LLM product-catalog explanation with strict context minimization.
 - Phase 6: deterministic eligibility/consent/frequency policy service.
