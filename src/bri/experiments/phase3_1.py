@@ -1,4 +1,4 @@
-"""Phase 3.1 runner (synthetic-data experiments only). Checkpoints 2-3.
+"""Phase 3.1 runner (synthetic-data experiments only). Checkpoints 2-5.
 
 `prepare-tuning` generates and validates the 9 `phase3_1_tuning` datasets (3 profiles x
 seeds 20261140-20261142); every check runs before anything is written; the final
@@ -15,6 +15,11 @@ Usage:
     python -m bri.experiments.phase3_1 prepare-tuning          # generate + validate
     python -m bri.experiments.phase3_1 pin-tuning-manifest     # immutable fingerprints (once)
     python -m bri.experiments.phase3_1 tune                    # Checkpoint 3 (tuning validation only)
+    python -m bri.experiments.phase3_1 freeze-config           # Checkpoint 4 (writes phase3_1-config once)
+    python -m bri.experiments.phase3_1 prepare-final           # Checkpoint 5: 30 final datasets, no models
+    python -m bri.experiments.phase3_1 pin-final-manifest      # immutable final-data fingerprints (once)
+
+`prepare-final` requires the pinned phase3_1-config; it trains and evaluates nothing.
 """
 from __future__ import annotations
 
@@ -44,6 +49,8 @@ DATA_ROOT = Path("data/phase3_1")
 REPORT = Path("artifacts/phase3_1/tuning_data_report.json")
 TUNING_DIR = Path("artifacts/phase3_1/tuning")
 CONFIG_MANIFEST = "phase3_1-config"
+FINAL_DATA_MANIFEST = "phase3_1-final-data"
+FINAL_REPORT = Path("artifacts/phase3_1/final_data_report.json")
 P3_CONFIG = "phase3-config"
 
 
@@ -52,14 +59,21 @@ class Phase31Refused(I.LockedTestSplitError):
 
 
 def preflight(namespace: str, manifests: dict) -> dict:
-    """All checks before writing: manifests, pre-registration, namespace, generator version."""
-    if namespace != TUNING_NS:
-        raise Phase31Refused(f"Checkpoint 2 authorizes only '{TUNING_NS}' datasets; '{namespace}' is refused")
+    """All checks before writing: manifests, pre-registration, namespace, generator version.
+
+    Final datasets (Checkpoint 5) need the pinned phase3_1-config: the configuration is
+    frozen before any final dataset exists.
+    """
+    if namespace == FINAL_NS:
+        if CONFIG_MANIFEST not in manifests:
+            raise Phase31Refused(f"'{FINAL_NS}' datasets require the pinned {CONFIG_MANIFEST} (Checkpoint 4)")
+    elif namespace != TUNING_NS:
+        raise Phase31Refused(f"only '{TUNING_NS}' and '{FINAL_NS}' datasets exist; '{namespace}' is refused")
     for needed in (PREREG, SEEDS_NAME):
         if needed not in manifests:
             raise Phase31Refused(f"manifest '{needed}' is not pinned")
-    spec = manifests[SEEDS_NAME]["seed_namespaces"][TUNING_NS]
-    I.check_seed_namespace(spec["seeds"], TUNING_NS, manifests)
+    spec = manifests[SEEDS_NAME]["seed_namespaces"][namespace]
+    I.check_seed_namespace(spec["seeds"], namespace, manifests)
     if spec["generator_version"] != PROFILE_GENERATOR_VERSION:
         raise Phase31Refused(f"generator {PROFILE_GENERATOR_VERSION} differs from reserved {spec['generator_version']}")
     pre = manifests[PREREG]["data"]
@@ -90,8 +104,8 @@ def _profile_checks(events: pd.DataFrame) -> dict:
     return out
 
 
-def prepare_one(spec: dict, profile: str, seed: int, root: Path) -> dict:
-    base = root / TUNING_NS / profile / f"seed{seed}"
+def prepare_one(spec: dict, profile: str, seed: int, root: Path, namespace: str = TUNING_NS) -> dict:
+    base = root / namespace / profile / f"seed{seed}"
     src, proc = base / "synthetic", base / "processed"
     gen = write_dataset(src, spec["customers"], spec["days"], seed, profile)
     errors = validate(src)
@@ -123,7 +137,7 @@ def prepare_one(spec: dict, profile: str, seed: int, root: Path) -> dict:
         raise RuntimeError(f"{profile}/seed{seed}: regeneration is not byte-identical")
     entry = I.dataset_entry(None, proc, prep, f"{profile}/seed{seed}", [])
     entry.pop("evaluations")
-    entry["seed_namespace"] = TUNING_NS
+    entry["seed_namespace"] = namespace
     entry["generation_metadata_sha256"] = I.sha256_file(src / S.METADATA_FILE)
     return {"entry": entry, "row_counts": gen["row_counts"],
             "consent_filter": {k: prep["consent_filter"][k] for k in ("input_events", "kept_events")},
@@ -138,7 +152,7 @@ def prepare_tuning(manifests: dict | None = None, root: Path = DATA_ROOT, namesp
     results = []
     for profile in spec["profiles"]:
         for seed in spec["seeds"]:
-            results.append(prepare_one(spec, profile, seed, root))
+            results.append(prepare_one(spec, profile, seed, root, namespace))
             log(f"  {profile} seed {seed}: generated, validated, reproduced")
     # Cross-profile behavior ordering per seed (habit > balanced > transition in personal concentration;
     # the reverse for in-session transitions), as defined by the invented profiles.
@@ -153,7 +167,25 @@ def prepare_tuning(manifests: dict | None = None, root: Path = DATA_ROOT, namesp
     return {"label": SYNTHETIC_LABEL, "namespace": namespace, "n_datasets": len(results),
             "spec": spec, "generator_version": PROFILE_GENERATOR_VERSION, "prep_version": PREP_VERSION,
             "datasets": results, "profile_ordering": ordering,
+            "config_sha256": I.MANIFEST_SHA256.get(CONFIG_MANIFEST) if namespace == FINAL_NS else None,
             "note": "Data preparation only: no model, OOF prediction, gate or evaluation."}
+
+
+def final_data_manifest(report: dict, manifests: dict) -> dict:
+    if report["namespace"] != FINAL_NS or report["config_sha256"] != I.MANIFEST_SHA256[CONFIG_MANIFEST]:
+        raise Phase31Refused("report is not a final-data report made under the pinned phase3_1-config")
+    return {
+        "manifest_format": I.MANIFEST_FORMAT, "label": SYNTHETIC_LABEL, "suite": FINAL_DATA_MANIFEST,
+        "notes": ("Fingerprints of the 30 Phase 3.1 final datasets, recorded at Checkpoint 5 after phase3_1-config "
+                  "was pinned and before any Phase 3.1 model was trained or evaluated on them. Locked for the single "
+                  "Phase 3.1 final evaluation; never used for selection."),
+        "references": {"prereg_sha256": I.MANIFEST_SHA256[PREREG], "seeds_sha256": I.MANIFEST_SHA256[SEEDS_NAME],
+                       "config_sha256": I.MANIFEST_SHA256[CONFIG_MANIFEST]},
+        "versions": {"generator": report["generator_version"], "prep": report["prep_version"]},
+        "final_datasets": [r["entry"] for r in report["datasets"]],
+        "configs": {}, "suite_definition_sha256": {}, "frozen_report_sha256": {}, "frozen_report_dir": None,
+        "datasets": [],
+    }
 
 
 def tuning_data_manifest(report: dict, manifests: dict) -> dict:
@@ -382,7 +414,8 @@ def config_manifest(report: dict, report_sha256: str, code_commit: str, manifest
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("command", choices=("prepare-tuning", "pin-tuning-manifest", "tune", "freeze-config"))
+    parser.add_argument("command", choices=("prepare-tuning", "pin-tuning-manifest", "tune", "freeze-config",
+                                            "prepare-final", "pin-final-manifest"))
     parser.add_argument("--namespace", default=TUNING_NS)
     args = parser.parse_args(argv)
     try:
@@ -400,8 +433,28 @@ def main(argv: list[str] | None = None) -> int:
             s = rep["selection"]
             print(f"primary hybrid (proposal): {s['primary_hybrid']}; delta_val {s['delta_val']}; "
                   f"statuses {s['status_counts']}; report {TUNING_DIR / 'tuning_report.json'}")
+        elif args.command == "prepare-final":
+            report = prepare_tuning(namespace=FINAL_NS)
+            FINAL_REPORT.parent.mkdir(parents=True, exist_ok=True)
+            FINAL_REPORT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
+            print(f"{report['n_datasets']} final datasets ready; report {FINAL_REPORT}")
+        elif args.command == "pin-final-manifest":
+            manifests = I.load_manifests()
+            if FINAL_DATA_MANIFEST in manifests:
+                raise Phase31Refused("final-data manifest already pinned")
+            report = json.loads(FINAL_REPORT.read_text(encoding="utf-8"))
+            for r in report["datasets"]:  # fingerprints must still match the files on disk
+                e = r["entry"]
+                proc = DATA_ROOT / FINAL_NS / e["behavior_profile"] / f"seed{e['seed']}" / "processed"
+                if I.processed_fingerprints(proc)["files"] != e["processed_files_sha256"]:
+                    raise Phase31Refused(f"{e['dataset_id']} changed since prepare-final")
+            digest = I.write_manifest(final_data_manifest(report, manifests),
+                                      I.MANIFEST_DIR / f"{FINAL_DATA_MANIFEST}.json")
+            print(f"final-data manifest written; pin sha256 {digest} in bri.experiments.integrity.MANIFEST_SHA256")
         elif args.command == "prepare-tuning":
-            report = prepare_tuning(namespace=args.namespace)
+            if args.namespace != TUNING_NS:
+                raise Phase31Refused("prepare-tuning writes tuning datasets only; use prepare-final for final data")
+            report = prepare_tuning(namespace=TUNING_NS)
             REPORT.parent.mkdir(parents=True, exist_ok=True)
             REPORT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
             print(f"{report['n_datasets']} tuning datasets ready; report {REPORT}")

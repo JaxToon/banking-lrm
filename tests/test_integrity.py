@@ -179,7 +179,8 @@ def test_repository_manifests_and_frozen_reports_are_intact():
     assert {"benchmark-v1", "phase2.2"} <= set(manifests)
     I.verify_frozen_reports(manifests)
     for m in manifests.values():
-        if any(k in m for k in ("seed_namespaces", "frozen_config", "design_document", "tuning_datasets")):  # no reports by design
+        if any(k in m for k in ("seed_namespaces", "frozen_config", "design_document", "tuning_datasets",
+                                 "final_datasets")):  # no reports by design (final data: report comes at the lock)
             continue
         assert m["frozen_report_sha256"], "every locked benchmark pins its frozen report files"
 

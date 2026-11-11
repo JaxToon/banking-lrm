@@ -64,6 +64,9 @@ MANIFEST_SHA256: dict[str, str] = {
     # Phase 3.1 frozen configuration (Checkpoint 4: static fusion, alpha NBS 0.6 / NBP 0.1,
     # tuning validation only), pinned before any phase3_1_final dataset exists.
     "phase3_1-config": "97e415e9c4762c017fc38c9487f91dc294d9be928bc44cbeae3c66f7f53791a5",
+    # Phase 3.1 final-data fingerprints (Checkpoint 5: 30 phase3_1_final datasets), written
+    # after phase3_1-config was pinned and before any model was trained on them.
+    "phase3_1-final-data": "9c3fd74088524157ffa16d435881adb55201b0bc5b3276189bc3f0f146502071",
 }
 
 
@@ -426,6 +429,10 @@ def main(argv: list[str] | None = None) -> int:
         if "tuning_datasets" in m:
             print(f"{suite}: tuning-data fingerprints ok, {len(m['tuning_datasets'])} dataset(s) "
                   "(test splits never evaluated; not a locked benchmark)")
+            continue
+        if "final_datasets" in m:
+            print(f"{suite}: final-data fingerprints ok, {len(m['final_datasets'])} dataset(s) "
+                  "(locked for the single final evaluation; not yet evaluated)")
             continue
         if "selection_record" in m:  # Phase 3.1 hybrid configuration
             ok = canonical_hash(m["frozen_config"]) == m["frozen_config_sha256"]
