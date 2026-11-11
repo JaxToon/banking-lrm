@@ -1,13 +1,20 @@
-"""Phase 3.1 runner (synthetic-data experiments only). Currently: Checkpoint 2 only.
+"""Phase 3.1 runner (synthetic-data experiments only). Checkpoints 2-3.
 
 `prepare-tuning` generates and validates the 9 `phase3_1_tuning` datasets (3 profiles x
-seeds 20261140-20261142). It trains no model, builds no OOF predictions or gates, and
-evaluates nothing. Every check runs before anything is written; the final namespace is
-refused.
+seeds 20261140-20261142); every check runs before anything is written; the final
+namespace is refused.
+
+`tune` (Checkpoint 3) runs on the tuning datasets only, with test-window events dropped
+before any sequence is built: per dataset x task x initialization seed {1,2,3}, 3 OOF
+SASRec fits + 1 full fit (frozen Phase 3 configuration, CUDA, runtime fingerprint equal
+to the frozen one), soft labels, support status, gates, static/gated validation NDCG@1,
+and the pre-registered selection. It writes a proposal report; it pins nothing and
+refuses to run once `phase3_1-config` exists.
 
 Usage:
     python -m bri.experiments.phase3_1 prepare-tuning          # generate + validate
     python -m bri.experiments.phase3_1 pin-tuning-manifest     # immutable fingerprints (once)
+    python -m bri.experiments.phase3_1 tune                    # Checkpoint 3 (tuning validation only)
 """
 from __future__ import annotations
 
@@ -15,6 +22,7 @@ import argparse
 import json
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 import numpy as np
@@ -34,6 +42,9 @@ FINAL_NS = "phase3_1_final"
 TUNING_DATA_MANIFEST = "phase3_1-tuning-data"
 DATA_ROOT = Path("data/phase3_1")
 REPORT = Path("artifacts/phase3_1/tuning_data_report.json")
+TUNING_DIR = Path("artifacts/phase3_1/tuning")
+CONFIG_MANIFEST = "phase3_1-config"
+P3_CONFIG = "phase3-config"
 
 
 class Phase31Refused(I.LockedTestSplitError):
@@ -158,13 +169,122 @@ def tuning_data_manifest(report: dict, manifests: dict) -> dict:
     }
 
 
+# --- Checkpoint 3: cross-fitting, gates and selection on TUNING validation only ---------
+
+def tune_preflight(manifests: dict) -> dict:
+    """Pinned prereg/seeds/tuning data, frozen Phase 3 config matching the prereg, no Phase 3.1 config yet."""
+    from bri.seq.data import SEQ_DATA_VERSION
+    from bri.seq.sasrec import MODEL_VERSION
+    from bri.seq.train import TRAIN_VERSION
+    for needed in (PREREG, SEEDS_NAME, TUNING_DATA_MANIFEST, P3_CONFIG):
+        if needed not in manifests:
+            raise Phase31Refused(f"manifest '{needed}' is not pinned")
+    if CONFIG_MANIFEST in manifests:
+        raise Phase31Refused("the Phase 3.1 configuration is already frozen; tuning may not run again")
+    pre, cfgm = manifests[PREREG], manifests[P3_CONFIG]
+    sha = I.canonical_hash(cfgm["frozen_config"])
+    if sha != cfgm["frozen_config_sha256"] or sha != pre["references"]["phase3_frozen_config_sha256"]:
+        raise Phase31Refused("frozen SASRec configuration differs from the one referenced by the pre-registration")
+    if ({"model": MODEL_VERSION, "train": TRAIN_VERSION} != {k: cfgm["versions"][k] for k in ("model", "train")}
+            or cfgm["tuning_data"]["seq_data_version"] != SEQ_DATA_VERSION):
+        raise Phase31Refused("SASRec pipeline versions differ from the frozen configuration")
+    spec = manifests[SEEDS_NAME]["seed_namespaces"][TUNING_NS]
+    I.check_seed_namespace(spec["seeds"], TUNING_NS, manifests)
+    return {"spec": spec, "cfgm": cfgm, "init_seeds": pre["seed_policy"]["initialization_seeds"],
+            "entries": manifests[TUNING_DATA_MANIFEST]["tuning_datasets"]}
+
+
+def load_tuning_dataset(entry: dict, root: Path, max_len: int) -> dict:
+    """Verified processed files, test-window events dropped, train/val sequence cases only."""
+    from bri.prep.split import compute_cutoffs
+    from bri.seq.data import build_seq_cases
+    from bri.seq.prepare import load_interactions, no_test_events
+    from bri.seq.train import train_popularity
+    proc = root / TUNING_NS / entry["behavior_profile"] / f"seed{entry['seed']}" / "processed"
+    inter, meta, cands = load_interactions(proc)
+    if I.verify_processed_dir(proc, meta)["files"] != entry["processed_files_sha256"]:
+        raise Phase31Refused(f"{entry['dataset_id']} differs from the pinned tuning-data fingerprints")
+    c, p = meta["cutoffs"], meta["params"]
+    cut = compute_cutoffs(c["window_start_utc"], c["window_end_utc"], p["val_days"], p["test_days"])
+    inter = no_test_events(inter)
+    return {"inter": inter, "candidates": cands,
+            "tiebreak": {t: train_popularity(inter, t, cands[t]) for t in cands},
+            "seqs": build_seq_cases(inter, cut, cands, ("train", "val"), max_len)}
+
+
+def _jsonable(cell: dict) -> dict:
+    v = cell["val_ndcg1"]
+    lst = lambda a: None if a is None else [float(x) for x in a]  # noqa: E731
+    return {**cell, "val_ndcg1": {"pf": lst(v["pf"]), "sasrec": lst(v["sasrec"]),
+                                  "oracle_router": lst(v["oracle_router"]),
+                                  "static": {str(a): lst(x) for a, x in v["static"].items()},
+                                  "gated": {k: lst(x) for k, x in v["gated"].items()}}}
+
+
+def tune(root: Path = DATA_ROOT, out_dir: Path = TUNING_DIR, manifests: dict | None = None,
+         expected_device: str = "cuda:0", log=print) -> dict:
+    from bri.seq import hybrid as H
+    from bri.seq import runtime as R
+    from bri.seq.crossfit import run_cell
+    from bri.tasks import TASKS
+    R.configure_determinism()  # before CUDA initialization
+    manifests = I.load_manifests() if manifests is None else manifests
+    pf = tune_preflight(manifests)
+    choice = R.select_device("cuda" if expected_device.startswith("cuda") else "cpu")
+    R.require_device(choice, expected_device)
+    runtime = R.runtime_fingerprint(choice.device)
+    if runtime["runtime_sha256"] != pf["cfgm"]["runtime"]["runtime_sha256"]:
+        raise Phase31Refused("runtime fingerprint differs from the one recorded with the frozen SASRec configuration")
+    frozen = pf["cfgm"]["frozen_config"]
+    (out_dir / "cells").mkdir(parents=True, exist_ok=True)
+    summary, t0 = [], time.perf_counter()
+    for entry in pf["entries"]:
+        profile, seed = entry["behavior_profile"], entry["seed"]
+        d = load_tuning_dataset(entry, root, frozen["model"]["max_len"])
+        log(f"  {profile} seed {seed}")
+        for task in TASKS:
+            tr, va = d["seqs"][(task, "train")], d["seqs"][(task, "val")]
+            H.check_candidates(d["candidates"][task], tr.items_vocab, va.items_vocab)
+            log(f"    {task}: {len(tr.cases)} train / {len(va.cases)} val cases")
+            for init in pf["init_seeds"]:
+                cell = run_cell(d["inter"], tr, va, d["tiebreak"][task], frozen, init, choice.device, log)
+                cell.update({"profile": profile, "seed": seed, "task": task,
+                             "train_sequences_sha256": tr.fingerprint(), "val_sequences_sha256": va.fingerprint()})
+                name = f"{profile}_seed{seed}_{task}_init{init}.json"
+                (out_dir / "cells" / name).write_text(json.dumps(_jsonable(cell)) + "\n", encoding="utf-8",
+                                                      newline="\n")
+                summary.append({"profile": profile, "seed": seed, "task": task, "init": init,
+                                "status": cell["status"], "min_support": cell["min_support"],
+                                "per_fold": cell["per_fold"], "means": H.cell_means(cell),
+                                "gates_not_converged": sorted(k for k, g in cell["gates"].items()
+                                                              if g.get("converged") is False),
+                                "alpha_val": {k: g["alpha_val"] for k, g in cell["gates"].items() if "alpha_val" in g},
+                                "fits": cell["fits"], "sasrec_seconds_total": cell["sasrec_seconds_total"]})
+    selection = H.select(summary, pf["spec"]["profiles"], list(TASKS))
+    report = {"label": SYNTHETIC_LABEL, "namespace": TUNING_NS, "hybrid_version": H.HYBRID_VERSION,
+              "prereg_sha256": I.MANIFEST_SHA256[PREREG],
+              "tuning_data_sha256": I.MANIFEST_SHA256[TUNING_DATA_MANIFEST],
+              "frozen_sasrec_config_sha256": pf["cfgm"]["frozen_config_sha256"], "runtime": runtime,
+              "init_seeds": pf["init_seeds"], "wall_seconds": round(time.perf_counter() - t0, 1),
+              "selection": selection, "cells": summary,
+              "note": ("Tuning validation only: no test split was built or evaluated. The selection is a proposal; "
+                       "it becomes binding only when frozen in a pinned phase3_1-config manifest after review.")}
+    (out_dir / "tuning_report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
+    return report
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("command", choices=("prepare-tuning", "pin-tuning-manifest"))
+    parser.add_argument("command", choices=("prepare-tuning", "pin-tuning-manifest", "tune"))
     parser.add_argument("--namespace", default=TUNING_NS)
     args = parser.parse_args(argv)
     try:
-        if args.command == "prepare-tuning":
+        if args.command == "tune":
+            rep = tune()
+            s = rep["selection"]
+            print(f"primary hybrid (proposal): {s['primary_hybrid']}; delta_val {s['delta_val']}; "
+                  f"statuses {s['status_counts']}; report {TUNING_DIR / 'tuning_report.json'}")
+        elif args.command == "prepare-tuning":
             report = prepare_tuning(namespace=args.namespace)
             REPORT.parent.mkdir(parents=True, exist_ok=True)
             REPORT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
