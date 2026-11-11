@@ -61,6 +61,9 @@ MANIFEST_SHA256: dict[str, str] = {
     "phase3_1-seeds": "a345f976499bd089cd3165a3a692cbcdcd9adb986f7c1751770327452a32ae85",
     # Phase 3.1 tuning-data fingerprints (Checkpoint 2), before any Phase 3.1 model.
     "phase3_1-tuning-data": "77e235d7b3c8799be8df1b445d25cc31daa09d045ff704b2f9111d74d797ca3e",
+    # Phase 3.1 frozen configuration (Checkpoint 4: static fusion, alpha NBS 0.6 / NBP 0.1,
+    # tuning validation only), pinned before any phase3_1_final dataset exists.
+    "phase3_1-config": "97e415e9c4762c017fc38c9487f91dc294d9be928bc44cbeae3c66f7f53791a5",
 }
 
 
@@ -423,6 +426,14 @@ def main(argv: list[str] | None = None) -> int:
         if "tuning_datasets" in m:
             print(f"{suite}: tuning-data fingerprints ok, {len(m['tuning_datasets'])} dataset(s) "
                   "(test splits never evaluated; not a locked benchmark)")
+            continue
+        if "selection_record" in m:  # Phase 3.1 hybrid configuration
+            ok = canonical_hash(m["frozen_config"]) == m["frozen_config_sha256"]
+            print(f"{suite}: frozen hybrid configuration {'ok' if ok else 'HASH MISMATCH'} "
+                  f"({m['frozen_config']['primary_hybrid']}, alpha {m['frozen_config']['alpha']}, "
+                  f"config sha256 {m['frozen_config_sha256'][:12]}...)")
+            if not ok:
+                return 1
             continue
         if "frozen_config" in m:
             print(f"{suite}: frozen configuration ok (trial {m['selection']['trial']}, "

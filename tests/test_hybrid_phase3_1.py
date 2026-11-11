@@ -253,15 +253,59 @@ def test_selection_never_replaces_unavailable_gates_with_zero():
 
 # --- tuning preflight -----------------------------------------------------------------------
 
-def test_tune_preflight_accepts_pinned_state_and_refuses_otherwise():
+def test_tune_preflight_accepts_pre_freeze_state_and_refuses_otherwise():
     from bri.experiments import phase3_1 as P31
-    manifests = I.load_manifests()
+    all_manifests = I.load_manifests()
+    manifests = {k: v for k, v in all_manifests.items() if k != P31.CONFIG_MANIFEST}  # state before Checkpoint 4
     pf = P31.tune_preflight(manifests)
     assert pf["init_seeds"] == [1, 2, 3] and len(pf["entries"]) == 9
     with pytest.raises(P31.Phase31Refused, match="already frozen"):
-        P31.tune_preflight({**manifests, P31.CONFIG_MANIFEST: {}})
+        P31.tune_preflight(all_manifests)  # the pinned config forbids any further tuning run
     with pytest.raises(P31.Phase31Refused, match="not pinned"):
         P31.tune_preflight({k: v for k, v in manifests.items() if k != P31.TUNING_DATA_MANIFEST})
     bad = {**manifests["phase3-config"], "frozen_config": {**manifests["phase3-config"]["frozen_config"], "device": "x"}}
     with pytest.raises(P31.Phase31Refused, match="differs"):
         P31.tune_preflight({**manifests, "phase3-config": bad})
+
+
+# --- Checkpoint 4: pinned configuration ----------------------------------------------------
+
+def test_pinned_config_is_the_approved_static_proposal():
+    from bri.experiments import phase3_1 as P31
+    m = I.load_manifests()
+    c = m[P31.CONFIG_MANIFEST]
+    f = c["frozen_config"]
+    assert I.canonical_hash(f) == c["frozen_config_sha256"]
+    assert f["primary_hybrid"] == "static_fusion" and f["alpha"] == {"nbs": 0.6, "nbp": 0.1}
+    assert all(a in H.ALPHA_GRID for a in f["alpha"].values())
+    assert f["sasrec"]["frozen_config_sha256"] == m["phase3_1-prereg"]["references"]["phase3_frozen_config_sha256"]
+    assert f["sasrec"]["initialization_seeds"] == m["phase3_1-prereg"]["seed_policy"]["initialization_seeds"]
+    assert c["references"] == {"prereg_sha256": I.MANIFEST_SHA256["phase3_1-prereg"],
+                               "seeds_sha256": I.MANIFEST_SHA256["phase3_1-seeds"],
+                               "tuning_data_sha256": I.MANIFEST_SHA256["phase3_1-tuning-data"],
+                               "phase3_config_manifest_sha256": I.MANIFEST_SHA256["phase3-config"]}
+    s = c["selection_record"]
+    assert s["all_gates_valid"] is False and s["status_counts"] == {"valid": 18, "exploratory": 3, "rejected": 33}
+    assert s["delta_val"] == H.NOT_EVALUABLE and s["alpha_exact_ties"]["nbp"] == [0.1, 0.2]
+    assert "NOT written in the phase3_1-prereg" in c["clarifications"][0]["text"]
+    assert c["datasets"] == [] and c["tuning_report"]["tuning_code_commit"].startswith("17ce14a")
+    r = c["cost_reconciliation"]
+    assert math.isclose(r["sasrec_block_minus_fit_training"],
+                        r["sasrec_block_seconds_total"] - r["fit_training_seconds_total"], abs_tol=2e-3)
+    assert math.isclose(r["wall_minus_fit_training"], r["wall_minus_sasrec_block"] + r["sasrec_block_minus_fit_training"],
+                        abs_tol=2e-3)
+
+
+def test_config_manifest_rebuilds_from_the_local_tuning_report():
+    """Skipped where the git-ignored tuning report is absent; otherwise it must match the pin byte for byte."""
+    import json
+    from bri.experiments import phase3_1 as P31
+    path = I.REPO_ROOT / P31.TUNING_DIR / "tuning_report.json"
+    if not path.exists():
+        pytest.skip("local tuning report not present")
+    m = I.load_manifests()
+    pinned = m[P31.CONFIG_MANIFEST]
+    pre = {k: v for k, v in m.items() if k != P31.CONFIG_MANIFEST}
+    rebuilt = P31.config_manifest(json.loads(path.read_text(encoding="utf-8")), I.sha256_file(path),
+                                  pinned["tuning_report"]["tuning_code_commit"], pre)
+    assert json.loads(json.dumps(rebuilt, sort_keys=True)) == pinned

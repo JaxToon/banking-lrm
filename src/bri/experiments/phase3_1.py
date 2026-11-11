@@ -273,13 +273,129 @@ def tune(root: Path = DATA_ROOT, out_dir: Path = TUNING_DIR, manifests: dict | N
     return report
 
 
+# --- Checkpoint 4: freeze the owner-approved configuration -------------------------------
+
+ALPHA_TIE_CLARIFICATION = (
+    "Exact ties in the static-fusion selection objective resolve to the earlier alpha grid entry (the project's "
+    "validation-grid convention). This rule is NOT written in the phase3_1-prereg manifest; it is a procedural "
+    "clarification confirmed by the project owner at Checkpoint 4 (2026-11-11), before any phase3_1_final dataset "
+    "was generated or any final result was seen. It applies to NBP, where alpha 0.1 and 0.2 tie exactly. It may not "
+    "be changed after final results.")
+
+
+def cost_reconciliation(report: dict) -> dict:
+    """Cost figures from the raw tuning report; what each one measures (no adjustment)."""
+    per = {}
+    for c in report["cells"]:
+        t = per.setdefault(c["task"], {"oof_fit_seconds": 0.0, "oof_fits": 0, "full_fit_seconds": 0.0, "full_fits": 0,
+                                        "sasrec_block_seconds": 0.0})
+        for f in c["fits"]:
+            k = "oof" if f["fit"].startswith("oof") else "full"
+            t[f"{k}_fit_seconds"] += f["train_seconds"]
+            t[f"{k}_fits"] += 1
+        t["sasrec_block_seconds"] += c["sasrec_seconds_total"]
+    fits = sum(t["oof_fit_seconds"] + t["full_fit_seconds"] for t in per.values())
+    block = sum(t["sasrec_block_seconds"] for t in per.values())
+    oof = sum(t["oof_fit_seconds"] for t in per.values())
+    full = sum(t["full_fit_seconds"] for t in per.values())
+    r3 = lambda x: round(x, 3)  # noqa: E731
+    return {
+        "per_task": {k: {n: (r3(v) if isinstance(v, float) else v) for n, v in t.items()} for k, t in per.items()},
+        "fit_training_seconds_total": r3(fits), "sasrec_block_seconds_total": r3(block),
+        "sasrec_block_minus_fit_training": r3(block - fits), "wall_seconds": report["wall_seconds"],
+        "wall_minus_sasrec_block": r3(report["wall_seconds"] - block),
+        "wall_minus_fit_training": r3(report["wall_seconds"] - fits),
+        "oof_to_full_training_ratio": r3(oof / full),
+        "definitions": {
+            "fit_training_seconds": "train_seconds per fit: the training loop incl. per-epoch validation evaluation",
+            "sasrec_block_seconds": ("per cell, wall time from the first OOF fit to the full model's validation scoring: "
+                                     "fit training plus best-state reload, the inference timing pass inside fit, "
+                                     "held-out OOF scoring, validation scoring and case subsetting"),
+            "wall_minus_sasrec_block": ("data loading and verification, sequence building, PF counts, gate fitting, "
+                                        "shared-evaluator NDCG@1 and report writing"),
+        },
+        "not_separately_measured": ["gate fitting", "inference (only inside sasrec_block_seconds)"],
+    }
+
+
+def config_manifest(report: dict, report_sha256: str, code_commit: str, manifests: dict) -> dict:
+    from bri.seq import hybrid as H
+    from bri.tasks import TASKS
+    pf = tune_preflight(manifests)
+    cells = [{**c, "means": {**c["means"], "static": {float(a): v for a, v in c["means"]["static"].items()}}}
+             for c in report["cells"]]  # JSON stores alpha keys as strings
+    sel = H.select(cells, pf["spec"]["profiles"], list(TASKS))
+    if json.loads(json.dumps(sel)) != report["selection"]:
+        raise Phase31Refused("selection recomputed from the cell summaries differs from the tuning report")
+    if report["prereg_sha256"] != I.MANIFEST_SHA256[PREREG] or \
+            report["tuning_data_sha256"] != I.MANIFEST_SHA256[TUNING_DATA_MANIFEST]:
+        raise Phase31Refused("tuning report references other manifests than the pinned ones")
+    if sel["primary_hybrid"] != "static":
+        raise Phase31Refused("this freeze implements the owner-approved static proposal only")
+    alpha = {t: sel["per_task"][t]["alpha"] for t in TASKS}
+    ties = {t: [float(a) for a, v in sel["per_task"][t]["static_grid"].items()
+                if v == sel["per_task"][t]["static_grid"][str(alpha[t])]] for t in TASKS}
+    frozen = {
+        "primary_hybrid": "static_fusion",
+        "formula": "P_hybrid = (1 - alpha) * P_PF + alpha * P_SASRec",
+        "alpha": alpha,
+        "personal_frequency": "Laplace-smoothed same-task history counts, next-event grid signal 'target'",
+        "sasrec": {"frozen_config_sha256": pf["cfgm"]["frozen_config_sha256"], "variant": "full",
+                   "initialization_seeds": pf["init_seeds"]},
+        "normalization": "Laplace PF, softmax SASRec over identical sorted candidate sets; no fitted normalizers",
+        "tie_break": "train popularity, then item id (shared evaluator)",
+        "gated_fusion": "not selected under the preregistered selection rule; reported as additional analysis only",
+    }
+    return {
+        "manifest_format": I.MANIFEST_FORMAT, "label": SYNTHETIC_LABEL, "suite": CONFIG_MANIFEST,
+        "notes": ("Phase 3.1 configuration frozen at Checkpoint 4 from tuning validation only, before any "
+                  "phase3_1_final dataset exists. Never changed after final results."),
+        "approval": {"checkpoint_4": "approved by the project owner on 2026-11-11",
+                     "not_authorized_by_this_manifest": ["phase3_1_final dataset generation", "final evaluation"]},
+        "references": {"prereg_sha256": I.MANIFEST_SHA256[PREREG], "seeds_sha256": I.MANIFEST_SHA256[SEEDS_NAME],
+                       "tuning_data_sha256": I.MANIFEST_SHA256[TUNING_DATA_MANIFEST],
+                       "phase3_config_manifest_sha256": I.MANIFEST_SHA256[P3_CONFIG]},
+        "tuning_report": {"path": str(TUNING_DIR / "tuning_report.json").replace("\\", "/"),
+                          "sha256": report_sha256, "tuning_code_commit": code_commit,
+                          "hybrid_version": report["hybrid_version"],
+                          "runtime_sha256": report["runtime"]["runtime_sha256"]},
+        "frozen_config": frozen, "frozen_config_sha256": I.canonical_hash(frozen),
+        "selection_record": {
+            "status_counts": sel["status_counts"], "all_gates_valid": sel["all_gates_valid"],
+            "delta_val": "not evaluable under the preregistered protocol" if sel["delta_val"] is None else sel["delta_val"],
+            "gated_not_selected_because": (
+                "preregistered rule (decision 14): gated requires every tuning dataset x task x initialization gate to "
+                f"be valid; {sel['status_counts']['exploratory']} exploratory and {sel['status_counts']['rejected']} "
+                "rejected cells. Consequence of the rule, not a post-hoc choice. No partial gated model is formed."),
+            "static_grid_macro_ndcg@1": {t: sel["per_task"][t]["static_grid"] for t in TASKS},
+            "alpha_exact_ties": ties,
+            "groups_val_ndcg@1": {t: {k: sel["per_task"][t][k] for k in ("pf_groups", "sasrec_groups", "static_groups",
+                                                                          "oracle_router_groups_diagnostic")}
+                                  for t in TASKS},
+            "oracle_router": "diagnostic upper bound only; never a candidate"},
+        "clarifications": [{"id": "C1", "topic": "alpha grid ties", "text": ALPHA_TIE_CLARIFICATION}],
+        "cost_reconciliation": cost_reconciliation(report),
+        "configs": {}, "suite_definition_sha256": {}, "frozen_report_sha256": {}, "frozen_report_dir": None,
+        "datasets": [],
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("command", choices=("prepare-tuning", "pin-tuning-manifest", "tune"))
+    parser.add_argument("command", choices=("prepare-tuning", "pin-tuning-manifest", "tune", "freeze-config"))
     parser.add_argument("--namespace", default=TUNING_NS)
     args = parser.parse_args(argv)
     try:
-        if args.command == "tune":
+        if args.command == "freeze-config":
+            import subprocess
+            path = TUNING_DIR / "tuning_report.json"
+            commit = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True,
+                                    check=True).stdout.strip()
+            man = config_manifest(json.loads(path.read_text(encoding="utf-8")), I.sha256_file(path), commit,
+                                  I.load_manifests())
+            digest = I.write_manifest(man, I.MANIFEST_DIR / f"{CONFIG_MANIFEST}.json")
+            print(f"{CONFIG_MANIFEST} written; pin sha256 {digest} in bri.experiments.integrity.MANIFEST_SHA256")
+        elif args.command == "tune":
             rep = tune()
             s = rep["selection"]
             print(f"primary hybrid (proposal): {s['primary_hybrid']}; delta_val {s['delta_val']}; "
