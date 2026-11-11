@@ -1,0 +1,188 @@
+{
+  "approval": {
+    "checkpoint_4": "approved by the project owner on 2026-11-11",
+    "not_authorized_by_this_manifest": [
+      "phase3_1_final dataset generation",
+      "final evaluation"
+    ]
+  },
+  "clarifications": [
+    {
+      "id": "C1",
+      "text": "Exact ties in the static-fusion selection objective resolve to the earlier alpha grid entry (the project's validation-grid convention). This rule is NOT written in the phase3_1-prereg manifest; it is a procedural clarification confirmed by the project owner at Checkpoint 4 (2026-11-11), before any phase3_1_final dataset was generated or any final result was seen. It applies to NBP, where alpha 0.1 and 0.2 tie exactly. It may not be changed after final results.",
+      "topic": "alpha grid ties"
+    }
+  ],
+  "configs": {},
+  "cost_reconciliation": {
+    "definitions": {
+      "fit_training_seconds": "train_seconds per fit: the training loop incl. per-epoch validation evaluation",
+      "sasrec_block_seconds": "per cell, wall time from the first OOF fit to the full model's validation scoring: fit training plus best-state reload, the inference timing pass inside fit, held-out OOF scoring, validation scoring and case subsetting",
+      "wall_minus_sasrec_block": "data loading and verification, sequence building, PF counts, gate fitting, shared-evaluator NDCG@1 and report writing"
+    },
+    "fit_training_seconds_total": 1862.369,
+    "not_separately_measured": [
+      "gate fitting",
+      "inference (only inside sasrec_block_seconds)"
+    ],
+    "oof_to_full_training_ratio": 2.165,
+    "per_task": {
+      "nbp": {
+        "full_fit_seconds": 72.653,
+        "full_fits": 27,
+        "oof_fit_seconds": 204.041,
+        "oof_fits": 81,
+        "sasrec_block_seconds": 280.267
+      },
+      "nbs": {
+        "full_fit_seconds": 515.737,
+        "full_fits": 27,
+        "oof_fit_seconds": 1069.938,
+        "oof_fits": 81,
+        "sasrec_block_seconds": 1590.339
+      }
+    },
+    "sasrec_block_minus_fit_training": 8.237,
+    "sasrec_block_seconds_total": 1870.606,
+    "wall_minus_fit_training": 111.331,
+    "wall_minus_sasrec_block": 103.094,
+    "wall_seconds": 1973.7
+  },
+  "datasets": [],
+  "frozen_config": {
+    "alpha": {
+      "nbp": 0.1,
+      "nbs": 0.6
+    },
+    "formula": "P_hybrid = (1 - alpha) * P_PF + alpha * P_SASRec",
+    "gated_fusion": "not selected under the preregistered selection rule; reported as additional analysis only",
+    "normalization": "Laplace PF, softmax SASRec over identical sorted candidate sets; no fitted normalizers",
+    "personal_frequency": "Laplace-smoothed same-task history counts, next-event grid signal 'target'",
+    "primary_hybrid": "static_fusion",
+    "sasrec": {
+      "frozen_config_sha256": "46fa3eca387ed2bf8e1a5e12cacb652084022cb4acf0c2fb8ae0a65d9b133d59",
+      "initialization_seeds": [
+        1,
+        2,
+        3
+      ],
+      "variant": "full"
+    },
+    "tie_break": "train popularity, then item id (shared evaluator)"
+  },
+  "frozen_config_sha256": "fb4313a4bd5d3ee95f56b7403b3f3e15f10eebe3f01a92504875c067d65000f2",
+  "frozen_report_dir": null,
+  "frozen_report_sha256": {},
+  "label": "SYNTHETIC-DATA EXPERIMENT: metrics reflect patterns deliberately embedded by the synthetic generator. They are not evidence of real customer behavior or of real-world recommendation effectiveness.",
+  "manifest_format": 1,
+  "notes": "Phase 3.1 configuration frozen at Checkpoint 4 from tuning validation only, before any phase3_1_final dataset exists. Never changed after final results.",
+  "references": {
+    "phase3_config_manifest_sha256": "dadfe7555c0d930aa1479a2aabb533dcf4ee748f6efd2471b0049ac1833271db",
+    "prereg_sha256": "9834e435dd8ba0a51b2123c57e7b9ae4522e6ec7aa7c8965ee875ab1616840eb",
+    "seeds_sha256": "a345f976499bd089cd3165a3a692cbcdcd9adb986f7c1751770327452a32ae85",
+    "tuning_data_sha256": "77e235d7b3c8799be8df1b445d25cc31daa09d045ff704b2f9111d74d797ca3e"
+  },
+  "selection_record": {
+    "all_gates_valid": false,
+    "alpha_exact_ties": {
+      "nbp": [
+        0.1,
+        0.2
+      ],
+      "nbs": [
+        0.6
+      ]
+    },
+    "delta_val": "not evaluable under the preregistered protocol",
+    "gated_not_selected_because": "preregistered rule (decision 14): gated requires every tuning dataset x task x initialization gate to be valid; 3 exploratory and 33 rejected cells. Consequence of the rule, not a post-hoc choice. No partial gated model is formed.",
+    "groups_val_ndcg@1": {
+      "nbp": {
+        "oracle_router_groups_diagnostic": {
+          "balanced": 0.3729418849744053,
+          "habit_dominant": 0.6334447652948713,
+          "transition_dominant": 0.23490835914201233
+        },
+        "pf_groups": {
+          "balanced": 0.3727762722071664,
+          "habit_dominant": 0.633974628639418,
+          "transition_dominant": 0.23261111237727686
+        },
+        "sasrec_groups": {
+          "balanced": 0.35188898926026296,
+          "habit_dominant": 0.6230415762568812,
+          "transition_dominant": 0.21558000099605037
+        },
+        "static_groups": {
+          "balanced": 0.3747154471544715,
+          "habit_dominant": 0.6360199266260671,
+          "transition_dominant": 0.23264192241104975
+        }
+      },
+      "nbs": {
+        "oracle_router_groups_diagnostic": {
+          "balanced": 0.440073592233784,
+          "habit_dominant": 0.6693119764168799,
+          "transition_dominant": 0.419652511914168
+        },
+        "pf_groups": {
+          "balanced": 0.3943305174110016,
+          "habit_dominant": 0.6632989432133969,
+          "transition_dominant": 0.2188170911104151
+        },
+        "sasrec_groups": {
+          "balanced": 0.38958199030092283,
+          "habit_dominant": 0.6546005031192209,
+          "transition_dominant": 0.39521226980066126
+        },
+        "static_groups": {
+          "balanced": 0.4049925601121613,
+          "habit_dominant": 0.6586996910019294,
+          "transition_dominant": 0.3933430925036458
+        }
+      }
+    },
+    "oracle_router": "diagnostic upper bound only; never a candidate",
+    "static_grid_macro_ndcg@1": {
+      "nbp": {
+        "0.0": 0.41312067107462047,
+        "0.1": 0.41445909873052944,
+        "0.2": 0.41445909873052944,
+        "0.3": 0.4132825039460564,
+        "0.4": 0.41165071388529856,
+        "0.5": 0.4093928856317943,
+        "0.6": 0.4067300369578471,
+        "0.7": 0.40569807845459144,
+        "0.8": 0.4025121337037892,
+        "0.9": 0.39885144327661687,
+        "1.0": 0.3968368555043982
+      },
+      "nbs": {
+        "0.0": 0.42548218391160453,
+        "0.1": 0.43414057718936533,
+        "0.2": 0.44473688431714176,
+        "0.3": 0.4583245409973746,
+        "0.4": 0.4735015040451089,
+        "0.5": 0.48303641574224593,
+        "0.6": 0.48567844787257886,
+        "0.7": 0.4853091017433106,
+        "0.8": 0.4850742760591264,
+        "0.9": 0.48335210122769295,
+        "1.0": 0.479798254406935
+      }
+    },
+    "status_counts": {
+      "exploratory": 3,
+      "rejected": 33,
+      "valid": 18
+    }
+  },
+  "suite": "phase3_1-config",
+  "suite_definition_sha256": {},
+  "tuning_report": {
+    "hybrid_version": "0.1.0",
+    "path": "artifacts/phase3_1/tuning/tuning_report.json",
+    "runtime_sha256": "bb54dbb1553a0499485e26317f683452b85244e19462e1ed2d1493b8d72e030f",
+    "sha256": "426d385f3f2658350fcd67c8f22448bd2014455bb6c16b5eba0876b760b5baae",
+    "tuning_code_commit": "17ce14a4438c05696e90a86779704c952a65ac17"
+  }
+}

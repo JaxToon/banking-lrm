@@ -1,0 +1,116 @@
+{
+  "approval": {
+    "checkpoint_1": "exact seed values approved by the project owner on 2026-11-10",
+    "not_authorized_by_this_manifest": [
+      "dataset generation",
+      "model training",
+      "cross-fitting",
+      "gate training",
+      "Phase 3.1 evaluation"
+    ]
+  },
+  "checked_against": {
+    "manifests": {
+      "benchmark-v1": "c257db0048161c61bf50f4ac56715d62a3c8ec99091e116508ef89415601d839",
+      "phase2.2": "e9fba9c76754989f9e495deefd7140fde1bd604e283babd1b9fdaea8a52928bf",
+      "phase2.3": "372094856d9f136c4d36392ac02b30e8a4b67be611a4ad6b0b208dd124a729ed",
+      "phase3": "47b5dc72d46fab0f56098339d3ae3b6f674da95d6b89985b2df23c636c4dae1d",
+      "phase3-config": "f0a4e2d9bafce6b78622ee8ed5aceb4ced500e9d401c956f5bdf74acf36d3d47",
+      "phase3-seeds": "121f310a5922315407d9dcf110e373791c3216e20f5c76e27170384a9dc5efb6",
+      "phase3_1-prereg": "b41b7685f6e7e5f1aaa0f8ec884a176b290c407a79bfa0b16c476ac3d8ccf3b4"
+    },
+    "seeds_in_use": [
+      42,
+      20261109,
+      20261110,
+      20261111,
+      20261112,
+      20261113,
+      20261114,
+      20261115,
+      20261116,
+      20261117,
+      20261118,
+      20261119,
+      20261130,
+      20261131,
+      20261132,
+      20261133,
+      20261134,
+      20261135,
+      20261136,
+      20261137,
+      20261138,
+      20261139
+    ]
+  },
+  "configs": {},
+  "datasets": [],
+  "frozen_report_dir": null,
+  "frozen_report_sha256": {},
+  "initialization_seeds_separate": [
+    1,
+    2,
+    3
+  ],
+  "label": "SYNTHETIC-DATA EXPERIMENT: metrics reflect patterns deliberately embedded by the synthetic generator. They are not evidence of real customer behavior or of real-world recommendation effectiveness.",
+  "manifest_format": 1,
+  "notes": "Phase 3.1 seed reservation, written before any Phase 3.1 dataset exists. Exact seed values were set by project-owner approval at Phase 3.1 Checkpoint 1 because the pre-registration fixed only the number of seeds per namespace.",
+  "prereg_reference": {
+    "manifest": "benchmarks/manifests/phase3_1-prereg.json",
+    "sha256": "9834e435dd8ba0a51b2123c57e7b9ae4522e6ec7aa7c8965ee875ab1616840eb"
+  },
+  "seed_namespaces": {
+    "phase3_1_final": {
+      "customers": 500,
+      "days": 30,
+      "generator_version": "0.3.0",
+      "profiles": [
+        "habit_dominant",
+        "balanced",
+        "transition_dominant"
+      ],
+      "purpose": "Phase 3.1 final evaluation after the configuration is frozen; each test split used once.",
+      "seeds": [
+        20261150,
+        20261151,
+        20261152,
+        20261153,
+        20261154,
+        20261155,
+        20261156,
+        20261157,
+        20261158,
+        20261159
+      ],
+      "split_days": [
+        16,
+        7,
+        7
+      ]
+    },
+    "phase3_1_tuning": {
+      "customers": 500,
+      "days": 30,
+      "generator_version": "0.3.0",
+      "profiles": [
+        "habit_dominant",
+        "balanced",
+        "transition_dominant"
+      ],
+      "purpose": "Phase 3.1 tuning: alpha / gate selection on validation splits only; test splits never evaluated.",
+      "seeds": [
+        20261140,
+        20261141,
+        20261142
+      ],
+      "split_days": [
+        16,
+        7,
+        7
+      ]
+    }
+  },
+  "suite": "phase3_1-seeds",
+  "suite_definition_sha256": {}
+}

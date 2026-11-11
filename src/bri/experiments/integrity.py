@@ -53,6 +53,23 @@ MANIFEST_SHA256: dict[str, str] = {
     "phase3-config": "dadfe7555c0d930aa1479a2aabb533dcf4ee748f6efd2471b0049ac1833271db",
     # Phase 3 final evaluation (30 phase3_final datasets), written after the run.
     "phase3": "0f8112a1942f364bd10423e81250ba68b8bc86d7606f801274b33870db25dc49",
+    # Phase 3.1 pre-registration (design doc revision 4), pinned before any Phase 3.1
+    # seed reservation, dataset or training.
+    "phase3_1-prereg": "9834e435dd8ba0a51b2123c57e7b9ae4522e6ec7aa7c8965ee875ab1616840eb",
+    # Phase 3.1 seed reservation (phase3_1_tuning 20261140-20261142, phase3_1_final
+    # 20261150-20261159; values approved at Checkpoint 1), before any Phase 3.1 dataset.
+    "phase3_1-seeds": "a345f976499bd089cd3165a3a692cbcdcd9adb986f7c1751770327452a32ae85",
+    # Phase 3.1 tuning-data fingerprints (Checkpoint 2), before any Phase 3.1 model.
+    "phase3_1-tuning-data": "77e235d7b3c8799be8df1b445d25cc31daa09d045ff704b2f9111d74d797ca3e",
+    # Phase 3.1 frozen configuration (Checkpoint 4: static fusion, alpha NBS 0.6 / NBP 0.1,
+    # tuning validation only), pinned before any phase3_1_final dataset exists.
+    "phase3_1-config": "97e415e9c4762c017fc38c9487f91dc294d9be928bc44cbeae3c66f7f53791a5",
+    # Phase 3.1 final-data fingerprints (Checkpoint 5: 30 phase3_1_final datasets), written
+    # after phase3_1-config was pinned and before any model was trained on them.
+    "phase3_1-final-data": "9c3fd74088524157ffa16d435881adb55201b0bc5b3276189bc3f0f146502071",
+    # Phase 3.1 final evaluation lock (30 phase3_1_final datasets, frozen report
+    # benchmarks/phase3_1/ incl. the RQ4 cost amendment), written once after the run.
+    "phase3_1": "3726aee9e6b4afc5de5bc21d948c22778c211ca61d98ff0cd3e8fc9fe099ba98",
 }
 
 
@@ -405,6 +422,29 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{suite}: seed reservation ok, " + ", ".join(
                 f"{ns} {min(v['seeds'])}-{max(v['seeds'])} ({len(v['seeds'])} seeds)"
                 for ns, v in m["seed_namespaces"].items()))
+            continue
+        if "design_document" in m:
+            doc = REPO_ROOT / m["design_document"]["path"]
+            state = "matches" if doc.exists() and sha256_file(doc) == m["design_document"]["sha256"] else "DIFFERS FROM"
+            print(f"{suite}: pre-registration ok (design document {m['design_document']['path']} {state} "
+                  f"recorded sha256 {m['design_document']['sha256'][:12]}...; reserves no seeds itself)")
+            continue
+        if "tuning_datasets" in m:
+            print(f"{suite}: tuning-data fingerprints ok, {len(m['tuning_datasets'])} dataset(s) "
+                  "(test splits never evaluated; not a locked benchmark)")
+            continue
+        if "final_datasets" in m:
+            state = "evaluated once; see the phase3_1 lock" if "phase3_1" in manifests else "not yet evaluated"
+            print(f"{suite}: final-data fingerprints ok, {len(m['final_datasets'])} dataset(s) "
+                  f"(locked for the single final evaluation; {state})")
+            continue
+        if "selection_record" in m:  # Phase 3.1 hybrid configuration
+            ok = canonical_hash(m["frozen_config"]) == m["frozen_config_sha256"]
+            print(f"{suite}: frozen hybrid configuration {'ok' if ok else 'HASH MISMATCH'} "
+                  f"({m['frozen_config']['primary_hybrid']}, alpha {m['frozen_config']['alpha']}, "
+                  f"config sha256 {m['frozen_config_sha256'][:12]}...)")
+            if not ok:
+                return 1
             continue
         if "frozen_config" in m:
             print(f"{suite}: frozen configuration ok (trial {m['selection']['trial']}, "
