@@ -67,6 +67,9 @@ MANIFEST_SHA256: dict[str, str] = {
     # Phase 3.1 final-data fingerprints (Checkpoint 5: 30 phase3_1_final datasets), written
     # after phase3_1-config was pinned and before any model was trained on them.
     "phase3_1-final-data": "9c3fd74088524157ffa16d435881adb55201b0bc5b3276189bc3f0f146502071",
+    # Phase 3.1 final evaluation lock (30 phase3_1_final datasets, frozen report
+    # benchmarks/phase3_1/ incl. the RQ4 cost amendment), written once after the run.
+    "phase3_1": "3726aee9e6b4afc5de5bc21d948c22778c211ca61d98ff0cd3e8fc9fe099ba98",
 }
 
 
@@ -431,8 +434,9 @@ def main(argv: list[str] | None = None) -> int:
                   "(test splits never evaluated; not a locked benchmark)")
             continue
         if "final_datasets" in m:
+            state = "evaluated once; see the phase3_1 lock" if "phase3_1" in manifests else "not yet evaluated"
             print(f"{suite}: final-data fingerprints ok, {len(m['final_datasets'])} dataset(s) "
-                  "(locked for the single final evaluation; not yet evaluated)")
+                  f"(locked for the single final evaluation; {state})")
             continue
         if "selection_record" in m:  # Phase 3.1 hybrid configuration
             ok = canonical_hash(m["frozen_config"]) == m["frozen_config_sha256"]

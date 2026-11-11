@@ -32,6 +32,14 @@ def inputs(processed_dir):
     return data, ne, seqs, wt
 
 
+_LOAD_MANIFESTS = I.load_manifests  # the real loader, kept before any monkeypatching
+
+
+def _pre_lock():
+    """Manifests as they were before the one-time phase3_1 lock (the state the runner was gated on)."""
+    return {k: v for k, v in _LOAD_MANIFESTS().items() if k != F.LOCK_MANIFEST}
+
+
 def _run(inputs, task="nbs", alpha=0.6, inits=(1, 2), device="cpu"):
     data, ne, seqs, wt = inputs
     return F.evaluate_task(task, ne, data, seqs, wt[task], alpha, TINY, inits, device)
@@ -94,6 +102,7 @@ def test_run_dataset_refuses_without_a_gated_plan(monkeypatch, tmp_path):
 
 def test_only_the_issued_plan_object_passes_and_it_must_match_the_pins(monkeypatch):
     import dataclasses
+    monkeypatch.setattr(I, "load_manifests", _pre_lock)  # require_gated_plan re-reads the pins
     fz = F.check_manifests(I.load_manifests())
     good = F.Plan({}, fz["sasrec"], fz["alpha"], fz["init_seeds"], fz["entries"], "cpu", {})
     with pytest.raises(F.FinalRunRefused, match="passed every gate"):  # built by a caller, same fields
@@ -156,7 +165,9 @@ def test_cli_run_requires_explicit_confirmation(monkeypatch):
 
 
 def test_check_manifests_accepts_the_pinned_state_and_refuses_tampering():
-    m = I.load_manifests()
+    with pytest.raises(F.FinalRunRefused, match="already locked"):  # after the lock: never again
+        F.check_manifests(I.load_manifests())
+    m = _pre_lock()
     fz = F.check_manifests(m)
     assert fz["alpha"] == {"nbs": 0.6, "nbp": 0.1} and fz["init_seeds"] == (1, 2, 3) and len(fz["entries"]) == 30
     with pytest.raises(F.FinalRunRefused, match="already locked"):
@@ -279,8 +290,46 @@ def test_cuda_gates_pass_without_opening_any_dataset(monkeypatch):
     monkeypatch.setattr(B, "load_processed", lambda *a, **k: pytest.fail("gates opened a dataset"))
     monkeypatch.setattr(D, "build_seq_cases", lambda *a, **k: pytest.fail("gates built sequence cases"))
     import dataclasses
+    with pytest.raises(F.FinalRunRefused, match="already locked"):  # the locked run cannot be repeated
+        F.gates(run_tests=False, log=lambda *_: None)
+    monkeypatch.setattr(I, "load_manifests", _pre_lock)
     plan = F.gates(run_tests=False, log=lambda *_: None)
     assert plan.alpha == {"nbs": 0.6, "nbp": 0.1} and len(plan.entries) == 30
     F.require_gated_plan(plan)  # the issued object is accepted ...
     with pytest.raises(F.FinalRunRefused):
         F.require_gated_plan(dataclasses.replace(plan))  # ... a copy is not
+
+
+# --- the one-time lock (pinned) --------------------------------------------------------------
+
+EXPECTED_FROZEN = {"phase3_1_report.json": "92ce1bcb9c671412aeed7fe7170c9d583b00b7b91a4cfb0b7fb92aa9b2bd6f6a",
+                   "phase3_1_report.md": "62e510f66dfe2aab22a3956013b4e58e413f4ad799720c5c474e2c50e44b00ba"}
+PRE_AMENDMENT_SHA = "e1d7dbcf03f069c68a5836d6ac638af66336e82ed1f7e3d791406291c7cf4469"
+
+
+def test_lock_manifest_is_pinned_and_references_the_approved_report():
+    m = I.load_manifests()
+    lock = m[F.LOCK_MANIFEST]
+    assert {k: v for k, v in lock["frozen_report_sha256"].items() if k != "FROZEN"} == EXPECTED_FROZEN
+    d = I.REPO_ROOT / lock["frozen_report_dir"]
+    assert {n: I.sha256_file(d / n) for n in EXPECTED_FROZEN} == EXPECTED_FROZEN
+    rep = json.loads((d / "phase3_1_report.json").read_text(encoding="utf-8"))
+    assert rep["run_config_sha256"] == lock["phase3_1_run_config_sha256"] == I.canonical_hash(rep["run_config"])
+    assert rep["amendments"][0]["pre_amendment_report_sha256"] == PRE_AMENDMENT_SHA
+    assert rep["run_config"]["alpha"] == {"nbs": 0.6, "nbp": 0.1}
+    assert rep["run_config"]["config_sha256"] == I.MANIFEST_SHA256["phase3_1-config"]
+    assert rep["run_config"]["final_data_sha256"] == I.MANIFEST_SHA256["phase3_1-final-data"]
+    c = rep["criteria"]
+    assert (c["RQ1"]["met"], c["RQ2"]["met"], c["outcome"]) == (False, True, "trade-off, not overall success")
+    assert c["RQ3"]["status"] == "not evaluable under the preregistered protocol"
+
+
+def test_locked_datasets_are_exactly_the_pinned_final_datasets():
+    m = I.load_manifests()
+    final = {e["dataset_id"]: e for e in m[F.FINAL_DATA_MANIFEST]["final_datasets"]}
+    locked = {e["dataset_id"]: e for e in m[F.LOCK_MANIFEST]["datasets"]}
+    assert set(locked) == set(final) and len(locked) == 30
+    for k, e in locked.items():
+        assert e["seed_namespace"] == F.FINAL_NS
+        for field in ("processed_files_sha256", "source_files_sha256", "prep_fingerprint", "seed", "behavior_profile"):
+            assert e[field] == final[k][field], (k, field)
